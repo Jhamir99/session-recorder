@@ -17,7 +17,7 @@ extension AudioSourceSelectionViewModel {
 
     func selectMonoChannel(id: String) {
         guard let device = selectedDevice, permissionState == .granted else { return }
-        let decision = AudioDeviceSelectionLogic.saveDecisionForMono(channelID: id, availableChannels: device.channels)
+        let decision = AudioDeviceSelectionHelper.saveDecisionForMono(channelID: id, availableChannels: device.channels)
         guard case .save(let selection) = decision else { return }
         activeSelection = selection
         selectedMode = .mono
@@ -30,7 +30,7 @@ extension AudioSourceSelectionViewModel {
     func selectStereoChannel(id: String) {
         guard let device = selectedDevice, permissionState == .granted, canSelectStereo else { return }
         if let left = stereoLeftCandidateID {
-            let decision = AudioDeviceSelectionLogic.saveDecisionForStereo(
+            let decision = AudioDeviceSelectionHelper.saveDecisionForStereo(
                 leftChannelID: left,
                 rightChannelID: id,
                 availableChannels: device.channels
@@ -55,7 +55,7 @@ extension AudioSourceSelectionViewModel {
         guard let device = selectedDevice, permissionState == .granted, canSelectStereo else { return }
         let currentRight = activeSelection?.mode == .stereo ? activeSelection?.stereoRightChannelID : nil
         if let currentRight, currentRight != id {
-            let decision = AudioDeviceSelectionLogic.saveDecisionForStereo(
+            let decision = AudioDeviceSelectionHelper.saveDecisionForStereo(
                 leftChannelID: id,
                 rightChannelID: currentRight,
                 availableChannels: device.channels
@@ -83,7 +83,7 @@ extension AudioSourceSelectionViewModel {
         guard let device = selectedDevice, permissionState == .granted, canSelectStereo else { return }
         let left = stereoLeftCandidateID ?? (activeSelection?.mode == .stereo ? activeSelection?.stereoLeftChannelID : nil)
         guard let left else { return }
-        let decision = AudioDeviceSelectionLogic.saveDecisionForStereo(
+        let decision = AudioDeviceSelectionHelper.saveDecisionForStereo(
             leftChannelID: left,
             rightChannelID: id,
             availableChannels: device.channels
@@ -100,7 +100,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     func replaceSavedSelectionForCurrentMode(device: AudioInputDevice) {
-        let replacement = AudioDeviceSelectionLogic.replacementSelectionForTabSwitch(
+        let replacement = AudioDeviceSelectionHelper.replacementSelectionForTabSwitch(
             mode: selectedMode,
             latestValidMonoChannelID: lastValidMonoByDevice[device.id] ?? activeMonoChannelID(for: device.id),
             latestValidStereoLeftChannelID: lastValidStereoByDevice[device.id]?.left ?? activeStereoLeftID(for: device.id),
@@ -115,7 +115,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     func fallbackToMonoForSingleChannel(device: AudioInputDevice) {
-        guard let mono = AudioDeviceSelectionLogic.initialMonoSelection(availableChannels: device.channels) else { return }
+        guard let mono = AudioDeviceSelectionHelper.initialMonoSelection(availableChannels: device.channels) else { return }
         selectedMode = .mono
         activeSelection = mono
         rememberValidSelection(mono, for: device.id)

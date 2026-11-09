@@ -24,7 +24,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     struct PreviewState {
-        var devices: [AudioDeviceSelectionLogic.DisambiguatedDevice] = []
+        var devices: [AudioDeviceSelectionHelper.DisambiguatedDevice] = []
         var selectedDeviceID: String?
         var permissionState: AudioInputPermissionState = .unknown
         var selectedMode: AudioChannelMode = .mono

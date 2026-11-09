@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class AudioSourceSelectionViewModel: ObservableObject {
-    @Published var devices: [AudioDeviceSelectionLogic.DisambiguatedDevice] = []
+    @Published var devices: [AudioDeviceSelectionHelper.DisambiguatedDevice] = []
     @Published var selectedDeviceID: String?
     @Published var permissionState: AudioInputPermissionState = .unknown
     @Published var selectedMode: AudioChannelMode = .mono
@@ -34,7 +34,7 @@ final class AudioSourceSelectionViewModel: ObservableObject {
     }
 
     var canSelectStereo: Bool {
-        AudioDeviceSelectionLogic.allowsStereoSelection(availableChannels: displayedChannels)
+        AudioDeviceSelectionHelper.allowsStereoSelection(availableChannels: displayedChannels)
     }
 
     func bindService() {

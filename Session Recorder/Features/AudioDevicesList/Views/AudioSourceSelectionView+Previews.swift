@@ -7,7 +7,7 @@ private enum AudioSourceSelectionPreviewData {
             AudioInputDevice(id: "a2", displayName: "USB Interface", channels: [AudioInputChannel(id: "a2:1", number: 1, name: nil)])
         ]
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames(devices),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames(devices),
             hasNoEligibleDevices: false,
             rawDevices: devices
         )
@@ -17,7 +17,7 @@ private enum AudioSourceSelectionPreviewData {
     static var noChannels: AudioSourceSelectionView {
         let device = AudioInputDevice(id: "d1", displayName: "Mixer", channels: [])
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
             permissionState: .granted,
             displayedChannels: [],
@@ -30,7 +30,7 @@ private enum AudioSourceSelectionPreviewData {
     static var permissionRequired: AudioSourceSelectionView {
         let device = AudioInputDevice(id: "d1", displayName: "Built-in Microphone", channels: [AudioInputChannel(id: "d1:1", number: 1, name: nil)])
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
             permissionState: .denied,
             userMessage: AudioSourceUserMessage(kind: .permissionRequired, text: "Permission must be granted to access audio input channels.", showsRetryPermissionAction: true),
@@ -44,7 +44,7 @@ private enum AudioSourceSelectionPreviewData {
         let channels = [AudioInputChannel(id: "d1:1", number: 1, name: "Mic")]
         let device = AudioInputDevice(id: "d1", displayName: "USB Mic", channels: channels)
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
             permissionState: .granted,
             selectedMode: .mono,
@@ -63,7 +63,7 @@ private enum AudioSourceSelectionPreviewData {
         ]
         let device = AudioInputDevice(id: "d1", displayName: "DJ Mixer", channels: channels)
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
             permissionState: .granted,
             selectedMode: .stereo,
@@ -77,7 +77,7 @@ private enum AudioSourceSelectionPreviewData {
     static var disconnectError: AudioSourceSelectionView {
         let device = AudioInputDevice(id: "d1", displayName: "DJ Mixer", channels: [AudioInputChannel(id: "d1:1", number: 1, name: nil)])
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: nil,
             permissionState: .unknown,
             userMessage: AudioSourceUserMessage(kind: .deviceDisconnected, text: "The selected audio device was disconnected.", showsRetryPermissionAction: false),
@@ -93,7 +93,7 @@ private enum AudioSourceSelectionPreviewData {
         ]
         let device = AudioInputDevice(id: "d1", displayName: "Audio Interface", channels: channels)
         let state = AudioSourceSelectionViewModel.PreviewState(
-            devices: AudioDeviceSelectionLogic.disambiguateDeviceNames([device]),
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
             permissionState: .granted,
             selectedMode: .stereo,

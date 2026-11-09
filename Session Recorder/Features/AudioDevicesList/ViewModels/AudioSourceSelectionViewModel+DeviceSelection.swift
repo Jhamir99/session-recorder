@@ -23,11 +23,11 @@ extension AudioSourceSelectionViewModel {
     func refreshFromService() {
         rawDevices = service.devices
         permissionState = service.permissionState
-        devices = AudioDeviceSelectionLogic.disambiguateDeviceNames(rawDevices)
+        devices = AudioDeviceSelectionHelper.disambiguateDeviceNames(rawDevices)
         hasNoEligibleDevices = rawDevices.isEmpty
 
         if let selectedDeviceID {
-            let disconnect = AudioDeviceSelectionLogic.disconnectResult(
+            let disconnect = AudioDeviceSelectionHelper.disconnectResult(
                 selectedDeviceID: selectedDeviceID,
                 availableDeviceIDs: Set(rawDevices.map(\.id))
             )
@@ -68,7 +68,7 @@ extension AudioSourceSelectionViewModel {
         }
 
         let saved = store.record(for: device.id)
-        let restored = AudioDeviceSelectionLogic.restoreSelection(
+        let restored = AudioDeviceSelectionHelper.restoreSelection(
             savedSelection: saved,
             isDeviceReliablyIdentified: rawDevices.contains(where: { $0.id == device.id }),
             availableChannels: device.channels
@@ -85,7 +85,7 @@ extension AudioSourceSelectionViewModel {
             return
         }
 
-        if let saved, AudioDeviceSelectionLogic.invalidSelectionResult(selection: saved, availableChannels: device.channels).showsNoValidChannelError {
+        if let saved, AudioDeviceSelectionHelper.invalidSelectionResult(selection: saved, availableChannels: device.channels).showsNoValidChannelError {
             activeSelection = nil
             userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
             return
@@ -95,7 +95,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     func initializeDefaults(for device: AudioInputDevice) {
-        if device.channels.count == 1, let mono = AudioDeviceSelectionLogic.initialMonoSelection(availableChannels: device.channels) {
+        if device.channels.count == 1, let mono = AudioDeviceSelectionHelper.initialMonoSelection(availableChannels: device.channels) {
             activeSelection = mono
             selectedMode = .mono
             rememberValidSelection(mono, for: device.id)
@@ -103,11 +103,11 @@ extension AudioSourceSelectionViewModel {
             return
         }
 
-        let mono = AudioDeviceSelectionLogic.initialMonoSelection(availableChannels: device.channels)
+        let mono = AudioDeviceSelectionHelper.initialMonoSelection(availableChannels: device.channels)
         activeSelection = mono
         selectedMode = .mono
         if let mono { rememberValidSelection(mono, for: device.id) }
-        if let stereo = AudioDeviceSelectionLogic.initialStereoSelection(availableChannels: device.channels) {
+        if let stereo = AudioDeviceSelectionHelper.initialStereoSelection(availableChannels: device.channels) {
             rememberValidSelection(stereo, for: device.id)
         }
         userMessage = nil
@@ -147,7 +147,7 @@ extension AudioSourceSelectionViewModel {
         }
 
         if let activeSelection {
-            let validity = AudioDeviceSelectionLogic.invalidSelectionResult(selection: activeSelection, availableChannels: device.channels)
+            let validity = AudioDeviceSelectionHelper.invalidSelectionResult(selection: activeSelection, availableChannels: device.channels)
             if validity.showsNoValidChannelError {
                 self.activeSelection = nil
                 userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
