@@ -1,32 +1,18 @@
 import SwiftUI
-import Playgrounds
 
 struct ContentView: View {
+    @State private var currentStatus: STATUSES = .START
 
     var body: some View {
-        HStack(spacing: 30) {
-            Button(action: {
-                print("Play")
-            }) {
-                Image(systemName: "play.fill")
-                    .font(.system(size: 30))
-            }
-
-            Button(action: {
-                print("Pause")
-            }) {
-                Image(systemName: "stop.fill")
-                    .font(.system(size: 30))
-            }
+        VStack(alignment: .leading, spacing: 30) {
+            AudioSourceSelectionView()
+            RecordButton(currentStatus: $currentStatus)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
 #Preview {
     ContentView()
-}
-
-#Playground {
-    _ = 1 + 2
 }

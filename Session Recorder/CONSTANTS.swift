@@ -1,0 +1,3 @@
+enum STATUSES {
+    case START, RECORDING, PLAYING
+}
