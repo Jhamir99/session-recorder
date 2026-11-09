@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode - user-specific / local state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Xcode - build products
+DerivedData/
+build/
+*.xcarchive
+
+# Agent/session working notes (keep local)
+Session Recorder/MEMORY.md
