@@ -42,6 +42,13 @@ final class AudioSourceSelectionViewModel: ObservableObject {
         )
     }
 
+    /// Message shown under the source row on the Record tab. States already shown by the
+    /// row itself (permission, no channels, no valid channel) are not repeated here.
+    var recordTabMessage: AudioSourceUserMessage? {
+        guard let userMessage, userMessage.kind == .deviceDisconnected else { return nil }
+        return userMessage
+    }
+
     var canSelectStereo: Bool {
         AudioDeviceSelectionHelper.allowsStereoSelection(availableChannels: displayedChannels)
     }

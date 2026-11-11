@@ -100,10 +100,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** none
   - **Done when:** The view model exposes a summary for the row: device label, mode, channel numbers, or a state (no input, permission required, no valid channel); no new selection behavior.
 
-- [ ] **T19 — Source row on the Record tab** (`Views/AudioSourceSummaryRow.swift` — new file, ask before creating; `ContentView.swift`)
+- [x] **T19 — Source row on the Record tab** (`Views/AudioSourceSummaryRow.swift` — new file, ask before creating; `ContentView.swift`)
   - **RF:** RF-6
   - **Depends on:** T16, T17, T18
   - **Done when:** The Record tab shows the source row at the top, a message area below it (RF-5/RF-7 messages), and `RecordButton` pinned at the bottom and always visible; tapping the row opens the source sheet.
+  - **Note (2026-11-11):** The sheet already has a minimal container (navigation title "Audio Source", **Done** button, scroll) so it can be dismissed on Mac; T20 turns its content into a native form. Record-tab messages show only what the row does not (currently: device disconnected).
 
 - [ ] **T20 — Turn the selection UI into the source sheet** (`Views/AudioSourceSelectionView.swift`, `Views/DeviceListView.swift`, `Views/ChannelSelectionView.swift`)
   - **RF:** RF-1–RF-6

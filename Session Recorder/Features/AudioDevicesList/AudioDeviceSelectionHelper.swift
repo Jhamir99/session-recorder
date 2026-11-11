@@ -221,6 +221,19 @@ enum AudioDeviceSelectionHelper {
         return .selected(deviceLabel: deviceLabel, mode: selection.mode, channelNumbers: numbers)
     }
 
+    /// Mode and channels for the source row, e.g. "Mono · 1", "Stereo · 1–2", "Stereo · L 3 · R 1".
+    static func sourceSummaryChannelText(mode: AudioChannelMode, channelNumbers: [Int]) -> String {
+        switch mode {
+        case .mono:
+            return "Mono · " + channelNumbers.map(String.init).joined(separator: ", ")
+        case .stereo:
+            guard channelNumbers.count == 2 else { return "Stereo" }
+            let left = channelNumbers[0], right = channelNumbers[1]
+            // A range reads naturally only for an adjacent ascending pair.
+            return right == left + 1 ? "Stereo · \(left)–\(right)" : "Stereo · L \(left) · R \(right)"
+        }
+    }
+
     static func disconnectResult(selectedDeviceID: String?, availableDeviceIDs: Set<String>) -> DisconnectResult {
         guard let selectedDeviceID else { return .unchanged }
         return availableDeviceIDs.contains(selectedDeviceID) ? .unchanged : .disconnected
