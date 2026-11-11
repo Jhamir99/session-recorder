@@ -69,7 +69,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** none
   - **Done when:** The repository saves/loads one last-selected device ID (ID only) under a new key; existing per-device channel records are unchanged.
 
-- [ ] **T13 — Pure automatic-selection decisions** (`AudioDeviceSelectionHelper.swift`)
+- [x] **T13 — Pure automatic-selection decisions** (`AudioDeviceSelectionHelper.swift`)
   - **RF:** RF-7
   - **Depends on:** T11
   - **Done when:** Pure functions cover launch selection (last used → first external → built-in), selection on connect (only replaces built-in/none), fallback on disconnect (first external → built-in → none), and reselection on reconnect (only if the user did not change the source).

@@ -234,6 +234,56 @@ enum AudioDeviceSelectionHelper {
         }
     }
 
+    // MARK: Automatic device selection (RF-7)
+    // Each function returns the device ID to select, or nil to keep the current state.
+    // "Built-in" means any non-external input (see `AudioInputDevice.isExternal`).
+
+    /// At app start: last selected device if connected → first external → first built-in.
+    static func launchSelection(devices: [AudioInputDevice], lastSelectedDeviceID: String?) -> String? {
+        if let lastSelectedDeviceID, devices.contains(where: { $0.id == lastSelectedDeviceID }) {
+            return lastSelectedDeviceID
+        }
+        return preferredDevice(in: devices)
+    }
+
+    /// When devices connect: switch to a newly connected external device only if the current
+    /// source is built-in or nothing is selected. Never replaces another external device.
+    static func selectionOnConnect(
+        previousDeviceIDs: Set<String>,
+        devices: [AudioInputDevice],
+        selectedDeviceID: String?
+    ) -> String? {
+        if let selectedDeviceID,
+           let selected = devices.first(where: { $0.id == selectedDeviceID }),
+           selected.isExternal {
+            return nil
+        }
+        return devices.first(where: { $0.isExternal && !previousDeviceIDs.contains($0.id) })?.id
+    }
+
+    /// When the selected device disconnects: first external → first built-in → nil (empty state).
+    static func fallbackOnDisconnect(devices: [AudioInputDevice], disconnectedDeviceID: String) -> String? {
+        preferredDevice(in: devices.filter { $0.id != disconnectedDeviceID })
+    }
+
+    /// When a device that was replaced by a fallback reconnects: select it again unless the
+    /// user changed the source manually in the meantime.
+    static func reselectionOnReconnect(
+        replacedDeviceID: String?,
+        userChangedSourceManually: Bool,
+        devices: [AudioInputDevice]
+    ) -> String? {
+        guard let replacedDeviceID, !userChangedSourceManually,
+              devices.contains(where: { $0.id == replacedDeviceID }) else {
+            return nil
+        }
+        return replacedDeviceID
+    }
+
+    private static func preferredDevice(in devices: [AudioInputDevice]) -> String? {
+        (devices.first(where: \.isExternal) ?? devices.first(where: { !$0.isExternal }))?.id
+    }
+
     static func disconnectResult(selectedDeviceID: String?, availableDeviceIDs: Set<String>) -> DisconnectResult {
         guard let selectedDeviceID else { return .unchanged }
         return availableDeviceIDs.contains(selectedDeviceID) ? .unchanged : .disconnected
