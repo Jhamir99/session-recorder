@@ -8,11 +8,32 @@
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Session Recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Session Recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DA73A2830A5164600621EF1 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
+		4DA73A2930A5164600621EF1 /* constitution.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = constitution.md; sourceTree = "<group>"; };
+		4DA73A2A30A5164600621EF1 /* project-structure.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "project-structure.md"; sourceTree = "<group>"; };
+		4DA73A2C30A5164600621EF1 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		4DA73A2D30A5164600621EF1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4DA73A2F30A5164600621EF1 /* plan.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = plan.md; sourceTree = "<group>"; };
+		4DA73A3030A5164600621EF1 /* spec.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = spec.md; sourceTree = "<group>"; };
+		4DA73A3130A5164600621EF1 /* tasks.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = tasks.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		000000000000000000000011 /* Exceptions for "Session Recorder" folder in "Session Recorder" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				MEMORY.md,
+			);
+			target = 000000000000000100000000 /* Session Recorder */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		000000000000000000000010 /* Session Recorder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				000000000000000000000011 /* Exceptions for "Session Recorder" folder in "Session Recorder" target */,
+			);
 			path = "Session Recorder";
 			sourceTree = "<group>";
 		};
@@ -30,6 +51,11 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				4DA73A2830A5164600621EF1 /* AGENTS.md */,
+				4DA73A2B30A5164600621EF1 /* docs */,
+				4DA73A2C30A5164600621EF1 /* LICENSE */,
+				4DA73A2D30A5164600621EF1 /* README.md */,
+				4DA73A3330A5164600621EF1 /* specs */,
 				000000000000000000000010 /* Session Recorder */,
 				000000000000000000000020 /* Products */,
 			);
@@ -41,6 +67,33 @@
 				000000000000000000000120 /* Session Recorder.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4DA73A2B30A5164600621EF1 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				4DA73A2930A5164600621EF1 /* constitution.md */,
+				4DA73A2A30A5164600621EF1 /* project-structure.md */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		4DA73A3230A5164600621EF1 /* audio-devices-list */ = {
+			isa = PBXGroup;
+			children = (
+				4DA73A2F30A5164600621EF1 /* plan.md */,
+				4DA73A3030A5164600621EF1 /* spec.md */,
+				4DA73A3130A5164600621EF1 /* tasks.md */,
+			);
+			path = "audio-devices-list";
+			sourceTree = "<group>";
+		};
+		4DA73A3330A5164600621EF1 /* specs */ = {
+			isa = PBXGroup;
+			children = (
+				4DA73A3230A5164600621EF1 /* audio-devices-list */,
+			);
+			path = specs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

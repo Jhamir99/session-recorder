@@ -85,7 +85,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 
 ## Change: app structure, source row and source sheet (RF-6 updated) — added 2026-11-11
 
-- [ ] **T16 — Share one view model between Record tab, row and sheet** (`Views/AudioSourceSelectionView.swift`, `ContentView.swift`)
+- [x] **T16 — Share one view model between Record tab, row and sheet** (`Views/AudioSourceSelectionView.swift`, `ContentView.swift`)
   - **RF:** RF-6, C4
   - **Depends on:** none
   - **Done when:** `AudioSourceSelectionView` receives the view model instead of creating it; the view model is created once at the Record-tab level; previews still compile.

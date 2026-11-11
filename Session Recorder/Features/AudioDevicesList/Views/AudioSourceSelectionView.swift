@@ -1,11 +1,8 @@
 import SwiftUI
 
 struct AudioSourceSelectionView: View {
-    @StateObject private var viewModel: AudioSourceSelectionViewModel
-
-    init(viewModel: AudioSourceSelectionViewModel? = nil) {
-        _viewModel = StateObject(wrappedValue: viewModel ?? AudioSourceSelectionViewModel())
-    }
+    // Owned by the Record tab so the source row and source sheet share one state.
+    @ObservedObject var viewModel: AudioSourceSelectionViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

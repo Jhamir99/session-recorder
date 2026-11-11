@@ -30,7 +30,7 @@ SwiftUI app (early stage) for DJs/musicians to record sessions from a USB-C audi
 ## Commands
 - Primary dev loop: open `Session Recorder.xcodeproj` in Xcode; use SwiftUI `#Preview` and run on a chosen simulator/device.
 - CLI build (macOS): `xcodebuild -project "Session Recorder.xcodeproj" -scheme "Session Recorder" -configuration Debug -destination 'platform=macOS' build`
-- CLI build (iOS Simulator, pick an available one): `xcodebuild -project "Session Recorder.xcodeproj" -scheme "Session Recorder" -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build`
+- CLI build (iOS Simulator, pick an available one): `xcodebuild -project "Session Recorder.xcodeproj" -scheme "Session Recorder" -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build` (list available ones with `xcrun simctl list devices available`)
 
 ## Conventions / constraints
 - UI text and code comments in English.
