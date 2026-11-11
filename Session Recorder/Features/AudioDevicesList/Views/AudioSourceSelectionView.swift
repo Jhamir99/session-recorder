@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct AudioSourceSelectionView: View {
-    // Owned by the Record tab so the source row and source sheet share one state.
-    @ObservedObject var viewModel: AudioSourceSelectionViewModel
+    // Injected by ContentView so the source row and source sheet share one state.
+    @EnvironmentObject private var viewModel: AudioSourceSelectionViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -20,6 +20,5 @@ struct AudioSourceSelectionView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .environmentObject(viewModel)
     }
 }

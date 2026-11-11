@@ -182,7 +182,7 @@ on manual select(id):
 |---|---|---|
 | `Session Recorder/ContentView.swift` | Becomes the app shell: `TabView` with Record and Sessions tabs (platform-adaptive, sidebar on iPad/Mac). Record tab: navigation container, source row at top, message area, `RecordButton` pinned at the bottom. Sessions tab: empty state. Owns the `AudioSourceSelectionViewModel` (one instance shared by row and sheet). | RF-6 |
 | `Views/AudioSourceSummaryRow.swift` | **New file (approval required before creating).** Compact row: device name + mode + channels, or state text (no input / permission required / no valid channel). Tap opens the sheet. | RF-6 |
-| `Views/AudioSourceSelectionView.swift` | Becomes the sheet content: receives the shared view model instead of creating it; `Form`/`List` with sections **Device** and **Channels**; title "Audio Source"; **Done** button; scrolls. | RF-1–RF-6 |
+| `Views/AudioSourceSelectionView.swift` | Becomes the sheet content: reads the shared view model from the environment instead of creating it; `Form`/`List` with sections **Device** and **Channels**; title "Audio Source"; **Done** button; scrolls. | RF-1–RF-6 |
 | `Views/DeviceListView.swift`, `Views/ChannelSelectionView.swift` | Render rows as native list/form rows (checkmarks, segmented Mono/Stereo) inside the sheet sections. Behavior unchanged. | RF-1–RF-4 |
 | `AudioSourceSelectionViewModel` (+ extension) | Expose a source summary for the row (device label, mode, channel numbers, state). No behavior changes. | RF-6 |
 | `Views/AudioSourceSelectionView+Previews.swift` | Update previews for sheet content; add previews for the row states and the Record tab. | RF-6, C5 |
@@ -191,7 +191,7 @@ on manual select(id):
 | Decision | Rejected alternative |
 |---|---|
 | Keep tabs in `ContentView` and the Sessions empty state inline (no new shell files). | New `AppShell` feature folder now — speculative until the library exists (C1). |
-| View model owned at Record-tab level and passed to row and sheet. | Two view models — would duplicate device observation and selection state. |
+| View model owned by `ContentView` (`@StateObject`) and injected with `.environmentObject` at the root; views read it with `@EnvironmentObject` (same pattern as `DeviceListView`/`ChannelSelectionView`). | Two view models — would duplicate device observation and selection state. Passing it as a parameter — more boilerplate across row/sheet/subviews. |
 | Reuse `AudioSourceSelectionView` as sheet content. | New sheet view duplicating device/channel UI. |
 | Messages shown on the Record tab and in the sheet. | Only in the sheet — users would miss automatic changes. |
 | Quality picker and level meters not added here. | Placeholders now — belong to the recording feature spec. |

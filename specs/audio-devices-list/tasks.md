@@ -88,7 +88,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 - [x] **T16 — Share one view model between Record tab, row and sheet** (`Views/AudioSourceSelectionView.swift`, `ContentView.swift`)
   - **RF:** RF-6, C4
   - **Depends on:** none
-  - **Done when:** `AudioSourceSelectionView` receives the view model instead of creating it; the view model is created once at the Record-tab level; previews still compile.
+  - **Done when:** `AudioSourceSelectionView` reads the view model with `@EnvironmentObject` instead of creating it; `ContentView` creates it once (`@StateObject`, optional injection for previews) and injects it at the root with `.environmentObject`; previews inject it and compile.
 
 - [ ] **T17 — Add Record/Sessions tabs** (`ContentView.swift`)
   - **RF:** RF-6, NFR-1
