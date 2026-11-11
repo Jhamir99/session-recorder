@@ -58,10 +58,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 
 ## Change: automatic device selection (RF-7, updated RF-5) — added 2026-11-11
 
-- [ ] **T11 — Mark devices as external or built-in** (`AudioDeviceModels.swift`, `AudioInputDeviceService.swift`)
+- [x] **T11 — Mark devices as external or built-in** (`AudioDeviceModels.swift`, `AudioInputDeviceService.swift`)
   - **RF:** RF-7
   - **Depends on:** none
   - **Done when:** `AudioInputDevice` exposes whether it is external; the service sets it from the discovered device type on macOS and iOS; the service offers a permission check that never shows the system prompt.
+  - **Note (2026-11-11):** macOS uses the Core Audio transport type (wired only); iOS uses device type `.external`. The non-prompting permission check already existed (`refreshPermissionState()`). Verified on a Mac: built-in and Continuity (iPhone) microphones are not external; not yet verified with a USB device or on iPhone/iPad.
 
 - [ ] **T12 — Persist last selected device ID** (`AudioDeviceSelectionRepository.swift`)
   - **RF:** RF-7, NFR-5

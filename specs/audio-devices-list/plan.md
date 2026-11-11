@@ -122,7 +122,7 @@ on permission/devices/channels change:
 | File | Change | RF |
 |---|---|---|
 | `AudioDeviceModels.swift` | Add whether a device is external or built-in to `AudioInputDevice`; add a message kind for automatic source changes. | RF-7 |
-| `AudioInputDeviceService.swift` | Set the external/built-in flag from the discovered device type (`.external` vs `.microphone`). Add a permission *check* without prompting, for automatic selection. | RF-7, RF-4 |
+| `AudioInputDeviceService.swift` | Set the external flag: on macOS from the Core Audio transport type (wired only: USB, Thunderbolt, FireWire, PCI, AVB; USB interfaces are reported as `.microphone`, so device type is not enough); on iOS from device type `.external`. Use the existing `refreshPermissionState()` as the permission *check* without prompting. | RF-7, RF-4 |
 | `AudioDeviceSelectionHelper.swift` | Pure decisions: launch selection, selection on connect, fallback on disconnect, reselection on reconnect. | RF-7 |
 | `AudioDeviceSelectionRepository.swift` | Save/load the last selected device ID (new key; device ID only). | RF-7, NFR-5 |
 | `ViewModels/AudioSourceSelectionViewModel+DeviceSelection.swift` | Apply automatic selection on start and on device-list changes; track "replaced device" and whether the user changed the source manually; stop deleting saved channel selection on disconnect; set the automatic-change message. | RF-5, RF-7 |
@@ -168,6 +168,7 @@ on manual select(id):
 | Keep saved channel selection on disconnect. | Delete it (previous behavior) — reconnect would lose channels. |
 | Automatic selection never shows the system permission prompt (NFR-2). | Prompt on launch without user context. |
 | Recording lock is a hook for the future recording feature. | Implementing recording state now (out of scope). |
+| Only wired devices count as external (2026-11-11), so connecting AirPods or a virtual/Continuity input never switches the source. | Any non-built-in device — Bluetooth headsets would take over the source. |
 
 ## 9) Change: app structure, source row and source sheet (RF-6 updated)
 

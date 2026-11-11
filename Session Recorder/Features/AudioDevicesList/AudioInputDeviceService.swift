@@ -1,4 +1,7 @@
 import AVFoundation
+#if os(macOS)
+import CoreAudio
+#endif
 import Combine
 import CoreMedia
 import Foundation
@@ -128,12 +131,32 @@ final class AudioInputDeviceService: ObservableObject {
                 AudioInputDevice(
                     id: device.uniqueID,
                     displayName: device.localizedName,
-                    channels: inputChannels(for: device)
+                    channels: inputChannels(for: device),
+                    isExternal: isExternalDevice(device)
                 )
             }
             .sorted { lhs, rhs in
                 lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
             }
+    }
+
+    private static func isExternalDevice(_ device: AVCaptureDevice) -> Bool {
+        #if os(macOS)
+        // On macOS USB interfaces are reported as `.microphone`, so use the Core Audio transport type.
+        // Only wired hardware counts as external; Bluetooth, virtual, aggregate and Continuity inputs do not.
+        let wiredTransportTypes: Set<UInt32> = [
+            kAudioDeviceTransportTypeUSB,
+            kAudioDeviceTransportTypeThunderbolt,
+            kAudioDeviceTransportTypeFireWire,
+            kAudioDeviceTransportTypePCI,
+            kAudioDeviceTransportTypeAVB
+        ]
+        return wiredTransportTypes.contains(UInt32(bitPattern: device.transportType))
+        #elseif os(iOS)
+        return device.deviceType == .external
+        #else
+        return false
+        #endif
     }
 
     private static func inputChannels(for device: AVCaptureDevice) -> [AudioInputChannel] {

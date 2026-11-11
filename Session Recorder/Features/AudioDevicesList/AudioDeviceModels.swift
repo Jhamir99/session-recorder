@@ -4,6 +4,8 @@ struct AudioInputDevice: Identifiable, Equatable {
     let id: String
     let displayName: String
     let channels: [AudioInputChannel]
+    /// Wired external device (e.g., USB-C mixer/interface). Built-in, Bluetooth and virtual inputs are not external (RF-7).
+    var isExternal: Bool = false
 }
 
 struct AudioInputChannel: Identifiable, Equatable {

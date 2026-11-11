@@ -30,7 +30,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     static var previewMono: AudioSourceSelectionViewModel {
-        previewDevice(name: "iPhone Microphone", channelCount: 1, mode: .mono, selection: .mono(channelID: "d1:1"))
+        previewDevice(name: "iPhone Microphone", isExternal: false, channelCount: 1, mode: .mono, selection: .mono(channelID: "d1:1"))
     }
 
     static var previewStereo: AudioSourceSelectionViewModel {
@@ -47,7 +47,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     static var previewPermissionRequired: AudioSourceSelectionViewModel {
-        let device = AudioInputDevice(id: "d1", displayName: "Xone:96", channels: previewChannels(count: 4))
+        let device = AudioInputDevice(id: "d1", displayName: "Xone:96", channels: previewChannels(count: 4), isExternal: true)
         return AudioSourceSelectionViewModel(previewState: .init(
             devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
             selectedDeviceID: "d1",
@@ -64,12 +64,13 @@ extension AudioSourceSelectionViewModel {
 
     private static func previewDevice(
         name: String,
+        isExternal: Bool = true,
         channelCount: Int,
         mode: AudioChannelMode,
         selection: ChannelSelection?
     ) -> AudioSourceSelectionViewModel {
         let channels = previewChannels(count: channelCount)
-        let device = AudioInputDevice(id: "d1", displayName: name, channels: channels)
+        let device = AudioInputDevice(id: "d1", displayName: name, channels: channels, isExternal: isExternal)
         let builtIn = AudioInputDevice(id: "d0", displayName: "Built-in Microphone", channels: previewChannels(deviceID: "d0", count: 1))
         let devices = [builtIn, device]
         return AudioSourceSelectionViewModel(previewState: .init(
