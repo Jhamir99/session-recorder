@@ -89,3 +89,11 @@ struct ContentView: View {
 #Preview("Record tab, no input") {
     ContentView(audioSourceViewModel: .previewNoInput)
 }
+
+#Preview("Record tab, auto-selected external") {
+    ContentView(audioSourceViewModel: .previewAutoSelectedExternal)
+}
+
+#Preview("Record tab, fallback after disconnect") {
+    ContentView(audioSourceViewModel: .previewFallbackToBuiltIn)
+}

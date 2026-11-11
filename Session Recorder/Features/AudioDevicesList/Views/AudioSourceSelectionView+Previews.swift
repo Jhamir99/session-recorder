@@ -138,3 +138,8 @@ private enum AudioSourceSelectionPreviewData {
         AudioSourceSelectionView().environmentObject(AudioSourceSelectionViewModel.previewManyChannels)
     )
 }
+#Preview("Fallback after disconnect") {
+    AudioSourceSelectionPreviewData.sheet(
+        AudioSourceSelectionView().environmentObject(AudioSourceSelectionViewModel.previewFallbackToBuiltIn)
+    )
+}

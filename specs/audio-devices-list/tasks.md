@@ -78,12 +78,13 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **RF:** RF-5, RF-7, RF-4
   - **Depends on:** T11, T12, T13
   - **Done when:** A device is auto-selected on start; connect/disconnect/reconnect follow RF-7; manual selection is respected and saved as last device; disconnect no longer deletes saved channel selection; automatic changes show a small message naming the new device; automatic selection never shows the system permission prompt.
-  - **Note (2026-11-12):** Verified by running the real view model against a fake device service (29 scenarios: launch order, disconnect fallback, reconnect restore, manual choice, connect rules, recording lock hook, empty state, permission not determined). Automatic-change notices are informational (secondary color); `AudioDeviceSelectionRepository.removeSelection` is no longer used. Not yet verified with real hardware.
+  - **Note (2026-11-12):** Verified by running the real view model against a fake device service (29 scenarios: launch order, disconnect fallback, reconnect restore, manual choice, connect rules, recording lock hook, empty state, permission not determined). Automatic-change notices are informational (secondary color); `AudioDeviceSelectionRepository.removeSelection` was removed (unused since disconnect keeps saved channels). Verified by the user with real hardware on 2026-11-12.
 
-- [ ] **T15 — Previews and verification** (`Views/AudioSourceSelectionView+Previews.swift`)
+- [x] **T15 — Previews and verification** (`Views/AudioSourceSelectionView+Previews.swift`)
   - **RF:** RF-5, RF-7, C5
   - **Depends on:** T14
   - **Done when:** Previews show an auto-selected external device and a fallback-to-built-in state; `xcodebuild` succeeds for macOS and iOS Simulator; manual checks confirm launch order, connect, unplug/replug restore, and manual choice respected.
+  - **Note (2026-11-12):** Previews added for auto-selected external and fallback after disconnect (Record tab and sheet). Manual checks with the user's mixer confirmed by the user on 2026-11-12.
 
 ## Change: app structure, source row and source sheet (RF-6 updated) — added 2026-11-11
 

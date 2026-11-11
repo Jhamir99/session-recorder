@@ -58,6 +58,29 @@ extension AudioSourceSelectionViewModel {
         ))
     }
 
+    /// External device selected automatically after it connected (RF-7).
+    static var previewAutoSelectedExternal: AudioSourceSelectionViewModel {
+        let viewModel = previewStereo
+        viewModel.userMessage = AudioSourceUserMessage(kind: .sourceChangedAutomatically, text: "Switched to Xone:96.", showsRetryPermissionAction: false)
+        return viewModel
+    }
+
+    /// Selected external device disconnected; fell back to the built-in input (RF-5, RF-7).
+    static var previewFallbackToBuiltIn: AudioSourceSelectionViewModel {
+        let channels = previewChannels(deviceID: "d0", count: 1)
+        let builtIn = AudioInputDevice(id: "d0", displayName: "iPhone Microphone", channels: channels)
+        return AudioSourceSelectionViewModel(previewState: .init(
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([builtIn]),
+            selectedDeviceID: "d0",
+            permissionState: .granted,
+            selectedMode: .mono,
+            displayedChannels: channels,
+            activeSelection: .mono(channelID: "d0:1"),
+            userMessage: AudioSourceUserMessage(kind: .sourceChangedAutomatically, text: "Xone:96 was disconnected. Switched to iPhone Microphone.", showsRetryPermissionAction: false),
+            rawDevices: [builtIn]
+        ))
+    }
+
     private static func previewChannels(deviceID: String = "d1", count: Int) -> [AudioInputChannel] {
         (1...count).map { AudioInputChannel(id: "\(deviceID):\($0)", number: $0, name: nil) }
     }

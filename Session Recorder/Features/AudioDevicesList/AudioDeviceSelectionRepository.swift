@@ -55,12 +55,6 @@ final class AudioDeviceSelectionRepository {
         persist(records)
     }
 
-    func removeSelection(for deviceID: String) {
-        var records = allRecords()
-        records.removeValue(forKey: deviceID)
-        persist(records)
-    }
-
     private func isValidForStorage(_ selection: ChannelSelection) -> Bool {
         switch selection.mode {
         case .mono:
