@@ -8,16 +8,33 @@ struct StoredChannelSelection: Codable, Equatable {
 final class AudioDeviceSelectionRepository {
     private let defaults: UserDefaults
     private let storageKey: String
+    private let lastSelectedDeviceKey: String
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
     init(
         defaults: UserDefaults = .standard,
-        storageKey: String = "audio_device_channel_selections_v1"
+        storageKey: String = "audio_device_channel_selections_v1",
+        lastSelectedDeviceKey: String = "audio_last_selected_device_id_v1"
     ) {
         self.defaults = defaults
         self.storageKey = storageKey
+        self.lastSelectedDeviceKey = lastSelectedDeviceKey
     }
+
+    // MARK: Last selected device (RF-7; device ID only, no personal data)
+
+    var lastSelectedDeviceID: String? {
+        guard let id = defaults.string(forKey: lastSelectedDeviceKey), !id.isEmpty else { return nil }
+        return id
+    }
+
+    func saveLastSelectedDeviceID(_ deviceID: String) {
+        guard !deviceID.isEmpty else { return }
+        defaults.set(deviceID, forKey: lastSelectedDeviceKey)
+    }
+
+    // MARK: Per-device channel selections (RF-3)
 
     func record(for deviceID: String) -> ChannelSelection? {
         allRecords()[deviceID]?.selection
