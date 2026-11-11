@@ -74,10 +74,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T11
   - **Done when:** Pure functions cover launch selection (last used → first external → built-in), selection on connect (only replaces built-in/none), fallback on disconnect (first external → built-in → none), and reselection on reconnect (only if the user did not change the source).
 
-- [ ] **T14 — Apply automatic selection in the view model** (`ViewModels/AudioSourceSelectionViewModel+DeviceSelection.swift`, `AudioDeviceModels.swift`)
+- [x] **T14 — Apply automatic selection in the view model** (`ViewModels/AudioSourceSelectionViewModel+DeviceSelection.swift`, `AudioDeviceModels.swift`)
   - **RF:** RF-5, RF-7, RF-4
   - **Depends on:** T11, T12, T13
   - **Done when:** A device is auto-selected on start; connect/disconnect/reconnect follow RF-7; manual selection is respected and saved as last device; disconnect no longer deletes saved channel selection; automatic changes show a small message naming the new device; automatic selection never shows the system permission prompt.
+  - **Note (2026-11-12):** Verified by running the real view model against a fake device service (29 scenarios: launch order, disconnect fallback, reconnect restore, manual choice, connect rules, recording lock hook, empty state, permission not determined). Automatic-change notices are informational (secondary color); `AudioDeviceSelectionRepository.removeSelection` is no longer used. Not yet verified with real hardware.
 
 - [ ] **T15 — Previews and verification** (`Views/AudioSourceSelectionView+Previews.swift`)
   - **RF:** RF-5, RF-7, C5

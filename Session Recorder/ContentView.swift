@@ -32,7 +32,7 @@ struct ContentView: View {
                 if let message = audioSourceViewModel.recordTabMessage {
                     Text(message.text)
                         .font(.footnote)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
                 }
 
                 Spacer(minLength: 0)

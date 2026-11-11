@@ -21,6 +21,14 @@ final class AudioSourceSelectionViewModel: ObservableObject {
     var lastValidMonoByDevice: [String: String] = [:]
     var lastValidStereoByDevice: [String: (left: String, right: String)] = [:]
 
+    // Automatic device selection state (RF-7).
+    var hasAppliedLaunchSelection = false
+    /// Device that disconnected and was replaced by a fallback; selected again if it reconnects.
+    var replacedDeviceID: String?
+    var userChangedSourceManually = false
+    /// Set by the future recording feature: while true, the source never changes automatically.
+    var isSourceLocked = false
+
     init(service: AudioInputDeviceService? = nil, store: AudioDeviceSelectionRepository? = nil) {
         self.service = service ?? AudioInputDeviceService()
         self.store = store ?? AudioDeviceSelectionRepository()
@@ -45,7 +53,7 @@ final class AudioSourceSelectionViewModel: ObservableObject {
     /// Message shown under the source row on the Record tab. States already shown by the
     /// row itself (permission, no channels, no valid channel) are not repeated here.
     var recordTabMessage: AudioSourceUserMessage? {
-        guard let userMessage, userMessage.kind == .deviceDisconnected else { return nil }
+        guard let userMessage, userMessage.isSourceChangeNotice else { return nil }
         return userMessage
     }
 

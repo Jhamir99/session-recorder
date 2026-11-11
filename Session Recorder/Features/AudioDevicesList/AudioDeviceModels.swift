@@ -67,10 +67,18 @@ struct AudioSourceUserMessage: Identifiable, Equatable {
         case noChannelsAvailable
         case noValidChannelAvailable
         case deviceDisconnected
+        /// Informational: the source changed because a device connected or disconnected (RF-7).
+        case sourceChangedAutomatically
     }
 
     let id = UUID()
     let kind: Kind
     let text: String
     let showsRetryPermissionAction: Bool
+
+    /// Messages about source changes that stay visible until the user acts, unlike state errors
+    /// that are recomputed on every refresh.
+    var isSourceChangeNotice: Bool {
+        kind == .deviceDisconnected || kind == .sourceChangedAutomatically
+    }
 }

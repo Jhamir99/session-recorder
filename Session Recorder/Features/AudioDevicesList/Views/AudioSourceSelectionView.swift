@@ -21,7 +21,7 @@ struct AudioSourceSelectionView: View {
                 Section {
                     Text(message.text)
                         .font(.footnote)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
                 }
             }
         }
