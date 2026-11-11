@@ -4,37 +4,36 @@ struct ChannelSelectionView: View {
     @EnvironmentObject private var viewModel: AudioSourceSelectionViewModel
 
     var body: some View {
-            if viewModel.selectedDeviceID != nil {
-                channelSection
-            }
+        if viewModel.selectedDeviceID != nil {
+            channelSection
+        }
     }
 
+    // Each element is its own form row inside the "Channels" section.
     @ViewBuilder
     private var channelSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if viewModel.showsPermissionPrompt, let message = viewModel.userMessage, message.kind == .permissionRequired {
-                Text(message.text)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                Button("Try Again") {
-                    viewModel.retryPermission()
-                }
-            } else if viewModel.permissionState == .granted {
-                Picker("Mode", selection: modeBinding) {
-                    Text("Mono").tag(AudioChannelMode.mono)
-                    Text("Stereo").tag(AudioChannelMode.stereo)
-                }
-                .pickerStyle(.segmented)
-                .disabled(viewModel.selectedDevice == nil)
+        if viewModel.showsPermissionPrompt, let message = viewModel.userMessage, message.kind == .permissionRequired {
+            Text(message.text)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Button("Try Again") {
+                viewModel.retryPermission()
+            }
+        } else if viewModel.permissionState == .granted {
+            Picker("Mode", selection: modeBinding) {
+                Text("Mono").tag(AudioChannelMode.mono)
+                Text("Stereo").tag(AudioChannelMode.stereo)
+            }
+            .pickerStyle(.segmented)
+            .disabled(viewModel.selectedDevice == nil)
 
-                if viewModel.displayedChannels.isEmpty {
-                    if viewModel.userMessage?.kind == .noChannelsAvailable {
-                        Text(viewModel.userMessage?.text ?? "No channels are available for this device.")
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    channelRows
+            if viewModel.displayedChannels.isEmpty {
+                if viewModel.userMessage?.kind == .noChannelsAvailable {
+                    Text(viewModel.userMessage?.text ?? "No channels are available for this device.")
+                        .foregroundStyle(.secondary)
                 }
+            } else {
+                channelRows
             }
         }
     }
@@ -51,10 +50,8 @@ struct ChannelSelectionView: View {
         if viewModel.selectedMode == .stereo {
             stereoChannelColumns
         } else {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(viewModel.displayedChannels) { channel in
-                    monoChannelRow(channel)
-                }
+            ForEach(viewModel.displayedChannels) { channel in
+                monoChannelRow(channel)
             }
         }
     }
@@ -69,20 +66,21 @@ struct ChannelSelectionView: View {
                 channelSelectionIndicator(for: channel.id)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
+    // Hint row plus one row with Left/Right columns.
+    @ViewBuilder
     private var stereoChannelColumns: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Select a channel for Left and Right.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+        Text("Select a channel for Left and Right.")
+            .font(.footnote)
+            .foregroundStyle(.secondary)
 
-            HStack(alignment: .top, spacing: 12) {
-                stereoChannelColumn(title: "Left", side: .left)
-                stereoChannelColumn(title: "Right", side: .right)
-            }
+        HStack(alignment: .top, spacing: 12) {
+            stereoChannelColumn(title: "Left", side: .left)
+            stereoChannelColumn(title: "Right", side: .right)
         }
     }
 
@@ -112,6 +110,7 @@ struct ChannelSelectionView: View {
                         stereoColumnIndicator(for: channel.id, side: side)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .disabled(isStereoChannelDisabled(channelID: channel.id, side: side))

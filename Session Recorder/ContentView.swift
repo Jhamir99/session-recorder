@@ -49,20 +49,23 @@ struct ContentView: View {
         }
     }
 
-    // Basic container so the sheet can be dismissed on every platform; T20 turns the content into a native form.
+    // Done button is needed on Mac, where sheets cannot be dismissed by swiping.
     private var sourceSheet: some View {
         NavigationStack {
-            ScrollView {
-                AudioSourceSelectionView()
-                    .padding()
-            }
-            .navigationTitle("Audio Source")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { isShowingSourceSheet = false }
+            AudioSourceSelectionView()
+                .navigationTitle("Audio Source")
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.inline)
+                #endif
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { isShowingSourceSheet = false }
+                    }
                 }
-            }
         }
+        #if os(macOS)
+        .frame(minWidth: 420, minHeight: 480)
+        #endif
         .environmentObject(audioSourceViewModel)
     }
 
