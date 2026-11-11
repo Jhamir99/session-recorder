@@ -2,7 +2,7 @@
 
 ## References
 - `docs/constitution.md` (C1–C6)
-- `specs/audio-devices-list/spec.md` (RF-1–RF-6)
+- `specs/audio-devices-list/spec.md` (RF-1–RF-7)
 
 ## 1) Files to create or modify (responsibility + RF coverage)
 All new implementation files go in `Session Recorder/Features/AudioDevicesList/` (new folder; creating files/folder approved in spec workflow — keep minimal). Views are in `Session Recorder/Features/AudioDevicesList/Views/`.
@@ -14,10 +14,10 @@ All new implementation files go in `Session Recorder/Features/AudioDevicesList/`
 | `Session Recorder/Features/AudioDevicesList/Views/DeviceListView.swift` | Create | Device list subview (disambiguated names, empty state), receives view model via environment. | RF-1 |
 | `Session Recorder/Features/AudioDevicesList/Views/ChannelSelectionView.swift` | Create | Channel/permission/mode/selection subview (Mono/Stereo tabs, Left/Right stereo columns), receives view model via environment. | RF-2, RF-3, RF-4, RF-5 |
 | `Session Recorder/Features/AudioDevicesList/AudioDeviceModels.swift` | Create | Value types for device identity/display name, channel (number + optional name), mode (mono/stereo), selection (mono / stereo left+right), permission UI state, and user-facing message states. No Apple-device I/O. | RF-1–RF-5 |
-| `Session Recorder/Features/AudioDevicesList/AudioDeviceSelectionLogic.swift` | Create | **Pure/testable logic**: disambiguate device names, format channel labels, defaults, stereo validation (2 different channels, left/right), no-valid-channel handling, restore validation, tab-switch replacement. | RF-1, RF-2, RF-3, RF-5 |
+| `Session Recorder/Features/AudioDevicesList/AudioDeviceSelectionHelper.swift` | Create | **Pure/testable logic**: disambiguate device names, format channel labels, defaults, stereo validation (2 different channels, left/right), no-valid-channel handling, restore validation, tab-switch replacement. | RF-1, RF-2, RF-3, RF-5 |
 | `Session Recorder/Features/AudioDevicesList/AudioDeviceSelectionRepository.swift` | Create | Local persistence of per-device selection (**device/channel IDs only, no personal data**). Save immediately on valid selection; load records for restore. | RF-3, NFR-5 |
 | `Session Recorder/Features/AudioDevicesList/AudioInputDeviceService.swift` | Create | Apple-API boundary: discover eligible input devices, observe connect/disconnect, expose channels, request/check audio-input permission, report permission changes. Publishes normalized model data. | RF-1, RF-2, RF-4, NFR-4 |
-| `Session Recorder/Features/AudioDevicesList/AudioSourceSelectionViewModel.swift` | Create | Coordinates service + pure logic + repository; holds UI state; enforces permission-gated channel view, retry, selection active only when device selected, clear+notify on disconnect, no default on invalid selection. | RF-1–RF-6, C4 |
+| `Session Recorder/Features/AudioDevicesList/ViewModels/AudioSourceSelectionViewModel.swift` (+ `+DeviceSelection`, `+ChannelSelection`, `+Preview` extensions) | Create | Coordinates service + pure logic + repository; holds UI state; enforces permission-gated channel view, retry, selection active only when device selected, clear+notify on disconnect, no default on invalid selection. | RF-1–RF-6, C4 |
 | `Session Recorder/CONSTANTS.swift` | Modify only if needed | Add small shared English text constants only if duplication is harmful. | RF-1–RF-5, C6 |
 | `specs/audio-devices-list/spec.md` | No change unless behavior changes | Source of truth; update only if approved scope changes. | C2 |
 
@@ -101,7 +101,7 @@ on permission/devices/channels change:
 ## 6) Test strategy (C5; no `node --test`, no deps)
 | Strategy | How | RF |
 |---|---|---|
-| Pure-logic verification | Add a native Xcode test target **only if valuable**; test `AudioDeviceSelectionLogic` with explicit inputs. No third-party test frameworks. | RF-1–5 |
+| Pure-logic verification | Add a native Xcode test target **only if valuable**; test `AudioDeviceSelectionHelper` with explicit inputs. No third-party test frameworks. | RF-1–5 |
 | Build verification | `xcodebuild -project "Session Recorder.xcodeproj" -scheme "Session Recorder" -configuration Debug -destination 'platform=macOS' build` (and iOS Simulator destination per `AGENTS.md`). | NFR-1, RF-6 |
 | SwiftUI previews | `#Preview` states: empty, duplicates, no channels, permission denied+retry, mono-only, stereo L/R, disconnect/error, restored selection. | RF-1–6 |
 | Manual integration | Real/simulated connect/disconnect, permission grant/revoke while open, restart restore for same interface. | RF-1,3,4,5, NFR-4 |
@@ -113,3 +113,85 @@ on permission/devices/channels change:
 - **RF-4:** prompt on device select, message+retry, hide channels, auto permission updates, block recording-related use — (1)-(4),(6).
 - **RF-5:** disconnect clear+notify; invalid selection error with no default — (1)-(4),(6).
 - **RF-6:** above record button, record control remains — (1),(4),(6).
+- **RF-6 (updated 2026-11-11):** tabs, source row, source sheet — (9).
+- **RF-7:** automatic device selection (launch order, connect, disconnect fallback, reconnect restore, manual choice respected) — (8).
+
+## 8) Change: automatic device selection (RF-7, updated RF-5)
+
+### Files to modify
+| File | Change | RF |
+|---|---|---|
+| `AudioDeviceModels.swift` | Add whether a device is external or built-in to `AudioInputDevice`; add a message kind for automatic source changes. | RF-7 |
+| `AudioInputDeviceService.swift` | Set the external/built-in flag from the discovered device type (`.external` vs `.microphone`). Add a permission *check* without prompting, for automatic selection. | RF-7, RF-4 |
+| `AudioDeviceSelectionHelper.swift` | Pure decisions: launch selection, selection on connect, fallback on disconnect, reselection on reconnect. | RF-7 |
+| `AudioDeviceSelectionRepository.swift` | Save/load the last selected device ID (new key; device ID only). | RF-7, NFR-5 |
+| `ViewModels/AudioSourceSelectionViewModel+DeviceSelection.swift` | Apply automatic selection on start and on device-list changes; track "replaced device" and whether the user changed the source manually; stop deleting saved channel selection on disconnect; set the automatic-change message. | RF-5, RF-7 |
+| `Views/AudioSourceSelectionView+Previews.swift` | Previews for auto-selected external, fallback to built-in after disconnect. | RF-7 |
+
+### Pure logic (explicit inputs)
+| Logic | Inputs | Output |
+|---|---|---|
+| Launch selection | devices (with external flag, list order), last selected device ID | device ID or none |
+| Selection on connect | previous device IDs, current devices, current selected ID | new device ID or keep current |
+| Fallback on disconnect | current devices, disconnected device ID | external (first) → built-in → none |
+| Reselection on reconnect | replaced device ID, user changed source manually, current devices | replaced device ID or keep current |
+
+### Pseudocode
+```text
+on start:
+  id = launchSelection(devices, store.lastSelectedDeviceID)
+  if id: autoSelect(id)
+
+on devices update(old, new):
+  if selected device missing:
+    replacedDeviceID = selected; userChangedSource = false
+    id = fallback(new, selected)            // keep its saved channels
+    if id: autoSelect(id, message: "Switched to <name>") else empty state
+  else if replacedDeviceID in new and !userChangedSource:
+    autoSelect(replacedDeviceID, message); replacedDeviceID = nil
+  else if newly connected external and (selected is built-in or none):
+    autoSelect(external, message)
+
+autoSelect(id):  // no permission prompt (check only)
+  selected = id; store.lastSelectedDeviceID = id
+  if permission granted: restoreOrInitialize else permission message + retry
+
+on manual select(id):
+  userChangedSource = true; replacedDeviceID = nil
+  store.lastSelectedDeviceID = id; existing flow (may prompt permission)
+```
+
+### Decisions
+| Decision | Rejected alternative |
+|---|---|
+| Persist last selected device ID (approved 2026-11-11; ID only). | Not persisting it — launch would ignore the user's last choice. |
+| Keep saved channel selection on disconnect. | Delete it (previous behavior) — reconnect would lose channels. |
+| Automatic selection never shows the system permission prompt (NFR-2). | Prompt on launch without user context. |
+| Recording lock is a hook for the future recording feature. | Implementing recording state now (out of scope). |
+
+## 9) Change: app structure, source row and source sheet (RF-6 updated)
+
+### Current state (before change)
+- `MyApp` shows `ContentView` directly: no tabs, no navigation container.
+- `ContentView` stacks `AudioSourceSelectionView` and `RecordButton` in a `VStack` with no scrolling; long channel lists push the record button off screen on iPhone.
+- `AudioSourceSelectionView` owns its view model (`@StateObject`), so a separate row and sheet cannot share state.
+- Device and channel rows are plain buttons in `VStack`s; messages are red text inside the list.
+
+### Files to modify / create
+| File | Change | RF |
+|---|---|---|
+| `Session Recorder/ContentView.swift` | Becomes the app shell: `TabView` with Record and Sessions tabs (platform-adaptive, sidebar on iPad/Mac). Record tab: navigation container, source row at top, message area, `RecordButton` pinned at the bottom. Sessions tab: empty state. Owns the `AudioSourceSelectionViewModel` (one instance shared by row and sheet). | RF-6 |
+| `Views/AudioSourceSummaryRow.swift` | **New file (approval required before creating).** Compact row: device name + mode + channels, or state text (no input / permission required / no valid channel). Tap opens the sheet. | RF-6 |
+| `Views/AudioSourceSelectionView.swift` | Becomes the sheet content: receives the shared view model instead of creating it; `Form`/`List` with sections **Device** and **Channels**; title "Audio Source"; **Done** button; scrolls. | RF-1–RF-6 |
+| `Views/DeviceListView.swift`, `Views/ChannelSelectionView.swift` | Render rows as native list/form rows (checkmarks, segmented Mono/Stereo) inside the sheet sections. Behavior unchanged. | RF-1–RF-4 |
+| `AudioSourceSelectionViewModel` (+ extension) | Expose a source summary for the row (device label, mode, channel numbers, state). No behavior changes. | RF-6 |
+| `Views/AudioSourceSelectionView+Previews.swift` | Update previews for sheet content; add previews for the row states and the Record tab. | RF-6, C5 |
+
+### Decisions
+| Decision | Rejected alternative |
+|---|---|
+| Keep tabs in `ContentView` and the Sessions empty state inline (no new shell files). | New `AppShell` feature folder now — speculative until the library exists (C1). |
+| View model owned at Record-tab level and passed to row and sheet. | Two view models — would duplicate device observation and selection state. |
+| Reuse `AudioSourceSelectionView` as sheet content. | New sheet view duplicating device/channel UI. |
+| Messages shown on the Record tab and in the sheet. | Only in the sheet — users would miss automatic changes. |
+| Quality picker and level meters not added here. | Placeholders now — belong to the recording feature spec. |

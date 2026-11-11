@@ -10,6 +10,7 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 - As a user, I want to see connected audio input devices so I can choose a recording source.
 - As a user, I want to view a device’s input channels so I know what can be recorded.
 - As a user, I want to select mono or stereo channels per device and have my last valid choice remembered.
+- As a user, I want my USB-C mixer/interface to be selected automatically when I connect it, and the app to fall back to the built-in microphone when it is unplugged.
 
 ## Functional Requirements
 
@@ -42,37 +43,64 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 - The system shall prevent recording-related use of the source until permission is granted.
 
 ### RF-5: Disconnection and invalid selection
-- When a selected device disconnects or becomes unavailable, the system shall clear its selection and notify the user with a small error message.
+- When a selected device disconnects or becomes unavailable, the system shall notify the user with a small message and select a fallback device as defined in RF-7.
+- When a selected device disconnects, the system shall keep that device's saved channel selection so it can be restored if the device reconnects.
 - If the current or saved channel selection becomes invalid (no valid channel available), then the system shall show a small error message stating that no valid channel is available and shall not apply a default channel selection.
 
-### RF-6: Placement
-- When the main screen is shown, the system shall display the audio device list and channel selection UI above the record button, while keeping the existing record control visible.
+### RF-6: App structure and placement
+- The app shall have two tabs: **Record** and **Sessions**. On iPhone they appear as a bottom tab bar; on iPad and Mac they may appear as a sidebar (platform-adaptive).
+- Until the session library feature exists, the Sessions tab shall show an empty state (for example, "No sessions yet").
+- When the Record tab is shown, the system shall display a compact **source row** at the top and the record control at the bottom; the record control shall stay visible regardless of how many devices or channels exist.
+- The source row shall show the selected device name and its channel selection (for example, `Xone:96 · Stereo · 1–2` or `iPhone Microphone · Mono · 1`). If no device is selected, permission is missing, or the selection is invalid, the row shall show that state instead (for example, "No input selected", "Permission required").
+- When the user taps the source row, the system shall open a **source sheet** containing the device list (RF-1) and channel selection (RF-2, RF-3, RF-4), using native list/form presentation and scrolling when content does not fit. The sheet shall have a **Done** action to close it.
+- Changes made in the source sheet shall apply immediately (no separate save step) and be reflected in the source row.
+- Small messages from RF-5 and RF-7 (disconnected device, automatic source change, no valid channel) shall be visible on the Record tab near the source row, and also inside the sheet when it is open.
+
+### RF-7: Automatic device selection
+- When the app starts, the system shall select a device automatically, in this order: (1) the last selected device, if connected and reliably identified; (2) otherwise, a connected external device (the first in list order); (3) otherwise, the built-in input.
+- When the selected device changes (manually or automatically), the system shall save its device ID locally as the last selected device (device ID only; no personal data).
+- When an external device connects and the current source is the built-in input or no device is selected, the system shall select the newly connected external device. If another external device is already selected, the system shall keep the current selection.
+- When the selected device disconnects, the system shall select a fallback: another connected external device if available (first in list order), otherwise the built-in input. If no eligible devices remain, the system shall show the empty state (RF-1).
+- When a device that was replaced by a fallback reconnects and the user has not manually changed the source since then, the system shall select that device again and restore its saved channel selection (RF-3).
+- When the user manually selects a device, the system shall keep that choice; automatic changes happen only on later connect/disconnect events as defined above.
+- When a device is selected automatically, the system shall apply the same channel restore/default rules as a manual selection (RF-3).
+- When a device is selected automatically and audio-input permission has not been granted, the system shall not show the system permission prompt; it shall show the permission message and retry action (RF-4).
+- When the selection changes automatically because of a connect/disconnect, the system shall inform the user with a small message naming the newly selected device.
+- While a recording is in progress (future recording feature), the system shall not change the selected device automatically.
 
 ## Non-Functional Requirements
 - **NFR-1:** Behavior works across supported Apple platforms with platform-appropriate presentation.
 - **NFR-2:** Permission requests occur in user-initiated device/source-selection context.
 - **NFR-3:** Labels are clear for non-technical users and precise for multi-channel interfaces.
 - **NFR-4:** Device, channel, and permission-state changes appear promptly/automatically.
-- **NFR-5:** Persisted data contains no personal data (only device/channel IDs).
+- **NFR-5:** Persisted data contains no personal data (only device/channel IDs, including the last selected device ID).
 
 ## Edge Cases
-- Many-channel interfaces remain usable with consistent channel ordering.
+- Many-channel interfaces remain usable with consistent channel ordering; the source sheet scrolls and the record control stays visible (RF-6).
+- A device disconnects while the source sheet is open: the sheet updates and shows the message; the row reflects the fallback device (RF-6, RF-7).
 - Duplicate device names are disambiguated in the list (RF-1).
 - A device with no channels shows a no-channels message in the channel-list area (RF-2).
 - A device/channel set becomes invalid: no default is applied; show a no-valid-channel error (RF-5).
 - A stereo selection is incomplete until two different channels are chosen; no stereo save occurs before a valid pair.
-- A disconnected device’s selection is cleared and the user is notified (RF-5).
+- A disconnected device is replaced by a fallback device, the user is notified, and its saved channel selection is kept (RF-5, RF-7).
+- Several external devices connected at launch with no last-used device: the first external in list order is selected (RF-7).
+- The last used device is connected but the user previously chose the built-in input manually: the last selected device (built-in) is restored (RF-7).
+- An external device is unplugged and plugged back in: it is selected again with its channel selection if the user did not change the source meanwhile (RF-7).
 
 ## Out of Scope
 - Actual audio recording, metering/waveform/monitoring, file export/naming/playback.
-- MIDI listing/mapping/sync, advanced routing, channel grouping beyond 1 or 2 selected channels, sample-rate/format configuration.
+- MIDI listing/mapping/sync, advanced routing, channel grouping beyond 1 or 2 selected channels, sample-rate/format configuration (quality will be added to the source row/sheet by the recording feature).
+- Level meters, session library content, and recording controls beyond the existing record button.
 - Output-only devices as record sources.
 
 ## Completion Criteria
-- Input devices appear above the record button, update automatically, and disambiguate duplicate names.
+- The app shows Record and Sessions tabs (sidebar on iPad/Mac where appropriate); Sessions shows an empty state.
+- The Record tab shows the source row at the top and the record control at the bottom, always visible; tapping the row opens the source sheet with device list and channel selection; changes apply immediately and update the row (RF-6).
+- Input devices appear in the source sheet, update automatically, and disambiguate duplicate names.
 - With permission granted, selecting a device shows channels with the specified formatting; without permission, a permission message and retry action are shown.
 - Mono/Stereo tabs enforce selection rules (left/right for stereo, no duplicate channel, single-channel devices mono-only), save valid choices immediately, and restore the last valid choice on restart when device identity/channels are reliable.
 - Disconnection and invalid-selection cases show small error messages and follow RF-5.
+- At launch a device is selected automatically (last used → external → built-in); connecting an external device replaces the built-in input but not another external; disconnecting falls back and notifies; reconnecting restores the previous device when the user has not changed the source; manual choices are respected (RF-7).
 - All new user-facing text is in English.
 
 ## Open Questions
