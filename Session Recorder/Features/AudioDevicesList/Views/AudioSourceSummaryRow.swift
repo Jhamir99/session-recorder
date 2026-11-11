@@ -88,22 +88,13 @@ struct AudioSourceSummaryRow: View {
     }
 }
 
-#Preview("Stereo selected") {
-    let channels = [
-        AudioInputChannel(id: "d1:1", number: 1, name: nil),
-        AudioInputChannel(id: "d1:2", number: 2, name: nil)
-    ]
-    let device = AudioInputDevice(id: "d1", displayName: "Xone:96", channels: channels)
-    let viewModel = AudioSourceSelectionViewModel(previewState: .init(
-        devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
-        selectedDeviceID: "d1",
-        permissionState: .granted,
-        selectedMode: .stereo,
-        displayedChannels: channels,
-        activeSelection: .stereo(leftChannelID: "d1:1", rightChannelID: "d1:2"),
-        rawDevices: [device]
-    ))
-    return AudioSourceSummaryRow(onTap: {})
-        .environmentObject(viewModel)
-        .padding()
+#Preview("Row states") {
+    VStack(spacing: 12) {
+        AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewStereo)
+        AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewMono)
+        AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewNoInput)
+        AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewPermissionRequired)
+        AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewNoValidChannel)
+    }
+    .padding()
 }

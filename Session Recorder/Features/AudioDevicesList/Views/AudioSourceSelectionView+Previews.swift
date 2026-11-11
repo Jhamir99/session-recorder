@@ -1,6 +1,13 @@
 import SwiftUI
 
 private enum AudioSourceSelectionPreviewData {
+    /// Presents content the way the Record tab's source sheet does.
+    static func sheet(_ content: some View) -> some View {
+        NavigationStack {
+            content.navigationTitle("Audio Source")
+        }
+    }
+
     static var duplicateNames: some View {
         let devices = [
             AudioInputDevice(id: "a1", displayName: "USB Interface", channels: [AudioInputChannel(id: "a1:1", number: 1, name: nil)]),
@@ -112,17 +119,22 @@ private enum AudioSourceSelectionPreviewData {
     }
 }
 
-#Preview { AudioSourceSelectionPreviewData.stereoLeftRight.padding() }
-#Preview("Sample devices") { AudioSourceSelectionPreviewData.restoredSelection.padding() }
+#Preview { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.stereoLeftRight) }
+#Preview("Sample devices") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.restoredSelection) }
 #Preview("Empty") {
-    AudioSourceSelectionView()
-        .environmentObject(AudioSourceSelectionViewModel(previewState: .init(hasNoEligibleDevices: true)))
-        .padding()
+    AudioSourceSelectionPreviewData.sheet(
+        AudioSourceSelectionView().environmentObject(AudioSourceSelectionViewModel.previewNoInput)
+    )
 }
-#Preview("Duplicate names") { AudioSourceSelectionPreviewData.duplicateNames.padding() }
-#Preview("No channels") { AudioSourceSelectionPreviewData.noChannels.padding() }
-#Preview("Permission required") { AudioSourceSelectionPreviewData.permissionRequired.padding() }
-#Preview("Mono only") { AudioSourceSelectionPreviewData.monoOnly.padding() }
-#Preview("Stereo left/right") { AudioSourceSelectionPreviewData.stereoLeftRight.padding() }
-#Preview("Disconnect/error") { AudioSourceSelectionPreviewData.disconnectError.padding() }
-#Preview("Restored selection") { AudioSourceSelectionPreviewData.restoredSelection.padding() }
+#Preview("Duplicate names") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.duplicateNames) }
+#Preview("No channels") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.noChannels) }
+#Preview("Permission required") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.permissionRequired) }
+#Preview("Mono only") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.monoOnly) }
+#Preview("Stereo left/right") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.stereoLeftRight) }
+#Preview("Disconnect/error") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.disconnectError) }
+#Preview("Restored selection") { AudioSourceSelectionPreviewData.sheet(AudioSourceSelectionPreviewData.restoredSelection) }
+#Preview("Many channels") {
+    AudioSourceSelectionPreviewData.sheet(
+        AudioSourceSelectionView().environmentObject(AudioSourceSelectionViewModel.previewManyChannels)
+    )
+}

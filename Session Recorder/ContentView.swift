@@ -82,6 +82,10 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
+#Preview("Record tab") {
+    ContentView(audioSourceViewModel: .previewStereo)
+}
+
+#Preview("Record tab, no input") {
+    ContentView(audioSourceViewModel: .previewNoInput)
 }

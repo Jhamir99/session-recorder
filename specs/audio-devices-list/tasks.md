@@ -111,7 +111,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T19
   - **Done when:** The sheet uses a native `Form`/`List` with **Device** and **Channels** sections, title "Audio Source" and a **Done** button; it scrolls with many channels; changes apply immediately and update the row; messages appear in the sheet; works on iPhone, iPad and Mac.
 
-- [ ] **T21 — Previews and verification for the new layout** (`Views/AudioSourceSelectionView+Previews.swift`)
+- [x] **T21 — Previews and verification for the new layout** (`Views/AudioSourceSelectionView+Previews.swift`)
   - **RF:** RF-6, C5
   - **Depends on:** T20
   - **Done when:** Previews cover the Record tab, row states (selected mono/stereo, no input, permission required, no valid channel) and the sheet; `xcodebuild` succeeds for macOS and iOS Simulator; manual check on iPhone-size simulator confirms the record button stays visible with a many-channel device.

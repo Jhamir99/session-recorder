@@ -23,6 +23,66 @@ extension AudioSourceSelectionViewModel {
         rawDevices = previewState.rawDevices
     }
 
+    // Sample states shared by the Record tab, source row and source sheet previews.
+
+    static var previewNoInput: AudioSourceSelectionViewModel {
+        AudioSourceSelectionViewModel(previewState: .init(hasNoEligibleDevices: true))
+    }
+
+    static var previewMono: AudioSourceSelectionViewModel {
+        previewDevice(name: "iPhone Microphone", channelCount: 1, mode: .mono, selection: .mono(channelID: "d1:1"))
+    }
+
+    static var previewStereo: AudioSourceSelectionViewModel {
+        previewDevice(name: "Xone:96", channelCount: 4, mode: .stereo, selection: .stereo(leftChannelID: "d1:1", rightChannelID: "d1:2"))
+    }
+
+    /// Large interface to check that the sheet scrolls and the record button stays visible.
+    static var previewManyChannels: AudioSourceSelectionViewModel {
+        previewDevice(name: "DJ Mixer 16x", channelCount: 16, mode: .stereo, selection: .stereo(leftChannelID: "d1:3", rightChannelID: "d1:4"))
+    }
+
+    static var previewNoValidChannel: AudioSourceSelectionViewModel {
+        previewDevice(name: "Xone:96", channelCount: 4, mode: .mono, selection: nil)
+    }
+
+    static var previewPermissionRequired: AudioSourceSelectionViewModel {
+        let device = AudioInputDevice(id: "d1", displayName: "Xone:96", channels: previewChannels(count: 4))
+        return AudioSourceSelectionViewModel(previewState: .init(
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames([device]),
+            selectedDeviceID: "d1",
+            permissionState: .denied,
+            userMessage: AudioSourceUserMessage(kind: .permissionRequired, text: "Permission must be granted to access audio input channels.", showsRetryPermissionAction: true),
+            showsPermissionPrompt: true,
+            rawDevices: [device]
+        ))
+    }
+
+    private static func previewChannels(deviceID: String = "d1", count: Int) -> [AudioInputChannel] {
+        (1...count).map { AudioInputChannel(id: "\(deviceID):\($0)", number: $0, name: nil) }
+    }
+
+    private static func previewDevice(
+        name: String,
+        channelCount: Int,
+        mode: AudioChannelMode,
+        selection: ChannelSelection?
+    ) -> AudioSourceSelectionViewModel {
+        let channels = previewChannels(count: channelCount)
+        let device = AudioInputDevice(id: "d1", displayName: name, channels: channels)
+        let builtIn = AudioInputDevice(id: "d0", displayName: "Built-in Microphone", channels: previewChannels(deviceID: "d0", count: 1))
+        let devices = [builtIn, device]
+        return AudioSourceSelectionViewModel(previewState: .init(
+            devices: AudioDeviceSelectionHelper.disambiguateDeviceNames(devices),
+            selectedDeviceID: "d1",
+            permissionState: .granted,
+            selectedMode: mode,
+            displayedChannels: channels,
+            activeSelection: selection,
+            rawDevices: devices
+        ))
+    }
+
     struct PreviewState {
         var devices: [AudioDeviceSelectionHelper.DisambiguatedDevice] = []
         var selectedDeviceID: String?
