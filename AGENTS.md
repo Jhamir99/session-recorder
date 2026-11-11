@@ -1,5 +1,14 @@
 # AGENTS.md — Session Recorder
-SwiftUI app (early stage) for DJs/musicians to record sessions from an audio/MIDI device (e.g., Xone/Pioneer). Goal: no backend/external dependencies; usable on Apple platforms.
+SwiftUI app (early stage) for DJs/musicians to record sessions from a USB-C audio device (e.g., Xone/Pioneer mixer) on iPhone, iPad, and Mac. Goal: no backend/external dependencies.
+
+## Product scope (summary; full vision in `README.md`)
+- Lossless recording up to 24-bit/48 kHz; default = highest quality supported by the device (capped at 24/48), user can change it.
+- Record one mono channel or one stereo pair. Master format: CAF (uncompressed PCM); FLAC and other formats only via user export.
+- Recording UI: level meters, elapsed time, file size/free space, pause/resume, background recording.
+- Library: list, play, rename, delete, trim, share/Files visibility.
+- Export: WAV/AIFF, FLAC, ALAC, AAC/M4A; optional compression when sharing. No MP3 (no native encoder).
+- UI: tabs Record/Sessions; source row + sheet; meters always on; auto-named save on stop; session detail with waveform/player/trim/share; single share sheet with format choice; trim saves a new copy; auto-pause on disconnect/call; built-in mic fallback; Mac shortcuts + Recording menu (see README "UI").
+- Out of scope for now: MIDI features, multichannel recording.
 
 ## Facts (from project)
 - Xcode project: `Session Recorder.xcodeproj`, scheme/target: `Session Recorder`.

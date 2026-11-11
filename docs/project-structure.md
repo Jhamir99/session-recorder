@@ -3,6 +3,8 @@
 This document describes the repository layout and feature code organization. Keep it durable and high-signal; update it when structure changes.
 
 ## Repository layout
+- `AGENTS.md` — canonical agent instructions for this repo.
+- `README.md` — project overview and product vision (scope, planned features, open questions).
 - `Session Recorder.xcodeproj/` — Xcode project (scheme/target: `Session Recorder`).
 - `Session Recorder/` — app source root used by the Xcode target (synchronized root group).
 - `docs/` — project-level documentation (e.g., `constitution.md`, `project-structure.md`).
@@ -13,7 +15,6 @@ This document describes the repository layout and feature code organization. Kee
 - `Session Recorder/ContentView.swift`, `RecordButton.swift` — app shell / shared UI.
 - `Session Recorder/CONSTANTS.swift` — small shared constants/types when justified.
 - `Session Recorder/Features/<FeatureName>/` — feature code (preferred for non-trivial features).
-- `Session Recorder/AGENTS.md` — canonical agent instructions for this repo.
 - `Session Recorder/MEMORY.md` — short session/project log.
 
 ## Feature folder pattern
