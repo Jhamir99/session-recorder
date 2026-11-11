@@ -42,6 +42,16 @@ struct ChannelSelection: Equatable, Codable {
     }
 }
 
+/// What the source row on the Record tab shows (RF-6).
+enum AudioSourceSummary: Equatable {
+    case noInputSelected
+    case permissionRequired(deviceLabel: String)
+    case noChannelsAvailable(deviceLabel: String)
+    case noValidChannel(deviceLabel: String)
+    /// Channel numbers in selection order: one for mono, left then right for stereo.
+    case selected(deviceLabel: String, mode: AudioChannelMode, channelNumbers: [Int])
+}
+
 enum AudioInputPermissionState: Equatable {
     case unknown
     case granted

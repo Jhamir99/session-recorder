@@ -33,6 +33,15 @@ final class AudioSourceSelectionViewModel: ObservableObject {
         return rawDevices.first(where: { $0.id == selectedDeviceID })
     }
 
+    var sourceSummary: AudioSourceSummary {
+        AudioDeviceSelectionHelper.sourceSummary(
+            deviceLabel: devices.first(where: { $0.id == selectedDeviceID })?.displayLabel,
+            permission: permissionState,
+            availableChannels: displayedChannels,
+            selection: activeSelection
+        )
+    }
+
     var canSelectStereo: Bool {
         AudioDeviceSelectionHelper.allowsStereoSelection(availableChannels: displayedChannels)
     }

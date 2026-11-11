@@ -95,7 +95,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T16
   - **Done when:** The app shows Record and Sessions tabs (bottom bar on iPhone, sidebar-adaptive on iPad/Mac); Sessions shows a "No sessions yet" empty state; Record tab has a navigation title.
 
-- [ ] **T18 — Source summary in the view model** (`ViewModels/AudioSourceSelectionViewModel*.swift`)
+- [x] **T18 — Source summary in the view model** (`ViewModels/AudioSourceSelectionViewModel*.swift`)
   - **RF:** RF-6
   - **Depends on:** none
   - **Done when:** The view model exposes a summary for the row: device label, mode, channel numbers, or a state (no input, permission required, no valid channel); no new selection behavior.

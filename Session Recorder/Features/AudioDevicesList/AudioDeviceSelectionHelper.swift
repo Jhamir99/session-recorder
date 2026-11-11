@@ -193,6 +193,34 @@ enum AudioDeviceSelectionHelper {
         return isValid ? .valid : .invalid
     }
 
+    static func sourceSummary(
+        deviceLabel: String?,
+        permission: AudioInputPermissionState,
+        availableChannels: [AudioInputChannel],
+        selection: ChannelSelection?
+    ) -> AudioSourceSummary {
+        guard let deviceLabel else { return .noInputSelected }
+        guard permission == .granted else { return .permissionRequired(deviceLabel: deviceLabel) }
+        guard !availableChannels.isEmpty else { return .noChannelsAvailable(deviceLabel: deviceLabel) }
+
+        let numberByID = Dictionary(uniqueKeysWithValues: availableChannels.map { ($0.id, $0.number) })
+        let selectedIDs: [String?]
+        switch selection?.mode {
+        case .mono:
+            selectedIDs = [selection?.monoChannelID]
+        case .stereo:
+            selectedIDs = [selection?.stereoLeftChannelID, selection?.stereoRightChannelID]
+        case nil:
+            return .noValidChannel(deviceLabel: deviceLabel)
+        }
+
+        let numbers = selectedIDs.compactMap { $0.flatMap { numberByID[$0] } }
+        guard let selection, numbers.count == selectedIDs.count else {
+            return .noValidChannel(deviceLabel: deviceLabel)
+        }
+        return .selected(deviceLabel: deviceLabel, mode: selection.mode, channelNumbers: numbers)
+    }
+
     static func disconnectResult(selectedDeviceID: String?, availableDeviceIDs: Set<String>) -> DisconnectResult {
         guard let selectedDeviceID else { return .unchanged }
         return availableDeviceIDs.contains(selectedDeviceID) ? .unchanged : .disconnected
