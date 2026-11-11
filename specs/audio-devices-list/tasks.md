@@ -90,7 +90,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** none
   - **Done when:** `AudioSourceSelectionView` reads the view model with `@EnvironmentObject` instead of creating it; `ContentView` creates it once (`@StateObject`, optional injection for previews) and injects it at the root with `.environmentObject`; previews inject it and compile.
 
-- [ ] **T17 — Add Record/Sessions tabs** (`ContentView.swift`)
+- [x] **T17 — Add Record/Sessions tabs** (`ContentView.swift`)
   - **RF:** RF-6, NFR-1
   - **Depends on:** T16
   - **Done when:** The app shows Record and Sessions tabs (bottom bar on iPhone, sidebar-adaptive on iPad/Mac); Sessions shows a "No sessions yet" empty state; Record tab has a navigation title.
