@@ -3,7 +3,7 @@ import Combine
 import os
 
 /// Apple-API boundary for audio capture (plan §3): captures the selected device, extracts the selected
-/// channels and publishes their peak levels. Writing to a file is added in T7.
+/// channels, publishes their peak levels and, while recording, writes them to a file (RF-3, RF-5).
 /// - macOS: `AVCaptureSession` on the selected device (Float32 non-interleaved).
 /// - iOS: `AVAudioEngine` input tap; the input is the device routed by `AudioInputDeviceService`.
 @MainActor
@@ -13,6 +13,8 @@ final class AudioCaptureService: ObservableObject {
     @Published private(set) var isRunning = false
     /// Format delivered to the app, e.g. `48000 Hz · 10 ch · Float32 non-interleaved` (debug line).
     @Published private(set) var nativeFormatDescription: String?
+    /// Set when writing to the file failed; writing stops (handled with interruptions, T12).
+    @Published private(set) var writeErrorDescription: String?
 
     enum StartError: Error {
         case deviceUnavailable
@@ -40,11 +42,20 @@ final class AudioCaptureService: ObservableObject {
         }
         stop()
 
-        let processor = CaptureSampleProcessor(channelIndexes: channelNumbers.map { $0 - 1 }) { [weak self] update in
-            Task { @MainActor [weak self] in
-                self?.apply(update)
+        let processor = CaptureSampleProcessor(
+            channelIndexes: channelNumbers.map { $0 - 1 },
+            onUpdate: { [weak self] update in
+                Task { @MainActor [weak self] in
+                    self?.apply(update)
+                }
+            },
+            onWriteError: { [weak self] description in
+                Task { @MainActor [weak self] in
+                    self?.logger.error("Recording write failed: \(description, privacy: .public)")
+                    self?.writeErrorDescription = description
+                }
             }
-        }
+        )
         #if os(iOS)
         try startEngine(processor: processor)
         #else
@@ -58,7 +69,26 @@ final class AudioCaptureService: ObservableObject {
         isRunning = true
     }
 
+    // MARK: Writing (RF-3, RF-5)
+
+    /// Starts writing the selected channels to `writer`, converted to its quality. Capture must be running.
+    func startWriting(to writer: RecordingFileWriter) {
+        writeErrorDescription = nil
+        processor?.setWriter(writer)
+    }
+
+    /// Paused: capture and meters keep running, nothing is written; resuming continues in the same file.
+    func setWritingPaused(_ paused: Bool) {
+        processor?.setWritingPaused(paused)
+    }
+
+    /// When this returns no write is in progress or will happen, so the file can be closed.
+    func stopWriting() {
+        processor?.setWriter(nil)
+    }
+
     func stop() {
+        processor?.setWriter(nil)
         #if os(iOS)
         stopEngine()
         #else
@@ -216,15 +246,27 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
 
     private let channelIndexes: [Int]
     private let onUpdate: @Sendable (Update) -> Void
+    private let onWriteError: @Sendable (String) -> Void
     private let reportInterval: TimeInterval = 1.0 / 30
     private var pendingPeaks: [Float]
     private var lastReport = Date.distantPast
     private var lastNativeFormat: AVAudioFormat?
     private var converter: AVAudioConverter?
 
-    init(channelIndexes: [Int], onUpdate: @escaping @Sendable (Update) -> Void) {
+    // Writing state: set from the main actor, used on the capture thread; guarded by `writeLock`.
+    private let writeLock = NSLock()
+    private var writer: RecordingFileWriter?
+    private var isWritingPaused = false
+    private var sampleRateConverter: AVAudioConverter?
+
+    init(
+        channelIndexes: [Int],
+        onUpdate: @escaping @Sendable (Update) -> Void,
+        onWriteError: @escaping @Sendable (String) -> Void
+    ) {
         self.channelIndexes = channelIndexes
         self.onUpdate = onUpdate
+        self.onWriteError = onWriteError
         self.pendingPeaks = Array(repeating: 0, count: channelIndexes.count)
     }
 
@@ -232,6 +274,7 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let buffer = Self.floatBuffer(from: sampleBuffer, converter: &converter, lastFormat: &lastNativeFormat) else { return }
         accumulate(buffer.pcm, formatChanged: buffer.formatChanged)
+        write(buffer.pcm)
     }
 
     /// iOS path: buffers from the `AVAudioEngine` input tap (already Float32 non-interleaved).
@@ -241,6 +284,90 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
             lastNativeFormat = buffer.format
         }
         accumulate(buffer, formatChanged: formatChanged)
+        write(buffer)
+    }
+
+    // MARK: Writing
+
+    func setWriter(_ writer: RecordingFileWriter?) {
+        writeLock.withLock {
+            self.writer = writer
+            isWritingPaused = false
+            sampleRateConverter = nil
+        }
+    }
+
+    func setWritingPaused(_ paused: Bool) {
+        writeLock.withLock {
+            isWritingPaused = paused
+            // Do not carry resampler state across the pause.
+            if !paused { sampleRateConverter?.reset() }
+        }
+    }
+
+    /// Holding the lock while writing makes `setWriter(nil)` wait for an in-flight write.
+    private func write(_ buffer: AVAudioPCMBuffer) {
+        writeLock.withLock {
+            guard let writer, !isWritingPaused else { return }
+            do {
+                let output = try recordingBuffer(from: buffer, targetFormat: writer.processingFormat)
+                try writer.write(output)
+            } catch {
+                self.writer = nil
+                onWriteError(String(describing: error))
+            }
+        }
+    }
+
+    enum WriteError: Error {
+        case cannotCreateBuffer
+        case conversionFailed
+    }
+
+    /// Selected channels (selection order) at the recording format; resampled only when the device rate differs.
+    private func recordingBuffer(from buffer: AVAudioPCMBuffer, targetFormat: AVAudioFormat) throws -> AVAudioPCMBuffer {
+        let sameRate = buffer.format.sampleRate == targetFormat.sampleRate
+        guard let selectedFormat = sameRate
+                ? targetFormat
+                : AVAudioFormat(standardFormatWithSampleRate: buffer.format.sampleRate, channels: targetFormat.channelCount),
+              let selected = AVAudioPCMBuffer(pcmFormat: selectedFormat, frameCapacity: buffer.frameLength),
+              let source = buffer.floatChannelData, let destination = selected.floatChannelData,
+              !buffer.format.isInterleaved else { throw WriteError.cannotCreateBuffer }
+
+        selected.frameLength = buffer.frameLength
+        let frameCount = Int(buffer.frameLength)
+        let available = Int(buffer.format.channelCount)
+        for (position, index) in channelIndexes.enumerated() where position < Int(selectedFormat.channelCount) {
+            if index < available {
+                destination[position].update(from: source[index], count: frameCount)
+            } else {
+                destination[position].update(repeating: 0, count: frameCount)
+            }
+        }
+        if sameRate { return selected }
+
+        if sampleRateConverter == nil || sampleRateConverter?.inputFormat != selectedFormat {
+            sampleRateConverter = AVAudioConverter(from: selectedFormat, to: targetFormat)
+        }
+        let ratio = targetFormat.sampleRate / selectedFormat.sampleRate
+        let capacity = AVAudioFrameCount((Double(selected.frameLength) * ratio).rounded(.up)) + 32
+        guard let sampleRateConverter,
+              let output = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: capacity) else {
+            throw WriteError.conversionFailed
+        }
+        var supplied = false
+        var conversionError: NSError?
+        let status = sampleRateConverter.convert(to: output, error: &conversionError) { _, inputStatus in
+            if supplied {
+                inputStatus.pointee = .noDataNow
+                return nil
+            }
+            supplied = true
+            inputStatus.pointee = .haveData
+            return selected
+        }
+        if status == .error { throw conversionError ?? WriteError.conversionFailed }
+        return output
     }
 
     private func accumulate(_ buffer: AVAudioPCMBuffer, formatChanged: Bool) {

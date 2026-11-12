@@ -46,7 +46,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T1, T2
   - **Done when:** Creates folders, creates the in-progress CAF (PCM, quality, 1/2 channels), finalizes (move to `Documents/Sessions/` with a unique name), discards empty files, lists leftovers for recovery, and reports free storage.
 
-- [ ] **T7 — Capture service: write, pause/resume** (`Features/Recording/AudioCaptureService.swift`)
+- [x] **T7 — Capture service: write, pause/resume** (`Features/Recording/AudioCaptureService.swift`)
   - **RF:** RF-3, RF-5, NFR-2
   - **Depends on:** T5, T5c, T6
   - **Done when:** Selected channels are converted to the selected quality (only when the device rate differs) and written on the capture queue; pause stops writing without stopping meters; resume continues in the same file; written frame count is exposed.
