@@ -112,42 +112,43 @@ final class AudioCaptureService: ObservableObject {
     #if os(iOS)
     // MARK: iOS — AVAudioEngine
 
+    /// All engine work (tap, start, restart, stop) runs on `processingQueue`, so a configuration change
+    /// never races with a start/stop, and the tap is only installed while the engine is stopped
+    /// (installing it with a stale hardware format raises an exception).
     private func startEngine(processor: CaptureSampleProcessor) throws {
         let engine = AVAudioEngine()
-        guard installTap(on: engine, processor: processor) else { throw StartError.deviceUnavailable }
-
-        // A route or channel-count change stops the engine; restart it with the new input format.
+        // A route, rate or channel-count change stops the engine; restart it with the new input format.
         configurationObserver = NotificationCenter.default.addObserver(
             forName: .AVAudioEngineConfigurationChange,
             object: engine,
             queue: .main
-        ) { [weak self] _ in
+        ) { [weak self] notification in
+            nonisolated(unsafe) let changedEngine = notification.object as AnyObject?
             Task { @MainActor [weak self] in
-                self?.restartEngineAfterConfigurationChange()
+                guard let self, let current = self.engine, current === changedEngine else { return }
+                self.runEngine(current, processor: processor)
             }
         }
         self.engine = engine
-        runEngine(engine)
+        runEngine(engine, processor: processor)
     }
 
-    /// Installs the input tap with the current hardware format; false when there is no usable input.
-    private func installTap(on engine: AVAudioEngine, processor: CaptureSampleProcessor) -> Bool {
-        let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        guard format.channelCount > 0, format.sampleRate > 0 else {
-            logger.error("No audio input available for the engine")
-            return false
-        }
-        input.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
-            processor.process(buffer)
-        }
-        return true
-    }
-
-    private func runEngine(_ engine: AVAudioEngine) {
+    /// (Re)installs the tap with the current hardware format and starts the engine, on the processing queue.
+    private func runEngine(_ engine: AVAudioEngine, processor: CaptureSampleProcessor) {
         nonisolated(unsafe) let runningEngine = engine
         let logger = self.logger
         processingQueue.async {
+            runningEngine.stop()
+            let input = runningEngine.inputNode
+            input.removeTap(onBus: 0)
+            let format = input.inputFormat(forBus: 0)
+            guard format.channelCount > 0, format.sampleRate > 0 else {
+                logger.error("No audio input available for the engine")
+                return
+            }
+            input.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
+                processor.process(buffer)
+            }
             runningEngine.prepare()
             do {
                 try runningEngine.start()
@@ -155,13 +156,6 @@ final class AudioCaptureService: ObservableObject {
                 logger.error("Cannot start audio engine: \(error.localizedDescription, privacy: .public)")
             }
         }
-    }
-
-    private func restartEngineAfterConfigurationChange() {
-        guard let engine, let processor else { return }
-        engine.inputNode.removeTap(onBus: 0)
-        guard installTap(on: engine, processor: processor) else { return }
-        runEngine(engine)
     }
 
     private func stopEngine() {
@@ -172,8 +166,8 @@ final class AudioCaptureService: ObservableObject {
         guard let engine else { return }
         nonisolated(unsafe) let stoppingEngine = engine
         processingQueue.async {
-            stoppingEngine.inputNode.removeTap(onBus: 0)
             stoppingEngine.stop()
+            stoppingEngine.inputNode.removeTap(onBus: 0)
         }
         self.engine = nil
     }

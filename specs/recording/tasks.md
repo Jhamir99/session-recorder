@@ -61,10 +61,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T8
   - **Done when:** Record tab shows meters (mono/L-R, clipping), status (`REC`/`PAUSED`, elapsed, size, remaining), Record / Pause-Resume / Stop; controls pinned at the bottom; `RecordButton` no longer used.
 
-- [ ] **T10 — Quality in source sheet and row; locked row** (`Features/Recording/Views/RecordingQualitySection.swift`, `Features/AudioDevicesList/Views/AudioSourceSelectionView.swift`, `AudioSourceSummaryRow.swift`)
+- [x] **T10 — Quality in source sheet and row; locked row** (`Features/Recording/Views/RecordingQualitySection.swift`, `Features/AudioDevicesList/Views/AudioSourceSelectionView.swift`, `AudioSourceSummaryRow.swift`)
   - **RF:** RF-1, RF-4
   - **Depends on:** T8
   - **Done when:** The sheet has a Quality section limited to offered options; the row shows quality; while recording/paused the row cannot open the sheet.
+  - **Result:** Also fixed on iPhone: session changes (route, rate, channels) are serialized and tracked (`isRoutingInput`), the engine restarts on one queue, device discovery runs off the main thread, meter levels live in `LevelMeterModel` so menus are not rebuilt 30×/s, and channel lists became menus (Channel / Left / Right).
 
 - [ ] **T11 — REC indicator on Sessions tab** (`Features/Recording/Views/RecordingIndicator.swift`, `ContentView.swift`)
   - **RF:** RF-4

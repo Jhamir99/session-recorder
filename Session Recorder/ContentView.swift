@@ -30,7 +30,10 @@ struct ContentView: View {
     private var recordTab: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 8) {
-                AudioSourceSummaryRow { isShowingSourceSheet = true }
+                AudioSourceSummaryRow(
+                    qualityLabel: recordingViewModel.quality?.label,
+                    isLocked: recordingViewModel.state.hasActiveRecording
+                ) { isShowingSourceSheet = true }
 
                 if let message = audioSourceViewModel.recordTabMessage {
                     Text(message.text)
@@ -38,8 +41,8 @@ struct ContentView: View {
                         .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
                 }
 
-                if !recordingViewModel.levels.isEmpty {
-                    LevelMetersView(levels: recordingViewModel.levels)
+                if recordingViewModel.meteredChannelCount > 0 {
+                    LiveLevelMetersView(meters: recordingViewModel.meters)
                         .padding(.top, 8)
                 }
 
@@ -113,6 +116,7 @@ struct ContentView: View {
         .frame(minWidth: 420, minHeight: 480)
         #endif
         .environmentObject(audioSourceViewModel)
+        .environment(\.recordingViewModel, recordingViewModel)
     }
 
     // Placeholder until the session library feature exists.

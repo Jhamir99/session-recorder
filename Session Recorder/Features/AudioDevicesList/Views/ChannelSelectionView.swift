@@ -45,119 +45,58 @@ struct ChannelSelectionView: View {
         )
     }
 
+    /// Compact menus (one row each) instead of a row per channel, so mixers with many inputs fit on screen.
     @ViewBuilder
     private var channelRows: some View {
         if viewModel.selectedMode == .stereo {
-            stereoChannelColumns
+            channelPicker("Left", selection: stereoLeftBinding, excluding: stereoRightID)
+            channelPicker("Right", selection: stereoRightBinding, excluding: stereoLeftID)
         } else {
-            ForEach(viewModel.displayedChannels) { channel in
-                monoChannelRow(channel)
+            channelPicker("Channel", selection: monoBinding, excluding: nil)
+        }
+    }
+
+    /// Menu of channel numbers; `excluding` hides the channel used by the other stereo side.
+    private func channelPicker(_ title: String, selection: Binding<String?>, excluding excludedID: String?) -> some View {
+        Picker(title, selection: selection) {
+            if selection.wrappedValue == nil {
+                Text("None").tag(String?.none)
+            }
+            ForEach(viewModel.displayedChannels.filter { $0.id != excludedID }) { channel in
+                Text("\(channel.number)").tag(Optional(channel.id))
             }
         }
+        .pickerStyle(.menu)
     }
 
-    private func monoChannelRow(_ channel: AudioInputChannel) -> some View {
-        Button {
-            viewModel.selectMonoChannel(id: channel.id)
-        } label: {
-            HStack {
-                Text("\(channel.number)")
-                Spacer()
-                channelSelectionIndicator(for: channel.id)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
+    private var monoBinding: Binding<String?> {
+        Binding(
+            get: { viewModel.activeSelection?.mode == .mono ? viewModel.activeSelection?.monoChannelID : nil },
+            set: { if let id = $0 { viewModel.selectMonoChannel(id: id) } }
+        )
     }
 
-    // Hint row plus one row with Left/Right columns.
-    @ViewBuilder
-    private var stereoChannelColumns: some View {
-        Text("Select a channel for Left and Right.")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-
-        HStack(alignment: .top, spacing: 12) {
-            stereoChannelColumn(title: "Left", side: .left)
-            stereoChannelColumn(title: "Right", side: .right)
-        }
+    private var stereoLeftID: String? {
+        viewModel.activeSelection?.mode == .stereo
+            ? viewModel.activeSelection?.stereoLeftChannelID
+            : viewModel.stereoLeftCandidateID
     }
 
-    private enum StereoSide {
-        case left
-        case right
+    private var stereoRightID: String? {
+        viewModel.activeSelection?.mode == .stereo ? viewModel.activeSelection?.stereoRightChannelID : nil
     }
 
-    private func stereoChannelColumn(title: String, side: StereoSide) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-
-            ForEach(viewModel.displayedChannels) { channel in
-                Button {
-                    switch side {
-                    case .left:
-                        viewModel.selectStereoLeftChannel(id: channel.id)
-                    case .right:
-                        viewModel.selectStereoRightChannel(id: channel.id)
-                    }
-                } label: {
-                    HStack {
-                        Text("\(channel.number)")
-                            .lineLimit(1)
-                        Spacer()
-                        stereoColumnIndicator(for: channel.id, side: side)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(isStereoChannelDisabled(channelID: channel.id, side: side))
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    private var stereoLeftBinding: Binding<String?> {
+        Binding(
+            get: { stereoLeftID },
+            set: { if let id = $0 { viewModel.selectStereoLeftChannel(id: id) } }
+        )
     }
 
-    @ViewBuilder
-    private func channelSelectionIndicator(for channelID: String) -> some View {
-        if viewModel.activeSelection?.mode == .mono, viewModel.activeSelection?.monoChannelID == channelID {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.tint)
-        }
-    }
-
-    @ViewBuilder
-    private func stereoColumnIndicator(for channelID: String, side: StereoSide) -> some View {
-        switch side {
-        case .left:
-            let selectedLeft = viewModel.activeSelection?.mode == .stereo
-                ? viewModel.activeSelection?.stereoLeftChannelID
-                : viewModel.stereoLeftCandidateID
-            if selectedLeft == channelID {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.tint)
-            }
-        case .right:
-            if viewModel.activeSelection?.mode == .stereo, viewModel.activeSelection?.stereoRightChannelID == channelID {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.tint)
-            }
-        }
-    }
-
-    private func isStereoChannelDisabled(channelID: String, side: StereoSide) -> Bool {
-        switch side {
-        case .left:
-            if viewModel.activeSelection?.mode == .stereo {
-                return viewModel.activeSelection?.stereoRightChannelID == channelID
-            }
-            return false
-        case .right:
-            let left = viewModel.activeSelection?.mode == .stereo
-                ? viewModel.activeSelection?.stereoLeftChannelID
-                : viewModel.stereoLeftCandidateID
-            return left == channelID
-        }
+    private var stereoRightBinding: Binding<String?> {
+        Binding(
+            get: { stereoRightID },
+            set: { if let id = $0 { viewModel.selectStereoRightChannel(id: id) } }
+        )
     }
 }

@@ -17,6 +17,9 @@ struct AudioSourceSelectionView: View {
                 }
             }
 
+            // Recording quality for the selected device (recording RF-1); provided by ContentView.
+            RecordingQualitySection()
+
             if let message = viewModel.userMessage, message.kind != .permissionRequired {
                 Section {
                     Text(message.text)

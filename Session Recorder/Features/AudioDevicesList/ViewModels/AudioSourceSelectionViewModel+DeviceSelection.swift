@@ -166,7 +166,8 @@ extension AudioSourceSelectionViewModel {
             selectedMode = selection.mode
             rememberValidSelection(selection, for: device.id)
             userMessage = nil
-            if selectedMode == .stereo && !canSelectStereo {
+            // While the session is changing the device may briefly show 1 channel; keep Stereo.
+            if selectedMode == .stereo && !canSelectStereo && !service.isRoutingInput {
                 fallbackToMonoForSingleChannel(device: device)
             }
             return
@@ -265,7 +266,7 @@ extension AudioSourceSelectionViewModel {
             }
         }
 
-        if selectedMode == .stereo && !canSelectStereo {
+        if selectedMode == .stereo && !canSelectStereo && !service.isRoutingInput {
             fallbackToMonoForSingleChannel(device: device)
             return
         }

@@ -1,13 +1,18 @@
 import SwiftUI
 
 /// Compact summary of the selected audio source on the Record tab (RF-6).
-/// Tapping it opens the source sheet.
+/// Tapping it opens the source sheet, except while a recording is locked to the source (recording RF-4).
 struct AudioSourceSummaryRow: View {
     @EnvironmentObject private var viewModel: AudioSourceSelectionViewModel
+    /// Recording quality shown after the channels, e.g. `24-bit/48 kHz` (recording RF-1).
+    var qualityLabel: String? = nil
+    var isLocked: Bool = false
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            if !isLocked { onTap() }
+        } label: {
             HStack(spacing: 12) {
                 Image(systemName: iconName)
                     .font(.title2)
@@ -26,7 +31,7 @@ struct AudioSourceSummaryRow: View {
 
                 Spacer(minLength: 0)
 
-                Image(systemName: "chevron.right")
+                Image(systemName: isLocked ? "lock.fill" : "chevron.right")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(.tertiary)
             }
@@ -37,7 +42,7 @@ struct AudioSourceSummaryRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Audio source: \(title), \(subtitle)")
-        .accessibilityHint("Opens audio source settings")
+        .accessibilityHint(isLocked ? "The source cannot change while recording" : "Opens audio source settings")
     }
 
     private var title: String {
@@ -63,7 +68,9 @@ struct AudioSourceSummaryRow: View {
         case .noValidChannel:
             return "No valid channel selected"
         case .selected(_, let mode, let channelNumbers):
-            return AudioDeviceSelectionHelper.sourceSummaryChannelText(mode: mode, channelNumbers: channelNumbers)
+            let channels = AudioDeviceSelectionHelper.sourceSummaryChannelText(mode: mode, channelNumbers: channelNumbers)
+            guard let qualityLabel else { return channels }
+            return "\(channels) · \(qualityLabel)"
         }
     }
 
@@ -91,6 +98,8 @@ struct AudioSourceSummaryRow: View {
 #Preview("Row states") {
     VStack(spacing: 12) {
         AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewStereo)
+        AudioSourceSummaryRow(qualityLabel: "24-bit/48 kHz", onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewStereo)
+        AudioSourceSummaryRow(qualityLabel: "24-bit/48 kHz", isLocked: true, onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewStereo)
         AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewMono)
         AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewNoInput)
         AudioSourceSummaryRow(onTap: {}).environmentObject(AudioSourceSelectionViewModel.previewPermissionRequired)

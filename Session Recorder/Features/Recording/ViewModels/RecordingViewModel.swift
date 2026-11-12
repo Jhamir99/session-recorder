@@ -2,6 +2,14 @@ import Combine
 import Foundation
 import os
 
+/// Live meter levels (~30 updates per second). Kept out of `RecordingViewModel` so views observing it
+/// (Record tab, source sheet with open menus) are not rebuilt on every level update; only the meters observe this.
+@MainActor
+final class LevelMeterModel: ObservableObject {
+    /// One level per recorded channel: mono 1, stereo left then right.
+    @Published fileprivate(set) var levels: [ChannelLevel] = []
+}
+
 /// Coordinates capture, files, settings and the selected source (plan §5):
 /// live level meters (RF-2), quality (RF-1) and the recording state machine (RF-3–RF-6).
 @MainActor
@@ -10,8 +18,10 @@ final class RecordingViewModel: ObservableObject {
     /// Elapsed time, file size and remaining time; updated every second while recording or paused (RF-4).
     @Published private(set) var liveInfo: RecordingLiveInfo = .zero
     @Published private(set) var notice: RecordingNotice?
-    /// One level per recorded channel: mono 1, stereo left then right.
-    @Published private(set) var levels: [ChannelLevel] = []
+    /// Live levels for the meters (observed only by the meter view).
+    let meters = LevelMeterModel()
+    /// Number of metered channels (0 when meters are hidden); changes only when the source changes.
+    @Published private(set) var meteredChannelCount = 0
     /// Quality for the next (or current) recording on the selected device (RF-1).
     @Published private(set) var quality: RecordingQuality?
     @Published private(set) var offeredQualities: [RecordingQuality] = []
@@ -91,7 +101,9 @@ final class RecordingViewModel: ObservableObject {
 
     /// Runs the device at the quality's rate so the recording is not resampled (when the device supports it).
     private func applySampleRate() {
-        guard let audioSource, let device = audioSource.selectedDevice, let quality,
+        // While the session is changing, supported rates may not be probed yet; applied when it finishes.
+        guard let audioSource, !audioSource.service.isRoutingInput,
+              let device = audioSource.selectedDevice, let quality,
               device.supportedSampleRates.contains(where: { abs($0 - quality.sampleRate) < 1 }) else { return }
         if let appliedSampleRate, appliedSampleRate.deviceID == device.id, appliedSampleRate.rate == quality.sampleRate {
             return
@@ -227,7 +239,9 @@ final class RecordingViewModel: ObservableObject {
     }
 
     private func updateMetering() {
-        guard let source = meteringSource else {
+        // iOS: the engine is stopped while the session changes (route, rate, channels) and restarted
+        // once with the final format, instead of restarting on every intermediate change.
+        guard let source = meteringSource, audioSource?.service.isRoutingInput != true else {
             capture.stop()
             return
         }
@@ -252,7 +266,10 @@ final class RecordingViewModel: ObservableObject {
         if lastClipDates.count != peaks.count {
             lastClipDates = Array(repeating: nil, count: peaks.count)
         }
-        levels = peaks.enumerated().map { index, peak in
+        if meteredChannelCount != peaks.count {
+            meteredChannelCount = peaks.count
+        }
+        meters.levels = peaks.enumerated().map { index, peak in
             if RecordingLogic.isClipping(peak: peak) {
                 lastClipDates[index] = now
             }

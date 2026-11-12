@@ -1,6 +1,15 @@
 import SwiftUI
 
 /// Live input level per recorded channel with clipping indicators (RF-2).
+/// Meters fed by the live levels; the only view that updates at the meter rate.
+struct LiveLevelMetersView: View {
+    @ObservedObject var meters: LevelMeterModel
+
+    var body: some View {
+        LevelMetersView(levels: meters.levels)
+    }
+}
+
 struct LevelMetersView: View {
     /// Mono: one level; stereo: left then right.
     let levels: [ChannelLevel]

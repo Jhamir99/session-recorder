@@ -15,7 +15,8 @@ import os
 final class AudioInputDeviceService: ObservableObject {
     @Published private(set) var devices: [AudioInputDevice] = []
     @Published private(set) var permissionState: AudioInputPermissionState = .unknown
-    /// True while input is being routed to a newly selected device (iOS); its channels are not final yet.
+    /// True while the iOS audio session is being changed (input route, sample rate, open channels):
+    /// channels and format are not final yet, so selection errors wait and capture stays stopped.
     @Published private(set) var isRoutingInput = false
 
     private var observers: [NSObjectProtocol] = []
@@ -26,6 +27,8 @@ final class AudioInputDeviceService: ObservableObject {
     private let sessionQueue = DispatchQueue(label: "SessionRecorder.AudioSession", qos: .userInitiated)
     /// iOS does not list supported rates; they are probed once per routed device (by port UID).
     private var probedSampleRates: [String: [Double]] = [:]
+    /// Session changes queued or running; `isRoutingInput` is true while this is above 0.
+    private var pendingSessionChanges = 0
     /// Rates probed on iOS (the ones recording can offer).
     nonisolated private static let probeCandidateRates: [Double] = [44_100, 48_000, 88_200, 96_000]
 
@@ -42,7 +45,12 @@ final class AudioInputDeviceService: ObservableObject {
         }
         #endif
         refreshPermissionState()
+        // Read once synchronously so the launch selection sees the devices; later refreshes are async on iOS.
+        #if os(iOS)
+        devices = Self.discoverAudioSessionInputs(probedSampleRates: probedSampleRates)
+        #else
         refreshDevices()
+        #endif
         observeDeviceChanges()
         observePermissionChangesIfNeeded()
     }
@@ -52,9 +60,17 @@ final class AudioInputDeviceService: ObservableObject {
         observers.forEach { center.removeObserver($0) }
     }
 
+    /// iOS: the session is read on the session queue (after any queued change), because its getters
+    /// block while a change (route, rate, channels) is running and would freeze the UI on the main thread.
     func refreshDevices() {
         #if os(iOS)
-        devices = Self.discoverAudioSessionInputs(probedSampleRates: probedSampleRates)
+        let probedSampleRates = self.probedSampleRates
+        sessionQueue.async { [weak self] in
+            let devices = Self.discoverAudioSessionInputs(probedSampleRates: probedSampleRates)
+            Task { @MainActor [weak self] in
+                self?.devices = devices
+            }
+        }
         #else
         devices = Self.discoverInputDevices()
         #endif
@@ -66,13 +82,15 @@ final class AudioInputDeviceService: ObservableObject {
     /// iOS: preferred session rate (only for the routed device). macOS: device nominal rate.
     func preferSampleRate(_ rate: Double, deviceID: String) {
         #if os(iOS)
-        updateSession { session, logger in
+        updateRoutedSession { session, logger in
             guard session.currentRoute.inputs.first?.uid == deviceID, abs(session.sampleRate - rate) >= 1 else { return }
             do {
                 try session.setPreferredSampleRate(rate)
             } catch {
                 logger.error("Cannot set sample rate \(rate) Hz: \(error.localizedDescription, privacy: .public)")
             }
+            // Some devices close the extra input channels when the rate changes.
+            Self.openAllInputChannels(session, logger: logger)
         }
         #elseif os(macOS)
         let logger = self.logger
@@ -85,9 +103,9 @@ final class AudioInputDeviceService: ObservableObject {
     /// The new channels arrive asynchronously through `devices`.
     func preferInput(deviceID: String) {
         #if os(iOS)
-        isRoutingInput = true
         let probe = SampleRateProbe()
-        updateSession(change: { session, logger in
+        let needsProbe = probedSampleRates[deviceID] == nil
+        updateRoutedSession(change: { session, logger in
             if let port = session.availableInputs?.first(where: { $0.uid == deviceID }),
                session.currentRoute.inputs.first?.uid != deviceID {
                 do {
@@ -96,16 +114,15 @@ final class AudioInputDeviceService: ObservableObject {
                     logger.error("Cannot route input to \(port.portName, privacy: .public): \(error.localizedDescription, privacy: .public)")
                 }
             }
-            Self.openAllInputChannels(session, logger: logger)
-            if session.currentRoute.inputs.first?.uid == deviceID {
+            // Probe before opening the channels: rate changes can close them again.
+            if needsProbe, session.currentRoute.inputs.first?.uid == deviceID {
                 probe.rates = Self.probeSampleRates(session)
             }
-        }, completion: { [weak self] in
+            Self.openAllInputChannels(session, logger: logger)
+        }, beforeRefresh: { [weak self] in
             if !probe.rates.isEmpty {
                 self?.probedSampleRates[deviceID] = probe.rates
-                self?.refreshDevices()
             }
-            self?.isRoutingInput = false
         })
         #endif
     }
@@ -148,7 +165,7 @@ final class AudioInputDeviceService: ObservableObject {
                 // While the app is not active, iOS reports a temporarily reduced route (fewer channels);
                 // devices are refreshed when the app becomes active again.
                 guard UIApplication.shared.applicationState == .active else { return }
-                self?.updateSession { session, logger in
+                self?.updateRoutedSession { session, logger in
                     Self.openAllInputChannels(session, logger: logger)
                 }
             }
@@ -183,7 +200,7 @@ final class AudioInputDeviceService: ObservableObject {
                 // In the background iOS may deactivate the session and close the extra input channels
                 // without a route change, so restore them when the app is active again.
                 self?.refreshPermissionState()
-                self?.updateSession { session, logger in
+                self?.updateRoutedSession { session, logger in
                     Self.configure(session, logger: logger)
                     Self.openAllInputChannels(session, logger: logger)
                 }
@@ -196,8 +213,8 @@ final class AudioInputDeviceService: ObservableObject {
     #if os(iOS)
     /// `.measurement` disables voice processing (gain/EQ/noise reduction) so line-level sources stay untouched.
     /// `.mixWithOthers` keeps other apps' audio playing while the app only shows devices or meters.
-    /// Runs `change` on the session queue, then refreshes the device list on the main actor.
-    /// `completion` runs on the main actor after the refresh.
+    /// Runs `change` on the session queue, then refreshes the device list.
+    /// With `completion`, it runs on the main actor instead and is responsible for the refresh.
     private func updateSession(
         change: @escaping @Sendable (AVAudioSession, Logger) -> Void,
         completion: (@MainActor @Sendable () -> Void)? = nil
@@ -206,14 +223,39 @@ final class AudioInputDeviceService: ObservableObject {
         sessionQueue.async { [weak self] in
             change(AVAudioSession.sharedInstance(), logger)
             Task { @MainActor [weak self] in
-                self?.refreshDevices()
-                completion?()
+                if let completion {
+                    completion()
+                } else {
+                    self?.refreshDevices()
+                }
             }
         }
     }
 
     private func updateSession(_ change: @escaping @Sendable (AVAudioSession, Logger) -> Void) {
         updateSession(change: change, completion: nil)
+    }
+
+    /// Like `updateSession`, but marks the session as changing (`isRoutingInput`) until it is done.
+    /// `beforeRefresh` runs on the main actor before the final device refresh.
+    private func updateRoutedSession(
+        change: @escaping @Sendable (AVAudioSession, Logger) -> Void,
+        beforeRefresh: (@MainActor @Sendable () -> Void)? = nil
+    ) {
+        pendingSessionChanges += 1
+        isRoutingInput = true
+        updateSession(change: change, completion: { [weak self] in
+            guard let self else { return }
+            beforeRefresh?()
+            pendingSessionChanges -= 1
+            isRoutingInput = pendingSessionChanges > 0
+            // Refresh again with the change finished, so the selection is re-evaluated with final channels.
+            refreshDevices()
+        })
+    }
+
+    private func updateRoutedSession(_ change: @escaping @Sendable (AVAudioSession, Logger) -> Void) {
+        updateRoutedSession(change: change, beforeRefresh: nil)
     }
 
     nonisolated private static func configure(_ session: AVAudioSession, logger: Logger) {
@@ -254,7 +296,7 @@ final class AudioInputDeviceService: ObservableObject {
         }
     }
 
-    private static func discoverAudioSessionInputs(probedSampleRates: [String: [Double]]) -> [AudioInputDevice] {
+    nonisolated private static func discoverAudioSessionInputs(probedSampleRates: [String: [Double]]) -> [AudioInputDevice] {
         let session = AVAudioSession.sharedInstance()
         let routeInput = session.currentRoute.inputs.first
         return (session.availableInputs ?? [])
