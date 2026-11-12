@@ -36,7 +36,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4
   - **Done when:** On a real iPhone/iPad the Xone appears with its name and all its input channels; selecting a device routes input to it; connect/disconnect follows RF-7; the built-in mic still works; macOS unchanged.
 
-- [ ] **T5c — iOS capture with AVAudioEngine** (`Features/Recording/AudioCaptureService.swift`)
+- [x] **T5c — iOS capture with AVAudioEngine** (`Features/Recording/AudioCaptureService.swift`)
   - **RF:** RF-2, NFR-6
   - **Depends on:** T5, T5b
   - **Done when:** On iOS, meters use an `AVAudioEngine` input tap on the routed device (Float32), mono and stereo, for the Xone and the built-in mic; the debug `Capture:` line shows the format; macOS keeps `AVCaptureSession`.

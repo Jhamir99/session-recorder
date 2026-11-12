@@ -2,14 +2,16 @@ import AVFoundation
 import Combine
 import os
 
-/// Apple-API boundary for audio capture (plan §3): opens the selected device, extracts the selected
+/// Apple-API boundary for audio capture (plan §3): captures the selected device, extracts the selected
 /// channels and publishes their peak levels. Writing to a file is added in T7.
+/// - macOS: `AVCaptureSession` on the selected device (Float32 non-interleaved).
+/// - iOS: `AVAudioEngine` input tap; the input is the device routed by `AudioInputDeviceService`.
 @MainActor
 final class AudioCaptureService: ObservableObject {
     /// Linear peak per selected channel (0...1), in selection order (mono: 1, stereo: left, right).
     @Published private(set) var peaks: [Float] = []
     @Published private(set) var isRunning = false
-    /// Native format reported by the device, e.g. `48000 Hz · 2 ch · Int16 interleaved` (plan §3 spike).
+    /// Format delivered to the app, e.g. `48000 Hz · 10 ch · Float32 non-interleaved` (debug line).
     @Published private(set) var nativeFormatDescription: String?
 
     enum StartError: Error {
@@ -19,10 +21,16 @@ final class AudioCaptureService: ObservableObject {
     }
 
     private let logger = Logger(subsystem: "SessionRecorder", category: "AudioCapture")
+    /// Starting/stopping capture can block, so it never runs on the main thread.
     private let processingQueue = DispatchQueue(label: "SessionRecorder.AudioCapture", qos: .userInteractive)
-    private var session: AVCaptureSession?
     private var processor: CaptureSampleProcessor?
     private var current: (deviceID: String, channelNumbers: [Int])?
+    #if os(iOS)
+    private var engine: AVAudioEngine?
+    private var configurationObserver: NSObjectProtocol?
+    #else
+    private var session: AVCaptureSession?
+    #endif
 
     /// Starts capturing `channelNumbers` (1-based, selection order) of the device with `deviceID`.
     /// Does nothing if the same device and channels are already running.
@@ -32,6 +40,117 @@ final class AudioCaptureService: ObservableObject {
         }
         stop()
 
+        let processor = CaptureSampleProcessor(channelIndexes: channelNumbers.map { $0 - 1 }) { [weak self] update in
+            Task { @MainActor [weak self] in
+                self?.apply(update)
+            }
+        }
+        #if os(iOS)
+        try startEngine(processor: processor)
+        #else
+        try startCaptureSession(deviceID: deviceID, processor: processor)
+        #endif
+
+        self.processor = processor
+        current = (deviceID, channelNumbers)
+        peaks = Array(repeating: 0, count: channelNumbers.count)
+        nativeFormatDescription = nil
+        isRunning = true
+    }
+
+    func stop() {
+        #if os(iOS)
+        stopEngine()
+        #else
+        stopCaptureSession()
+        #endif
+        processor = nil
+        current = nil
+        isRunning = false
+        peaks = []
+    }
+
+    private func apply(_ update: CaptureSampleProcessor.Update) {
+        guard isRunning else { return }
+        if let format = update.nativeFormatDescription, format != nativeFormatDescription {
+            nativeFormatDescription = format
+            logger.notice("Capture format: \(format, privacy: .public)")
+        }
+        peaks = update.peaks
+    }
+
+    #if os(iOS)
+    // MARK: iOS — AVAudioEngine
+
+    private func startEngine(processor: CaptureSampleProcessor) throws {
+        let engine = AVAudioEngine()
+        guard installTap(on: engine, processor: processor) else { throw StartError.deviceUnavailable }
+
+        // A route or channel-count change stops the engine; restart it with the new input format.
+        configurationObserver = NotificationCenter.default.addObserver(
+            forName: .AVAudioEngineConfigurationChange,
+            object: engine,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.restartEngineAfterConfigurationChange()
+            }
+        }
+        self.engine = engine
+        runEngine(engine)
+    }
+
+    /// Installs the input tap with the current hardware format; false when there is no usable input.
+    private func installTap(on engine: AVAudioEngine, processor: CaptureSampleProcessor) -> Bool {
+        let input = engine.inputNode
+        let format = input.outputFormat(forBus: 0)
+        guard format.channelCount > 0, format.sampleRate > 0 else {
+            logger.error("No audio input available for the engine")
+            return false
+        }
+        input.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
+            processor.process(buffer)
+        }
+        return true
+    }
+
+    private func runEngine(_ engine: AVAudioEngine) {
+        nonisolated(unsafe) let runningEngine = engine
+        let logger = self.logger
+        processingQueue.async {
+            runningEngine.prepare()
+            do {
+                try runningEngine.start()
+            } catch {
+                logger.error("Cannot start audio engine: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+    }
+
+    private func restartEngineAfterConfigurationChange() {
+        guard let engine, let processor else { return }
+        engine.inputNode.removeTap(onBus: 0)
+        guard installTap(on: engine, processor: processor) else { return }
+        runEngine(engine)
+    }
+
+    private func stopEngine() {
+        if let configurationObserver {
+            NotificationCenter.default.removeObserver(configurationObserver)
+        }
+        configurationObserver = nil
+        guard let engine else { return }
+        nonisolated(unsafe) let stoppingEngine = engine
+        processingQueue.async {
+            stoppingEngine.inputNode.removeTap(onBus: 0)
+            stoppingEngine.stop()
+        }
+        self.engine = nil
+    }
+    #else
+    // MARK: macOS — AVCaptureSession
+
+    private func startCaptureSession(deviceID: String, processor: CaptureSampleProcessor) throws {
         guard let device = AVCaptureDevice(uniqueID: deviceID) else { throw StartError.deviceUnavailable }
         let input: AVCaptureDeviceInput
         do {
@@ -50,7 +169,6 @@ final class AudioCaptureService: ObservableObject {
         session.addInput(input)
 
         let output = AVCaptureAudioDataOutput()
-        #if os(macOS)
         // macOS can deliver Float32 non-interleaved directly at the device rate (no conversion needed).
         output.audioSettings = [
             AVFormatIDKey: kAudioFormatLinearPCM,
@@ -58,37 +176,23 @@ final class AudioCaptureService: ObservableObject {
             AVLinearPCMIsFloatKey: true,
             AVLinearPCMIsNonInterleaved: true
         ]
-        #endif
         guard session.canAddOutput(output) else {
             session.commitConfiguration()
             throw StartError.cannotAddOutput
         }
         session.addOutput(output)
         session.commitConfiguration()
-
-        let processor = CaptureSampleProcessor(channelIndexes: channelNumbers.map { $0 - 1 }) { [weak self] update in
-            Task { @MainActor [weak self] in
-                self?.apply(update)
-            }
-        }
         output.setSampleBufferDelegate(processor, queue: processingQueue)
 
         self.session = session
-        self.processor = processor
-        self.current = (deviceID, channelNumbers)
-        peaks = Array(repeating: 0, count: channelNumbers.count)
-        nativeFormatDescription = nil
-
-        // startRunning blocks until the session runs; keep it off the main thread.
         // AVCaptureSession is designed to be started/stopped from a background queue.
         nonisolated(unsafe) let runningSession = session
         processingQueue.async {
             runningSession.startRunning()
         }
-        isRunning = true
     }
 
-    func stop() {
+    private func stopCaptureSession() {
         guard let session else { return }
         let processor = self.processor
         nonisolated(unsafe) let stoppingSession = session
@@ -97,23 +201,11 @@ final class AudioCaptureService: ObservableObject {
             _ = processor // keep the delegate alive until the session has stopped
         }
         self.session = nil
-        self.processor = nil
-        current = nil
-        isRunning = false
-        peaks = []
     }
-
-    private func apply(_ update: CaptureSampleProcessor.Update) {
-        guard isRunning else { return }
-        if let format = update.nativeFormatDescription, format != nativeFormatDescription {
-            nativeFormatDescription = format
-            logger.notice("Capture native format: \(format, privacy: .public)")
-        }
-        peaks = update.peaks
-    }
+    #endif
 }
 
-/// Runs on the capture queue (not the main actor): converts buffers to Float32 non-interleaved,
+/// Runs off the main actor (capture queue or engine tap thread): gets Float32 non-interleaved buffers,
 /// extracts the selected channels and reports peaks about 30 times per second.
 nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate, @unchecked Sendable {
     struct Update: Sendable {
@@ -136,13 +228,25 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
         self.pendingPeaks = Array(repeating: 0, count: channelIndexes.count)
     }
 
+    /// macOS path: sample buffers from `AVCaptureAudioDataOutput`.
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let buffer = Self.floatBuffer(from: sampleBuffer, converter: &converter, lastFormat: &lastNativeFormat) else { return }
-        let formatChanged = buffer.formatChanged
+        accumulate(buffer.pcm, formatChanged: buffer.formatChanged)
+    }
 
-        let frameCount = Int(buffer.pcm.frameLength)
-        if let channels = buffer.pcm.floatChannelData {
-            let available = Int(buffer.pcm.format.channelCount)
+    /// iOS path: buffers from the `AVAudioEngine` input tap (already Float32 non-interleaved).
+    func process(_ buffer: AVAudioPCMBuffer) {
+        let formatChanged = lastNativeFormat != buffer.format
+        if formatChanged {
+            lastNativeFormat = buffer.format
+        }
+        accumulate(buffer, formatChanged: formatChanged)
+    }
+
+    private func accumulate(_ buffer: AVAudioPCMBuffer, formatChanged: Bool) {
+        let frameCount = Int(buffer.frameLength)
+        if let channels = buffer.floatChannelData, !buffer.format.isInterleaved {
+            let available = Int(buffer.format.channelCount)
             for (position, index) in channelIndexes.enumerated() where index < available {
                 var peak: Float = 0
                 let samples = channels[index]

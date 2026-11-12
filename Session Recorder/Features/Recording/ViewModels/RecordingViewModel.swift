@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import os
 
 /// Coordinates audio capture with the selected source (plan §5). For now: live level meters (RF-2);
 /// the recording state machine is added in T8.
@@ -11,6 +12,7 @@ final class RecordingViewModel: ObservableObject {
     @Published private(set) var nativeFormatDescription: String?
 
     let capture: AudioCaptureService
+    private let logger = Logger(subsystem: "SessionRecorder", category: "Recording")
     private weak var audioSource: AudioSourceSelectionViewModel?
     private var lastClipDates: [Date?] = []
     private var cancellables: Set<AnyCancellable> = []
@@ -48,6 +50,7 @@ final class RecordingViewModel: ObservableObject {
         do {
             try capture.start(deviceID: source.deviceID, channelNumbers: source.channelNumbers)
         } catch {
+            logger.error("Cannot start level meters: \(String(describing: error), privacy: .public)")
             capture.stop()
         }
     }
