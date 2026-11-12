@@ -22,7 +22,7 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 
 ### RF-2: Channel display
 - When the user selects a device and audio-input permission is granted, the system shall display its available input channels in a consistent order.
-- When displaying a channel, the system shall show the channel number; if a device-provided name differs from that number, the system shall show it in parentheses; if it matches the number, the system shall show only the number.
+- When displaying a channel, the system shall show only the channel number (device-provided channel names are not shown; changed 2026-11-12 because they repeated the device name).
 - If a selected device has no available input channels, then the system shall show a message in the channel-list area stating that no channels are available.
 
 ### RF-3: Mono/stereo selection and persistence
@@ -34,7 +34,7 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 - A device’s selection shall be considered active only when that device is selected by the user.
 - When the app restarts and the same physical device/interface can be reliably identified with valid saved channels, the system shall restore that device’s last selected choice; if it cannot be reliably identified or channels are not valid, the system shall not restore it.
 - When a device has only 1 available input channel, the system shall use mono with that channel and shall not allow a stereo pair.
-- When no valid saved selection exists for a multi-channel device, the system shall use channel 1 as the initial mono choice and channels 1 and 2 as the initial stereo choice.
+- When no valid saved selection exists for a multi-channel device, the system shall select **Stereo** with channels 1 and 2 (left, right); channel 1 shall be the initial choice of the Mono tab (changed 2026-11-12; previously Mono was selected first).
 
 ### RF-4: Audio-input permission
 - When the user selects a device, the system shall attempt to obtain/use audio-input permission as needed for that source.

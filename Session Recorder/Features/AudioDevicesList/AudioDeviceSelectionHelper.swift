@@ -56,15 +56,6 @@ enum AudioDeviceSelectionHelper {
         }
     }
 
-    static func formatChannelLabel(number: Int, optionalName: String?) -> String {
-        guard let optionalName else { return "\(number)" }
-        let trimmed = optionalName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty || trimmed == "\(number)" {
-            return "\(number)"
-        }
-        return "\(number) (\(trimmed))"
-    }
-
     static func channelAreaState(permission: AudioInputPermissionState, channels: [AudioInputChannel]) -> ChannelAreaState {
         guard permission == .granted else { return .permissionRequired }
         return channels.isEmpty ? .noChannelsAvailable : .channelList

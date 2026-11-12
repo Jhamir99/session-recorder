@@ -4,6 +4,7 @@ extension AudioSourceSelectionViewModel {
     func selectDevice(id: String) {
         guard rawDevices.contains(where: { $0.id == id }) else { return }
         selectedDeviceID = id
+        routeInputToSelectedDevice()
         stereoLeftCandidateID = nil
         userMessage = nil
         userChangedSourceManually = true
@@ -83,6 +84,7 @@ extension AudioSourceSelectionViewModel {
     /// it only checks the current status; if not granted, the permission message and retry appear (RF-4).
     func autoSelectDevice(id: String, notice: String?) {
         selectedDeviceID = id
+        routeInputToSelectedDevice()
         stereoLeftCandidateID = nil
         userMessage = nil
         store.saveLastSelectedDeviceID(id)
@@ -109,6 +111,15 @@ extension AudioSourceSelectionViewModel {
         }
         let disconnectedName = disconnectedLabel ?? "The selected audio device"
         autoSelectDevice(id: fallbackID, notice: "\(disconnectedName) was disconnected. Switched to \(label(for: fallbackID)).")
+    }
+
+    /// On iOS the input route decides which device is captured and how many channels it exposes,
+    /// so route first and read the updated channels before restoring the channel selection.
+    private func routeInputToSelectedDevice() {
+        guard let selectedDeviceID else { return }
+        service.preferInput(deviceID: selectedDeviceID)
+        rawDevices = service.devices
+        devices = AudioDeviceSelectionHelper.disambiguateDeviceNames(rawDevices)
     }
 
     private func label(for deviceID: String) -> String {
@@ -179,13 +190,13 @@ extension AudioSourceSelectionViewModel {
             return
         }
 
+        // Multi-channel devices start in Stereo with channels 1–2 (mono default stays 1 for the Mono tab).
         let mono = AudioDeviceSelectionHelper.initialMonoSelection(availableChannels: device.channels)
-        activeSelection = mono
-        selectedMode = .mono
+        let stereo = AudioDeviceSelectionHelper.initialStereoSelection(availableChannels: device.channels)
         if let mono { rememberValidSelection(mono, for: device.id) }
-        if let stereo = AudioDeviceSelectionHelper.initialStereoSelection(availableChannels: device.channels) {
-            rememberValidSelection(stereo, for: device.id)
-        }
+        if let stereo { rememberValidSelection(stereo, for: device.id) }
+        activeSelection = stereo ?? mono
+        selectedMode = stereo != nil ? .stereo : .mono
         userMessage = nil
     }
 
@@ -212,7 +223,18 @@ extension AudioSourceSelectionViewModel {
         }
 
         showsPermissionPrompt = false
+        let channelsChanged = displayedChannels != device.channels
         displayedChannels = device.channels
+
+        // The device exposed new channels (e.g., iOS opened all of a mixer's inputs after routing):
+        // try the saved selection again, or recompute the defaults if nothing was saved for this device
+        // (so a mixer first seen with 1 channel ends up in Stereo 1–2). If the saved selection is still
+        // invalid, the no-valid-channel error stays.
+        if channelsChanged, !device.channels.isEmpty,
+           activeSelection == nil || store.record(for: device.id) == nil {
+            restoreOrInitializeForSelectedDevice()
+            return
+        }
 
         if device.channels.isEmpty {
             activeSelection = nil

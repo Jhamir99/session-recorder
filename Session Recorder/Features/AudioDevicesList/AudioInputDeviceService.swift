@@ -5,15 +5,24 @@ import CoreAudio
 import Combine
 import CoreMedia
 import Foundation
+import os
 
+/// Input device discovery and permission.
+/// - macOS: `AVCaptureDevice` (each audio device, including USB interfaces, is listed).
+/// - iOS: `AVAudioSession` inputs (ports). `AVCaptureDevice` only exposes a generic microphone there
+///   that follows the audio route, so USB interfaces would not appear with their name and channels.
 @MainActor
 final class AudioInputDeviceService: ObservableObject {
     @Published private(set) var devices: [AudioInputDevice] = []
     @Published private(set) var permissionState: AudioInputPermissionState = .unknown
 
     private var observers: [NSObjectProtocol] = []
+    private let logger = Logger(subsystem: "SessionRecorder", category: "AudioInputDevices")
 
     init() {
+        #if os(iOS)
+        configureAudioSession()
+        #endif
         refreshPermissionState()
         refreshDevices()
         observeDeviceChanges()
@@ -26,8 +35,29 @@ final class AudioInputDeviceService: ObservableObject {
     }
 
     func refreshDevices() {
-        let discovered = Self.discoverInputDevices()
-        devices = discovered
+        #if os(iOS)
+        devices = Self.discoverAudioSessionInputs()
+        #else
+        devices = Self.discoverInputDevices()
+        #endif
+    }
+
+    /// Routes audio input to the selected device so its channels and capture use it.
+    /// iOS only (one input route at a time); macOS captures from any device directly.
+    func preferInput(deviceID: String) {
+        #if os(iOS)
+        let session = AVAudioSession.sharedInstance()
+        guard let port = session.availableInputs?.first(where: { $0.uid == deviceID }) else { return }
+        if session.currentRoute.inputs.first?.uid != deviceID {
+            do {
+                try session.setPreferredInput(port)
+            } catch {
+                logger.error("Cannot route input to \(port.portName, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            }
+        }
+        openAllInputChannels()
+        refreshDevices()
+        #endif
     }
 
     func refreshPermissionState() {
@@ -57,6 +87,23 @@ final class AudioInputDeviceService: ObservableObject {
 
     private func observeDeviceChanges() {
         let center = NotificationCenter.default
+        #if os(iOS)
+        // Connecting/disconnecting a USB interface or headset changes the audio route.
+        let routeObserver = center.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                // While the app is not active, iOS reports a temporarily reduced route (fewer channels);
+                // devices are refreshed when the app becomes active again.
+                guard UIApplication.shared.applicationState == .active else { return }
+                self?.openAllInputChannels()
+                self?.refreshDevices()
+            }
+        }
+        observers.append(routeObserver)
+        #endif
         let names: [Notification.Name] = [
             AVCaptureDevice.wasConnectedNotification,
             AVCaptureDevice.wasDisconnectedNotification
@@ -82,6 +129,10 @@ final class AudioInputDeviceService: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
+                // In the background iOS may deactivate the session and close the extra input channels
+                // without a route change, so restore them when the app is active again.
+                self?.configureAudioSession()
+                self?.openAllInputChannels()
                 self?.refreshPermissionState()
                 if self?.permissionState == .granted {
                     self?.refreshDevices()
@@ -91,6 +142,67 @@ final class AudioInputDeviceService: ObservableObject {
         observers.append(observer)
         #endif
     }
+
+    #if os(iOS)
+    /// `.measurement` disables voice processing (gain/EQ/noise reduction) so line-level sources stay untouched.
+    /// `.mixWithOthers` keeps other apps' audio playing while the app only shows devices or meters.
+    private func configureAudioSession() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers])
+            try session.setActive(true)
+        } catch {
+            logger.error("Cannot configure audio session: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// iOS may open fewer channels than the device has (e.g., 1 or 2 of a mixer's inputs).
+    private func openAllInputChannels() {
+        let session = AVAudioSession.sharedInstance()
+        let maximum = session.maximumInputNumberOfChannels
+        guard maximum > 0, session.inputNumberOfChannels < maximum,
+              session.currentRoute.inputs.first?.portType != .builtInMic else { return }
+        do {
+            try session.setPreferredInputNumberOfChannels(maximum)
+        } catch {
+            logger.error("Cannot open \(maximum) input channels: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private static func discoverAudioSessionInputs() -> [AudioInputDevice] {
+        let session = AVAudioSession.sharedInstance()
+        let routeInput = session.currentRoute.inputs.first
+        return (session.availableInputs ?? [])
+            .filter { !$0.uid.isEmpty }
+            .map { port in
+                // Channel details are reliable only for the port in the current route.
+                let isRouteInput = port.uid == routeInput?.uid
+                let described = (isRouteInput ? routeInput?.channels : port.channels) ?? []
+                // Use the hardware maximum, not the currently open count, so the channel list does not
+                // shrink while iOS is still opening the channels (openAllInputChannels).
+                let routeChannelCount = isRouteInput && port.portType != .builtInMic
+                    ? max(session.inputNumberOfChannels, session.maximumInputNumberOfChannels)
+                    : 0
+                let count = max(described.count, routeChannelCount, 1)
+                // Device-provided channel names are not shown (only numbers), so they are not read.
+                let channels = (1...count).map { number in
+                    AudioInputChannel(id: "\(port.uid):\(number)", number: number, name: nil)
+                }
+                return AudioInputDevice(
+                    id: port.uid,
+                    displayName: port.portName,
+                    channels: channels,
+                    // Only wired USB interfaces/mixers count as external (RF-7); headsets and Bluetooth do not.
+                    isExternal: port.portType == .usbAudio,
+                    // iOS does not list supported rates; the current hardware rate is what the route runs at.
+                    supportedSampleRates: isRouteInput ? [session.sampleRate] : []
+                )
+            }
+            .sorted { lhs, rhs in
+                lhs.displayName.localizedCaseInsensitiveCompare(rhs.displayName) == .orderedAscending
+            }
+    }
+    #endif
 
     private static func currentPermissionState() -> AudioInputPermissionState {
         switch AVCaptureDevice.authorizationStatus(for: .audio) {

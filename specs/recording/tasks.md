@@ -25,10 +25,21 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** none
   - **Done when:** `AudioInputDevice` exposes the device's supported sample rates on Mac and iOS; previews and existing behavior unchanged; builds on both platforms.
 
-- [ ] **T5 — Capture service: live levels (+ iOS capture spike)** (`Features/Recording/AudioCaptureService.swift`)
+- [x] **T5 — Capture service: live levels (+ iOS capture spike)** (`Features/Recording/AudioCaptureService.swift`)
   - **RF:** RF-2, NFR-6
   - **Depends on:** T1, T2
   - **Done when:** For the selected device and channels the service publishes per-channel peaks while idle; verified on a real Mac and iPhone/iPad with the mixer. The iOS capture API decision (AVCaptureSession vs. AVAudioEngine) is recorded in `plan.md` §3, including native format/bit depth seen on device.
+  - **Result (2026-11-12):** macOS verified with the Xone (meters OK). iOS delivered Int16 interleaved and did not list the Xone → iOS moves to AVAudioSession discovery (T5b) and AVAudioEngine capture (T5c).
+
+- [x] **T5b — iOS device discovery and routing with AVAudioSession** (`Features/AudioDevicesList/AudioInputDeviceService.swift`, `ViewModels/AudioSourceSelectionViewModel+DeviceSelection.swift`)
+  - **RF:** audio-devices-list RF-1–RF-3, RF-7; recording RF-1
+  - **Depends on:** T4
+  - **Done when:** On a real iPhone/iPad the Xone appears with its name and all its input channels; selecting a device routes input to it; connect/disconnect follows RF-7; the built-in mic still works; macOS unchanged.
+
+- [ ] **T5c — iOS capture with AVAudioEngine** (`Features/Recording/AudioCaptureService.swift`)
+  - **RF:** RF-2, NFR-6
+  - **Depends on:** T5, T5b
+  - **Done when:** On iOS, meters use an `AVAudioEngine` input tap on the routed device (Float32), mono and stereo, for the Xone and the built-in mic; the debug `Capture:` line shows the format; macOS keeps `AVCaptureSession`.
 
 - [ ] **T6 — Session file store** (`Features/Recording/SessionFileStore.swift`)
   - **RF:** RF-3, RF-6, RF-8, NFR-3, NFR-4
@@ -37,7 +48,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 
 - [ ] **T7 — Capture service: write, pause/resume** (`Features/Recording/AudioCaptureService.swift`)
   - **RF:** RF-3, RF-5, NFR-2
-  - **Depends on:** T5, T6
+  - **Depends on:** T5, T5c, T6
   - **Done when:** Selected channels are converted to the selected quality (only when the device rate differs) and written on the capture queue; pause stops writing without stopping meters; resume continues in the same file; written frame count is exposed.
 
 - [ ] **T8 — Recording view model** (`Features/Recording/ViewModels/RecordingViewModel.swift`)

@@ -61,7 +61,7 @@ struct ChannelSelectionView: View {
             viewModel.selectMonoChannel(id: channel.id)
         } label: {
             HStack {
-                Text(AudioDeviceSelectionHelper.formatChannelLabel(number: channel.number, optionalName: channel.name))
+                Text("\(channel.number)")
                 Spacer()
                 channelSelectionIndicator(for: channel.id)
             }
@@ -104,7 +104,7 @@ struct ChannelSelectionView: View {
                     }
                 } label: {
                     HStack {
-                        Text(AudioDeviceSelectionHelper.formatChannelLabel(number: channel.number, optionalName: channel.name))
+                        Text("\(channel.number)")
                             .lineLimit(1)
                         Spacer()
                         stereoColumnIndicator(for: channel.id, side: side)

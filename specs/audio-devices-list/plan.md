@@ -27,7 +27,7 @@ The equivalent of “today as a parameter”: pass explicit inputs (devices, cha
 | Logic | Inputs (explicit) | Output | RF |
 |---|---|---|---|
 | Disambiguate device names | ordered `(id, displayName)` | labels with duplicate suffixes (`A (1)`, `A (2)`) | RF-1 |
-| Format channel label | `(channelNumber, optionalName)` | `number` or `number (name)` per spec | RF-2 |
+| Format channel label | `channelNumber` | `number` only (names dropped 2026-11-12) | RF-2 |
 | Channel-area state | permission, channels | permission message+retry / no-channels / channel list | RF-2, RF-4 |
 | Initial defaults | available channel IDs (consistent order) | mono `[1st]`, stereo `[1st,2nd]` when available | RF-3 |
 | Mono validation | candidate, available channels | valid; single-channel => mono only | RF-3 |
@@ -83,7 +83,7 @@ on permission/devices/channels change:
 | Main screen | `ContentView` renders audio-source UI above `RecordButton`; record control remains. | RF-6 |
 | Device list | Eligible inputs with disambiguated names; empty state when none; tap selects device. | RF-1 |
 | Permission not granted | Message + “try granting permission again” button in channel/selection area; channels hidden. Auto-updates. | RF-4 |
-| Channels (granted) | No-channels message or ordered channel rows (`number` / `number (name)`) with **Mono/Stereo** tabs. | RF-2, RF-3 |
+| Channels (granted) | No-channels message or ordered channel rows (`number` only) with **Mono/Stereo** tabs. | RF-2, RF-3 |
 | Selection | Mono: 1 channel. Stereo: 2 different channels, left then right. Single-channel: mono only. Tab switch replaces saved selection. | RF-3 |
 | Errors | Small messages for disconnected device and no valid channel available. | RF-5 |
 | Platforms | Platform-appropriate presentation, same behavior across supported Apple targets. | NFR-1, NFR-3 |
