@@ -33,7 +33,8 @@ final class AudioInputDeviceService: ObservableObject {
     nonisolated private static let probeCandidateRates: [Double] = [44_100, 48_000, 88_200, 96_000]
 
     /// Carries probe results from the session queue to the main actor.
-    private final class SampleRateProbe: @unchecked Sendable {
+    /// Nonisolated: filled on the session queue, read on the main actor after that work finished.
+    nonisolated private final class SampleRateProbe: @unchecked Sendable {
         var rates: [Double] = []
     }
     #endif

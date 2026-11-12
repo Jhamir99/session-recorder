@@ -67,7 +67,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** The sheet has a Quality section limited to offered options; the row shows quality; while recording/paused the row cannot open the sheet.
   - **Result:** Also fixed on iPhone: session changes (route, rate, channels) are serialized and tracked (`isRoutingInput`), the engine restarts on one queue, device discovery runs off the main thread, meter levels live in `LevelMeterModel` so menus are not rebuilt 30×/s, and channel lists became menus (Channel / Left / Right).
 
-- [ ] **T11 — REC indicator on Sessions tab** (`Features/Recording/Views/RecordingIndicator.swift`, `ContentView.swift`)
+- [x] **T11 — REC indicator on Sessions tab** (`Features/Recording/Views/RecordingIndicator.swift`, `ContentView.swift`)
   - **RF:** RF-4
   - **Depends on:** T9
   - **Done when:** While recording/paused the Sessions tab shows `REC`/`PAUSED` + elapsed; tapping it selects the Record tab.

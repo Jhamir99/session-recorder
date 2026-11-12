@@ -135,7 +135,8 @@ final class AudioCaptureService: ObservableObject {
 
     /// (Re)installs the tap with the current hardware format and starts the engine, on the processing queue.
     private func runEngine(_ engine: AVAudioEngine, processor: CaptureSampleProcessor) {
-        nonisolated(unsafe) let runningEngine = engine
+        // AVAudioEngine is Sendable, so it can be used on the processing queue directly.
+        let runningEngine = engine
         let logger = self.logger
         processingQueue.async {
             runningEngine.stop()
@@ -146,6 +147,8 @@ final class AudioCaptureService: ObservableObject {
                 logger.error("No audio input available for the engine")
                 return
             }
+            // Deprecated in iOS 27 in favor of the throwing variant, which this SDK only exposes to Swift as
+            // the internal `__installTap`; keep this until Apple ships the Swift wrapper.
             input.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
                 processor.process(buffer)
             }
@@ -164,7 +167,7 @@ final class AudioCaptureService: ObservableObject {
         }
         configurationObserver = nil
         guard let engine else { return }
-        nonisolated(unsafe) let stoppingEngine = engine
+        let stoppingEngine = engine
         processingQueue.async {
             stoppingEngine.stop()
             stoppingEngine.inputNode.removeTap(onBus: 0)

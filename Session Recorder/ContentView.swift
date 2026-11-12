@@ -1,6 +1,12 @@
 import SwiftUI
 
 struct ContentView: View {
+    private enum AppTab: Hashable {
+        case record
+        case sessions
+    }
+
+    @State private var selectedTab: AppTab = .record
     @State private var isShowingSourceSheet = false
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel = RecordingViewModel()
@@ -11,11 +17,11 @@ struct ContentView: View {
 
     var body: some View {
         // Bottom tab bar on iPhone; sidebar-adaptable on iPad and Mac.
-        TabView {
-            Tab("Record", systemImage: "record.circle") {
+        TabView(selection: $selectedTab) {
+            Tab("Record", systemImage: "record.circle", value: AppTab.record) {
                 recordTab
             }
-            Tab("Sessions", systemImage: "list.bullet") {
+            Tab("Sessions", systemImage: "list.bullet", value: AppTab.sessions) {
                 sessionsTab
             }
         }
@@ -128,6 +134,17 @@ struct ContentView: View {
                 description: Text("Your recorded sessions will appear here.")
             )
             .navigationTitle("Sessions")
+            // REC/PAUSED stays visible while a recording exists (RF-4).
+            .safeAreaInset(edge: .top) {
+                if recordingViewModel.state.hasActiveRecording {
+                    RecordingIndicator(
+                        state: recordingViewModel.state,
+                        elapsedSeconds: recordingViewModel.liveInfo.elapsedSeconds
+                    ) { selectedTab = .record }
+                    .padding(.horizontal)
+                    .padding(.top, 4)
+                }
+            }
         }
     }
 }
