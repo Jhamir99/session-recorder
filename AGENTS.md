@@ -18,9 +18,8 @@ SwiftUI app (early stage) for DJs/musicians to record sessions from a USB-C audi
 - No test targets, CI workflows, package manifests, or lint/format config found.
 
 ## Code layout
-- App entry/UI shell: `Session Recorder/MyApp.swift` (`@main`), `Session Recorder/ContentView.swift`, `Session Recorder/RecordButton.swift`.
-- Shared constants/types: `Session Recorder/CONSTANTS.swift`.
-- Feature code: `Session Recorder/Features/<FeatureName>/` (e.g., `Features/AudioDevicesList/`). Keep SwiftUI views in `Views/`; keep device/audio state, services, selection logic, and persistence/repository logic outside Views (see Constitution C4).
+- App entry/UI shell: `Session Recorder/MyApp.swift` (`@main`, Recording menu commands), `Session Recorder/ContentView.swift` (Record/Sessions tabs).
+- Feature code: `Session Recorder/Features/<FeatureName>/` (`Features/AudioDevicesList/`, `Features/Recording/`). Keep SwiftUI views in `Views/`; keep device/audio state, services, selection logic, and persistence/repository logic outside Views (see Constitution C4).
 - `Session Recorder/MEMORY.md`: short project/session log (keep concise).
 
 ## Project structure

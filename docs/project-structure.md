@@ -6,14 +6,14 @@ This document describes the repository layout and feature code organization. Kee
 - `AGENTS.md` — canonical agent instructions for this repo.
 - `README.md` — project overview and product vision (scope, planned features, open questions).
 - `Session Recorder.xcodeproj/` — Xcode project (scheme/target: `Session Recorder`).
+- `Session-Recorder-Info.plist` — Info.plist keys that cannot be generated from build settings (iOS `UIBackgroundModes = audio`); merged with the generated Info.plist.
 - `Session Recorder/` — app source root used by the Xcode target (synchronized root group).
 - `docs/` — project-level documentation (e.g., `constitution.md`, `project-structure.md`).
 - `specs/<feature>/` — feature specs, plans, and tasks (what/why/acceptance; plans map files and RFs).
 
 ## App source layout
-- `Session Recorder/MyApp.swift` — app entry (`@main`).
-- `Session Recorder/ContentView.swift`, `RecordButton.swift` — app shell / shared UI.
-- `Session Recorder/CONSTANTS.swift` — small shared constants/types when justified.
+- `Session Recorder/MyApp.swift` — app entry (`@main`) and menu commands.
+- `Session Recorder/ContentView.swift` — app shell (Record/Sessions tabs, source sheet).
 - `Session Recorder/Features/<FeatureName>/` — feature code (preferred for non-trivial features).
 - `Session Recorder/MEMORY.md` — short session/project log.
 
@@ -34,7 +34,7 @@ Session Recorder/Features/<FeatureName>/
     <SubView>.swift                   (focused subviews)
 ```
 
-Not every feature needs every file. Keep it simple (Constitution C1). Current example: `Features/AudioDevicesList/`.
+Not every feature needs every file. Keep it simple (Constitution C1). Current examples: `Features/AudioDevicesList/` (device and channel selection) and `Features/Recording/` (capture service, session file store, recording logic/settings, `RecordingViewModel` + `+Interruptions`, views and `RecordingCommands`).
 
 ## Boundaries (Constitution C4)
 - **Views** render state and emit user intent; they do not perform device discovery, permission I/O, persistence, or core selection rules.

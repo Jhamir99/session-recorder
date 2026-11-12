@@ -104,7 +104,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Previews exist for idle with meters (mono/stereo, clipping), recording, paused (user / disconnected / interruption), low storage warning, saved/recovered notices, quality section, locked row, Sessions indicator, DND tip.
   - **Result:** Quality previews live in `RecordingViews+Previews.swift`; Record tab states in `ContentView.swift`; preview view models never start capture or touch files.
 
-- [ ] **T18 — Cleanup and docs** (`RecordButton.swift`, `CONSTANTS.swift`, `AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T18 — Cleanup and docs** (`RecordButton.swift`, `CONSTANTS.swift`, `AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2
   - **Depends on:** T9
   - **Done when:** `RecordButton.swift` and `STATUSES` are removed; docs list `Features/Recording/`, the storage decision, and the updated status.

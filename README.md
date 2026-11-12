@@ -4,10 +4,12 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 ## Status
 
-**Early development.** The project currently focuses on audio input setup:
+**Early development.** Implemented so far:
 
-- Audio input device selection
-- Audio input channel selection (mono or stereo)
+- Audio input device selection and channel selection (mono or stereo).
+- Recording: quality per device, level meters, record/pause/resume/stop, live elapsed time/file size/remaining time, background recording, automatic save, interruption handling (disconnect, calls, low storage, recovery after a crash), and a Mac **Recording** menu.
+
+Next: the session library (list, playback, rename, delete, trim, share/export).
 
 ## Product Vision
 
@@ -54,8 +56,9 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 - Multichannel recording (more than one stereo pair).
 - Backend, accounts, or cloud services.
 
-### Open Questions
-- Session metadata (name, date, duration, notes) storage format.
+### Session storage
+- Each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm` (date and time the recording started). Date and duration are read from the file; there is no separate metadata file for now.
+- A recording in progress is written to the app's Application Support folder and moved to `Sessions` when it stops (or on the next launch, if the app was terminated while recording).
 
 ## Overview
 
