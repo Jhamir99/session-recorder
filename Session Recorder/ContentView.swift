@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var currentStatus: STATUSES = .START
     @State private var isShowingSourceSheet = false
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
+    @StateObject private var recordingViewModel = RecordingViewModel()
 
     init(audioSourceViewModel: AudioSourceSelectionViewModel? = nil) {
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
@@ -22,6 +23,9 @@ struct ContentView: View {
         .tabViewStyle(.sidebarAdaptable)
         // Injected at the root so tabs and sheets presented from them share the same state.
         .environmentObject(audioSourceViewModel)
+        .task {
+            recordingViewModel.attach(audioSource: audioSourceViewModel)
+        }
     }
 
     private var recordTab: some View {
@@ -34,6 +38,20 @@ struct ContentView: View {
                         .font(.footnote)
                         .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
                 }
+
+                if !recordingViewModel.levels.isEmpty {
+                    LevelMetersView(levels: recordingViewModel.levels)
+                        .padding(.top, 8)
+                }
+
+                #if DEBUG
+                // Capture spike (recording plan §3): native format delivered by the device.
+                if let format = recordingViewModel.nativeFormatDescription {
+                    Text("Capture: \(format)")
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(.secondary)
+                }
+                #endif
 
                 Spacer(minLength: 0)
 

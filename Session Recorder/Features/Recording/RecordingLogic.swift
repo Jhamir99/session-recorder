@@ -11,6 +11,8 @@ enum RecordingLogic {
     static let minimumRemainingSeconds: TimeInterval = 60
     static let lowStorageWarningSeconds: TimeInterval = 10 * 60
     static let clipHoldSeconds: TimeInterval = 2
+    /// Peaks at or above this count as clipping (about -0.01 dBFS; integer sources never reach exactly 1).
+    static let clipThreshold: Float = 0.999
     /// Bottom of the meter scale.
     static let meterFloorDecibels: Float = -60
 
@@ -102,6 +104,10 @@ enum RecordingLogic {
     }
 
     // MARK: Meters (RF-2)
+
+    static func isClipping(peak: Float) -> Bool {
+        peak >= clipThreshold
+    }
 
     static func isClipIndicatorVisible(lastClipDate: Date?, now: Date) -> Bool {
         guard let lastClipDate else { return false }
