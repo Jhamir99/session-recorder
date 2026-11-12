@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var currentStatus: STATUSES = .START
     @State private var isShowingSourceSheet = false
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel = RecordingViewModel()
@@ -44,6 +43,15 @@ struct ContentView: View {
                         .padding(.top, 8)
                 }
 
+                if recordingViewModel.state.hasActiveRecording {
+                    RecordingStatusView(state: recordingViewModel.state, liveInfo: recordingViewModel.liveInfo)
+                        .padding(.top, 16)
+                }
+
+                if let notice = recordingViewModel.notice {
+                    recordingNoticeView(notice)
+                }
+
                 #if DEBUG
                 // Capture spike (recording plan §3): native format delivered by the device.
                 if let format = recordingViewModel.nativeFormatDescription {
@@ -56,14 +64,34 @@ struct ContentView: View {
                 Spacer(minLength: 0)
 
                 // Pinned at the bottom so it stays visible regardless of device/channel count.
-                RecordButton(currentStatus: $currentStatus)
-                    .frame(maxWidth: .infinity)
+                RecordingControlsView(
+                    state: recordingViewModel.state,
+                    canRecord: recordingViewModel.canRecord,
+                    canResume: recordingViewModel.canResume,
+                    onRecord: recordingViewModel.startRecording,
+                    onPause: recordingViewModel.pauseRecording,
+                    onResume: recordingViewModel.resumeRecording,
+                    onStop: recordingViewModel.stopRecording
+                )
             }
             .padding()
             .navigationTitle("Record")
         }
         .sheet(isPresented: $isShowingSourceSheet) {
             sourceSheet
+        }
+    }
+
+    private func recordingNoticeView(_ notice: RecordingNotice) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(notice.text)
+                .font(.footnote)
+                .foregroundStyle(notice.isError ? Color.red : Color.secondary)
+            Spacer(minLength: 0)
+            Button("Dismiss", systemImage: "xmark.circle.fill", action: recordingViewModel.dismissNotice)
+                .labelStyle(.iconOnly)
+                .buttonStyle(.plain)
+                .foregroundStyle(.tertiary)
         }
     }
 
