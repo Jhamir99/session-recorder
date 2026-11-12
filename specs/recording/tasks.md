@@ -41,7 +41,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T5, T5b
   - **Done when:** On iOS, meters use an `AVAudioEngine` input tap on the routed device (Float32), mono and stereo, for the Xone and the built-in mic; the debug `Capture:` line shows the format; macOS keeps `AVCaptureSession`.
 
-- [ ] **T6 — Session file store** (`Features/Recording/SessionFileStore.swift`)
+- [x] **T6 — Session file store** (`Features/Recording/SessionFileStore.swift`)
   - **RF:** RF-3, RF-6, RF-8, NFR-3, NFR-4
   - **Depends on:** T1, T2
   - **Done when:** Creates folders, creates the in-progress CAF (PCM, quality, 1/2 channels), finalizes (move to `Documents/Sessions/` with a unique name), discards empty files, lists leftovers for recovery, and reports free storage.
