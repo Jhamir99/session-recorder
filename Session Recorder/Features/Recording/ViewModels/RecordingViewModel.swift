@@ -54,6 +54,12 @@ final class RecordingViewModel: ObservableObject {
     /// The ~10 min low-storage warning is shown once per recording (RF-8).
     var isLowStorageWarningShown = false
     private var liveInfoTask: Task<Void, Never>?
+    /// False while the app is in the background; idle meters stop then to save battery (NFR-6).
+    private var isAppInForeground = true
+    #if os(macOS)
+    /// Keeps the Mac from idle-sleeping while a recording exists (RF-7).
+    private var sleepPreventionActivity: NSObjectProtocol?
+    #endif
 
     init(
         capture: AudioCaptureService? = nil,
@@ -76,6 +82,13 @@ final class RecordingViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.sourceDidChange() }
             .store(in: &cancellables)
+        sourceDidChange()
+    }
+
+    /// Recording continues in the background (iOS background audio mode); idle meters do not (RF-7, NFR-6).
+    func setAppInForeground(_ inForeground: Bool) {
+        guard isAppInForeground != inForeground else { return }
+        isAppInForeground = inForeground
         sourceDidChange()
     }
 
@@ -173,6 +186,7 @@ final class RecordingViewModel: ObservableObject {
         capture.startWriting(to: writer)
         state = .recording
         audioSource?.isSourceLocked = true
+        preventIdleSleep(true)
         updateLiveInfo()
         startLiveInfoUpdates()
     }
@@ -224,6 +238,7 @@ final class RecordingViewModel: ObservableObject {
         state = .idle
         liveInfo = .zero
         audioSource?.isSourceLocked = false
+        preventIdleSleep(false)
         // Source changes were ignored while recording; apply the current source now.
         sourceDidChange()
     }
@@ -234,6 +249,22 @@ final class RecordingViewModel: ObservableObject {
 
     func show(_ notice: RecordingNotice) {
         self.notice = notice
+    }
+
+    // MARK: Mac sleep (RF-7)
+
+    private func preventIdleSleep(_ prevent: Bool) {
+        #if os(macOS)
+        if prevent, sleepPreventionActivity == nil {
+            sleepPreventionActivity = ProcessInfo.processInfo.beginActivity(
+                options: [.idleSystemSleepDisabled, .userInitiated],
+                reason: "Recording a session"
+            )
+        } else if !prevent, let sleepPreventionActivity {
+            ProcessInfo.processInfo.endActivity(sleepPreventionActivity)
+            self.sleepPreventionActivity = nil
+        }
+        #endif
     }
 
     // MARK: Live info (RF-4)
@@ -282,7 +313,7 @@ final class RecordingViewModel: ObservableObject {
     private func updateMetering() {
         // iOS: the engine is stopped while the session changes (route, rate, channels) and restarted
         // once with the final format, instead of restarting on every intermediate change.
-        guard let source = meteringSource, audioSource?.service.isRoutingInput != true else {
+        guard isAppInForeground, let source = meteringSource, audioSource?.service.isRoutingInput != true else {
             capture.stop()
             return
         }

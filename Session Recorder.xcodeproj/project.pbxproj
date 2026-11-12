@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Session Recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Session Recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D142C2C30A62A4700FDD565 /* Session-Recorder-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Session-Recorder-Info.plist"; sourceTree = "<group>"; };
 		4DA73A2830A5164600621EF1 /* AGENTS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = AGENTS.md; sourceTree = "<group>"; };
 		4DA73A2930A5164600621EF1 /* constitution.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = constitution.md; sourceTree = "<group>"; };
 		4DA73A2A30A5164600621EF1 /* project-structure.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "project-structure.md"; sourceTree = "<group>"; };
@@ -51,6 +52,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				4D142C2C30A62A4700FDD565 /* Session-Recorder-Info.plist */,
 				4DA73A2830A5164600621EF1 /* AGENTS.md */,
 				4DA73A2B30A5164600621EF1 /* docs */,
 				4DA73A2C30A5164600621EF1 /* LICENSE */,
@@ -311,6 +313,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Session-Recorder-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Session Recorder needs access to audio input devices to let you choose a source for recording sessions.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -352,6 +355,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Session-Recorder-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Session Recorder needs access to audio input devices to let you choose a source for recording sessions.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;

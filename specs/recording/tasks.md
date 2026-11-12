@@ -83,7 +83,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Warning once at ~10 min left; auto stop + save + notice at ~1 min; on launch, leftover in-progress files with audio become sessions with a recovery notice (empty ones are deleted).
   - **Result:** Recovery runs once per process from `RecordingViewModel.attach` (no `MyApp.swift` change needed).
 
-- [ ] **T14 — Background recording and Mac sleep** (Xcode: Background Modes → Audio; `RecordingViewModel.swift`)
+- [x] **T14 — Background recording and Mac sleep** (Xcode: Background Modes → Audio; `RecordingViewModel.swift`)
   - **RF:** RF-7
   - **Depends on:** T8
   - **Done when:** `UIBackgroundModes = audio` set for iOS; recording continues with the iPhone locked / app in background; idle capture stops in background when not recording; Mac does not idle-sleep while recording.

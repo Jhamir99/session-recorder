@@ -8,6 +8,7 @@ struct ContentView: View {
 
     @State private var selectedTab: AppTab = .record
     @State private var isShowingSourceSheet = false
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel = RecordingViewModel()
 
@@ -30,6 +31,10 @@ struct ContentView: View {
         .environmentObject(audioSourceViewModel)
         .task {
             recordingViewModel.attach(audioSource: audioSourceViewModel)
+        }
+        // Idle meters stop in the background; a recording keeps going (RF-7).
+        .onChange(of: scenePhase) { _, phase in
+            recordingViewModel.setAppInForeground(phase != .background)
         }
     }
 
