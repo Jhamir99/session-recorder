@@ -15,13 +15,22 @@ import os
 final class AudioInputDeviceService: ObservableObject {
     @Published private(set) var devices: [AudioInputDevice] = []
     @Published private(set) var permissionState: AudioInputPermissionState = .unknown
+    /// True while input is being routed to a newly selected device (iOS); its channels are not final yet.
+    @Published private(set) var isRoutingInput = false
 
     private var observers: [NSObjectProtocol] = []
     private let logger = Logger(subsystem: "SessionRecorder", category: "AudioInputDevices")
+    #if os(iOS)
+    /// AVAudioSession calls that change the session can block while it is active, so they never run
+    /// on the main thread. Serial, so they apply in the order they were requested.
+    private let sessionQueue = DispatchQueue(label: "SessionRecorder.AudioSession", qos: .userInitiated)
+    #endif
 
     init() {
         #if os(iOS)
-        configureAudioSession()
+        updateSession { session, logger in
+            Self.configure(session, logger: logger)
+        }
         #endif
         refreshPermissionState()
         refreshDevices()
@@ -44,19 +53,23 @@ final class AudioInputDeviceService: ObservableObject {
 
     /// Routes audio input to the selected device so its channels and capture use it.
     /// iOS only (one input route at a time); macOS captures from any device directly.
+    /// The new channels arrive asynchronously through `devices`.
     func preferInput(deviceID: String) {
         #if os(iOS)
-        let session = AVAudioSession.sharedInstance()
-        guard let port = session.availableInputs?.first(where: { $0.uid == deviceID }) else { return }
-        if session.currentRoute.inputs.first?.uid != deviceID {
-            do {
-                try session.setPreferredInput(port)
-            } catch {
-                logger.error("Cannot route input to \(port.portName, privacy: .public): \(error.localizedDescription, privacy: .public)")
+        isRoutingInput = true
+        updateSession(change: { session, logger in
+            if let port = session.availableInputs?.first(where: { $0.uid == deviceID }),
+               session.currentRoute.inputs.first?.uid != deviceID {
+                do {
+                    try session.setPreferredInput(port)
+                } catch {
+                    logger.error("Cannot route input to \(port.portName, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                }
             }
-        }
-        openAllInputChannels()
-        refreshDevices()
+            Self.openAllInputChannels(session, logger: logger)
+        }, completion: { [weak self] in
+            self?.isRoutingInput = false
+        })
         #endif
     }
 
@@ -98,8 +111,9 @@ final class AudioInputDeviceService: ObservableObject {
                 // While the app is not active, iOS reports a temporarily reduced route (fewer channels);
                 // devices are refreshed when the app becomes active again.
                 guard UIApplication.shared.applicationState == .active else { return }
-                self?.openAllInputChannels()
-                self?.refreshDevices()
+                self?.updateSession { session, logger in
+                    Self.openAllInputChannels(session, logger: logger)
+                }
             }
         }
         observers.append(routeObserver)
@@ -131,11 +145,10 @@ final class AudioInputDeviceService: ObservableObject {
             Task { @MainActor [weak self] in
                 // In the background iOS may deactivate the session and close the extra input channels
                 // without a route change, so restore them when the app is active again.
-                self?.configureAudioSession()
-                self?.openAllInputChannels()
                 self?.refreshPermissionState()
-                if self?.permissionState == .granted {
-                    self?.refreshDevices()
+                self?.updateSession { session, logger in
+                    Self.configure(session, logger: logger)
+                    Self.openAllInputChannels(session, logger: logger)
                 }
             }
         }
@@ -146,10 +159,32 @@ final class AudioInputDeviceService: ObservableObject {
     #if os(iOS)
     /// `.measurement` disables voice processing (gain/EQ/noise reduction) so line-level sources stay untouched.
     /// `.mixWithOthers` keeps other apps' audio playing while the app only shows devices or meters.
-    private func configureAudioSession() {
-        let session = AVAudioSession.sharedInstance()
+    /// Runs `change` on the session queue, then refreshes the device list on the main actor.
+    /// `completion` runs on the main actor after the refresh.
+    private func updateSession(
+        change: @escaping @Sendable (AVAudioSession, Logger) -> Void,
+        completion: (@MainActor @Sendable () -> Void)? = nil
+    ) {
+        let logger = self.logger
+        sessionQueue.async { [weak self] in
+            change(AVAudioSession.sharedInstance(), logger)
+            Task { @MainActor [weak self] in
+                self?.refreshDevices()
+                completion?()
+            }
+        }
+    }
+
+    private func updateSession(_ change: @escaping @Sendable (AVAudioSession, Logger) -> Void) {
+        updateSession(change: change, completion: nil)
+    }
+
+    nonisolated private static func configure(_ session: AVAudioSession, logger: Logger) {
         do {
-            try session.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers])
+            if session.category != .playAndRecord || session.mode != .measurement
+                || !session.categoryOptions.contains(.mixWithOthers) {
+                try session.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers])
+            }
             try session.setActive(true)
         } catch {
             logger.error("Cannot configure audio session: \(error.localizedDescription, privacy: .public)")
@@ -157,8 +192,7 @@ final class AudioInputDeviceService: ObservableObject {
     }
 
     /// iOS may open fewer channels than the device has (e.g., 1 or 2 of a mixer's inputs).
-    private func openAllInputChannels() {
-        let session = AVAudioSession.sharedInstance()
+    nonisolated private static func openAllInputChannels(_ session: AVAudioSession, logger: Logger) {
         let maximum = session.maximumInputNumberOfChannels
         guard maximum > 0, session.inputNumberOfChannels < maximum,
               session.currentRoute.inputs.first?.portType != .builtInMic else { return }

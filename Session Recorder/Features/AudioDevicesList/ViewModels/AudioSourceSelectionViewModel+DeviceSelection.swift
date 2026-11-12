@@ -174,6 +174,8 @@ extension AudioSourceSelectionViewModel {
 
         if let saved, AudioDeviceSelectionHelper.invalidSelectionResult(selection: saved, availableChannels: device.channels).showsNoValidChannelError {
             activeSelection = nil
+            // Channels are not final while input is being routed to this device: wait, no error yet.
+            if service.isRoutingInput { return }
             userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
             return
         }
@@ -230,9 +232,18 @@ extension AudioSourceSelectionViewModel {
         // try the saved selection again, or recompute the defaults if nothing was saved for this device
         // (so a mixer first seen with 1 channel ends up in Stereo 1–2). If the saved selection is still
         // invalid, the no-valid-channel error stays.
-        if channelsChanged, !device.channels.isEmpty,
-           activeSelection == nil || store.record(for: device.id) == nil {
+        // No selection and no message means the restore waited for routing to finish (see restore).
+        // A source-change notice ("Switched to …") may be showing; it is kept after the restore.
+        let sourceChangeNotice = userMessage?.isSourceChangeNotice == true ? userMessage : nil
+        let restoreWaitedForRouting = activeSelection == nil
+            && (userMessage == nil || sourceChangeNotice != nil)
+            && !service.isRoutingInput
+        if !device.channels.isEmpty,
+           restoreWaitedForRouting || (channelsChanged && (activeSelection == nil || store.record(for: device.id) == nil)) {
             restoreOrInitializeForSelectedDevice()
+            if let sourceChangeNotice, userMessage == nil {
+                userMessage = sourceChangeNotice
+            }
             return
         }
 
@@ -248,6 +259,7 @@ extension AudioSourceSelectionViewModel {
             let validity = AudioDeviceSelectionHelper.invalidSelectionResult(selection: activeSelection, availableChannels: device.channels)
             if validity.showsNoValidChannelError {
                 self.activeSelection = nil
+                if service.isRoutingInput { return }
                 userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
                 return
             }
