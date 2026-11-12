@@ -38,9 +38,9 @@ New feature folder: `Session Recorder/Features/Recording/` (views in `Views/`, v
 ## 2) Pure/testable logic (`RecordingLogic`)
 | Logic | Inputs (explicit) | Output | RF |
 |---|---|---|---|
-| Offered sample rates | device supported rates | `[44100, 48000] ∩ supported`, or `[48000]` if empty | RF-1 |
+| Offered sample rates | device supported rates | `[44100, 48000, 88200, 96000] ∩ supported`, or `[48000]` if empty | RF-1 |
 | Offered qualities | offered rates | rates × `[16, 24]` bits | RF-1 |
-| Resolve quality | saved quality?, offered qualities | saved if offered, else highest (24-bit, highest rate) | RF-1 |
+| Resolve quality | saved quality?, offered qualities | saved if offered, else 24/48 (or 24-bit at highest rate ≤ 48 kHz, else lowest) | RF-1 |
 | Bytes per second | quality, channel count | `rate × bits/8 × channels` | RF-4 |
 | Remaining seconds | free bytes, bytes/s | free / bytes/s (≥ 0) | RF-4 |
 | Can start | permission, valid selection, remaining seconds | allowed, or error reason (`< 60 s` → not enough storage) | RF-3 |
@@ -69,6 +69,7 @@ selected device + channels + quality
 - **Writing:** `AVAudioFile` with CAF settings (`kAudioFormatLinearPCM`, 16/24-bit, chosen rate, 1 or 2 channels). Written on the capture queue (never the main thread). CAF needs no final header for readability, so audio before a crash is kept (NFR-4).
 - **Pause:** capture keeps running (meters stay live); buffers are simply not written. Resume writes again to the same file → no gap, no extra file (RF-5).
 - **Meters while idle:** capture runs without a writer while a valid source + permission exist and the Record tab is visible / app is active (NFR-6: capture stops when the app is in the background and idle).
+- **Hardware sample rate:** the device runs at the quality's rate when supported (iOS: `setPreferredSampleRate` on the session queue; supported rates probed per device on routing. macOS: Core Audio `kAudioDevicePropertyNominalSampleRate`, system-wide). Otherwise the capture thread resamples.
 - **Free storage:** `volumeAvailableCapacityForImportantUsage` (fallback `volumeAvailableCapacity`) of the Documents volume, checked every second while recording.
 - **Mac sleep:** `ProcessInfo.beginActivity(options: .idleSystemSleepDisabled)` on start, `endActivity` on stop.
 

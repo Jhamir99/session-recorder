@@ -51,12 +51,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T5, T5c, T6
   - **Done when:** Selected channels are converted to the selected quality (only when the device rate differs) and written on the capture queue; pause stops writing without stopping meters; resume continues in the same file; written frame count is exposed.
 
-- [ ] **T8 — Recording view model** (`Features/Recording/ViewModels/RecordingViewModel.swift`)
+- [x] **T8 — Recording view model** (`Features/Recording/ViewModels/RecordingViewModel.swift`)
   - **RF:** RF-1, RF-3–RF-6
   - **Depends on:** T2, T3, T7
   - **Done when:** State machine idle/recording/paused works; start checks can-start and shows errors; live info updates every second; stop saves and shows "Saved: …"; empty recordings discarded; `isSourceLocked` set while a recording exists; quality resolved and saved per device.
 
-- [ ] **T9 — Record tab UI: meters, status, controls** (`Features/Recording/Views/LevelMetersView.swift`, `RecordingStatusView.swift`, `RecordingControlsView.swift`, `ContentView.swift`)
+- [x] **T9 — Record tab UI: meters, status, controls** (`Features/Recording/Views/LevelMetersView.swift`, `RecordingStatusView.swift`, `RecordingControlsView.swift`, `ContentView.swift`)
   - **RF:** RF-2–RF-6, NFR-1
   - **Depends on:** T8
   - **Done when:** Record tab shows meters (mono/L-R, clipping), status (`REC`/`PAUSED`, elapsed, size, remaining), Record / Pause-Resume / Stop; controls pinned at the bottom; `RecordButton` no longer used.

@@ -1,6 +1,6 @@
 # Session Recorder
 
-Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicians to record practice and performance sessions from an audio device connected over USB-C (for example, a DJ mixer or audio interface). Sessions are recorded lossless (up to 24-bit/48 kHz) and can later be exported to other formats or compressed for sharing. This repository is part of a personal portfolio project.
+Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicians to record practice and performance sessions from an audio device connected over USB-C (for example, a DJ mixer or audio interface). Sessions are recorded lossless (up to 24-bit/96 kHz) and can later be exported to other formats or compressed for sharing. This repository is part of a personal portfolio project.
 
 ## Status
 
@@ -13,7 +13,7 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 ### Recording
 - Record from a USB-C audio device, choosing which channels to record: one mono channel or one stereo pair.
-- Lossless recording, up to **24-bit / 48 kHz**. By default, the app uses the highest quality supported by the device (capped at 24/48); the user can change it.
+- Lossless recording at **44.1, 48, 88.2 or 96 kHz** (as supported by the device), 16 or 24-bit. Default **24-bit / 48 kHz**; the user can change it per device.
 - Master file format: **CAF** with uncompressed PCM (Apple's native container: no 4 GB limit and stays readable if recording is interrupted). About 1 GB per hour for stereo 24/48. Converting to FLAC or other formats is done by the user via export.
 - While recording: input level meters (with clipping warning), elapsed time, file size and free storage, pause/resume.
 - Recording continues in the background (e.g., iPhone locked or app in background).

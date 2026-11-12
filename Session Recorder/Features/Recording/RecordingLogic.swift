@@ -2,7 +2,8 @@ import Foundation
 
 /// Pure recording rules: explicit inputs, deterministic outputs, no I/O.
 enum RecordingLogic {
-    static let allowedSampleRates: [Double] = [44_100, 48_000]
+    /// Rates the user can pick, shown only when the device supports them (RF-1; up to 96 kHz, 2026-11-12).
+    static let allowedSampleRates: [Double] = [44_100, 48_000, 88_200, 96_000]
     static let allowedBitDepths: [Int] = [16, 24]
     /// Used (with conversion) when the device supports none of the allowed rates (RF-1).
     static let fallbackSampleRate: Double = 48_000
@@ -31,18 +32,22 @@ enum RecordingLogic {
         }
     }
 
-    static func highestQuality(in offered: [RecordingQuality]) -> RecordingQuality {
-        offered.max { lhs, rhs in
-            (lhs.bitDepth, lhs.sampleRate) < (rhs.bitDepth, rhs.sampleRate)
-        } ?? RecordingQuality(sampleRate: fallbackSampleRate, bitDepth: 24)
+    /// 24-bit/48 kHz when offered; otherwise 24-bit at the highest offered rate up to 48 kHz,
+    /// or the lowest offered rate when all are higher (RF-1).
+    static func defaultQuality(in offered: [RecordingQuality]) -> RecordingQuality {
+        let preferred = RecordingQuality(sampleRate: 48_000, bitDepth: 24)
+        if offered.contains(preferred) { return preferred }
+        let rates = Set(offered.map(\.sampleRate)).sorted()
+        let rate = rates.last(where: { $0 <= 48_000 }) ?? rates.first ?? fallbackSampleRate
+        return RecordingQuality(sampleRate: rate, bitDepth: 24)
     }
 
-    /// Saved quality if the device still offers it, otherwise the highest offered quality.
+    /// Saved quality if the device still offers it, otherwise the default quality.
     static func resolveQuality(saved: RecordingQuality?, offered: [RecordingQuality]) -> RecordingQuality {
         if let saved, offered.contains(saved) {
             return saved
         }
-        return highestQuality(in: offered)
+        return defaultQuality(in: offered)
     }
 
     // MARK: Storage (RF-3, RF-4, RF-8)

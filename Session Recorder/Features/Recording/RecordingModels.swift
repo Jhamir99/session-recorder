@@ -61,6 +61,7 @@ enum RecordingStartError: Equatable {
     case noValidSource
     case notEnoughStorage
     case deviceUnavailable
+    case cannotCreateFile
 }
 
 struct RecordingNotice: Identifiable, Equatable {
@@ -98,6 +99,8 @@ struct RecordingNotice: Identifiable, Equatable {
             "Not enough free storage to record."
         case .startFailed(.deviceUnavailable):
             "The audio device is not available. Check the connection and try again."
+        case .startFailed(.cannotCreateFile):
+            "The recording file could not be created."
         case .deviceDisconnected(let deviceName):
             "\(deviceName) disconnected. Recording paused."
         case .interrupted:

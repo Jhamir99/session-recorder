@@ -19,9 +19,10 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 ## Functional Requirements
 
 ### RF-1: Recording quality
-- The system shall offer quality options made of a **sample rate** (44.1 kHz or 48 kHz) and a **bit depth** (16-bit or 24-bit). Higher values shall not be offered.
-- The system shall offer only the sample rates supported by the selected device. If the device supports neither 44.1 nor 48 kHz natively, the system shall offer 48 kHz (converted from the device rate).
-- When no saved quality exists for the selected device, the system shall use the highest offered quality (24-bit / highest offered sample rate).
+- The system shall offer quality options made of a **sample rate** (44.1, 48, 88.2 or 96 kHz) and a **bit depth** (16-bit or 24-bit). Higher values shall not be offered.
+- The system shall offer only the sample rates supported by the selected device. If the device supports none of them natively, the system shall offer 48 kHz (converted from the device rate).
+- When no saved quality exists for the selected device, the system shall use **24-bit / 48 kHz**; if 48 kHz is not offered, 24-bit at the highest offered rate below 48 kHz, or the lowest offered rate if all are higher.
+- When a quality is in use, the system shall run the device at its sample rate when the device supports it, so the recording is not resampled (on Mac this changes the device rate system-wide, as audio apps do).
 - When the user changes the quality, the system shall save it locally for that device (device ID and numeric values only; no personal data) and use it for the next recording.
 - When a saved quality is no longer offered by the device (for example, the sample rate is not supported), the system shall use the default from this RF and shall not delete the saved value.
 - The source row (audio-devices-list RF-6) shall show the quality (for example, `Xone:96 · Stereo · 1–2 · 24-bit/48 kHz`). The source sheet shall contain a **Quality** section to change it.
@@ -84,7 +85,7 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 
 ## Non-Functional Requirements
 - **NFR-1:** Works on iPhone, iPad, and Mac with platform-appropriate presentation; controls stay usable at large Dynamic Type sizes.
-- **NFR-2:** Recorded audio is bit-accurate PCM at the selected quality: no dropped audio, gaps, or clicks during normal recording or at pause/resume boundaries.
+- **NFR-2:** Recorded audio is bit-accurate PCM at the selected quality: no dropped audio or gaps during normal recording. At a pause/resume boundary the audio is joined without a fade, so a click can be heard there (accepted 2026-11-12; a crossfade option may be added later in settings).
 - **NFR-3:** Recordings of several hours (at least 4 h of stereo 24/48, about 4 GB) work without file-size limits or growing memory use.
 - **NFR-4:** Audio recorded before any interruption or termination is never lost (RF-8).
 - **NFR-5:** Persisted settings contain no personal data (device IDs, quality values, and a tip-dismissed flag only). Audio files are stored only on the device; no backend or external services.
@@ -92,7 +93,8 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 - **NFR-7:** User-facing text is in English and understandable to non-technical users.
 
 ## Edge Cases
-- Device supports only 96 kHz: 48 kHz is offered (converted) (RF-1).
+- Device supports only 96 kHz: 96 kHz is offered and selected by default (RF-1).
+- Device supports only 32 kHz: 48 kHz is offered (converted) (RF-1).
 - Mono built-in microphone: one meter, mono file (RF-2, RF-3).
 - The user changes the channel selection while idle: meters follow the new channels immediately (RF-2).
 - Record tapped with less than 1 minute of free storage: error, no file (RF-3).
@@ -109,7 +111,7 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 - Session library: list, playback, rename, delete, trim, share/export, waveform (separate feature). Until it exists, the Sessions tab keeps its empty state except for the REC indicator (RF-4).
 - First-use explanation screen before the permission prompt and the "Open Settings" notice (separate onboarding/permission work).
 - Input monitoring (hearing the input through headphones), gain control in the app, markers/notes during recording.
-- Sample rates above 48 kHz, bit depths other than 16/24, 32-bit float, compressed formats while recording.
+- Sample rates above 96 kHz, bit depths other than 16/24, 32-bit float, compressed formats while recording.
 - Multichannel recording (more than one stereo pair) and MIDI features.
 - Recording from two devices at the same time.
 
@@ -128,7 +130,9 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 ## Decisions (approved 2026-11-12)
 - **Session storage format:** each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder (visible in Files/Finder). The file name is the session name; date and duration are read from the file. No separate metadata file for now.
 - **Name format:** `Session YYYY-MM-DD HH.mm` (dot instead of `:`, which is not safe in Mac file names).
-- **Quality persistence:** saved per device; when nothing is saved, the highest offered quality is selected (RF-1).
+- **Quality persistence:** saved per device; when nothing is saved, 24-bit/48 kHz is selected (RF-1).
+- **Sample rates (2026-11-12):** 44.1, 48, 88.2 and 96 kHz, only those the device supports; default 24-bit/48 kHz. iOS does not list supported rates, so they are probed when a device is selected.
+- **Pause/resume fades (2026-11-12):** no fade for now; a crossfade option may be added later in settings.
 - **Low-storage thresholds:** warning at about 10 minutes and automatic stop at about 1 minute of remaining recording time (RF-8).
 
 ## Open Questions

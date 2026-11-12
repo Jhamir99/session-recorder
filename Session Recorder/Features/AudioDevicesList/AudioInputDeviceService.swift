@@ -24,6 +24,15 @@ final class AudioInputDeviceService: ObservableObject {
     /// AVAudioSession calls that change the session can block while it is active, so they never run
     /// on the main thread. Serial, so they apply in the order they were requested.
     private let sessionQueue = DispatchQueue(label: "SessionRecorder.AudioSession", qos: .userInitiated)
+    /// iOS does not list supported rates; they are probed once per routed device (by port UID).
+    private var probedSampleRates: [String: [Double]] = [:]
+    /// Rates probed on iOS (the ones recording can offer).
+    nonisolated private static let probeCandidateRates: [Double] = [44_100, 48_000, 88_200, 96_000]
+
+    /// Carries probe results from the session queue to the main actor.
+    private final class SampleRateProbe: @unchecked Sendable {
+        var rates: [Double] = []
+    }
     #endif
 
     init() {
@@ -45,7 +54,7 @@ final class AudioInputDeviceService: ObservableObject {
 
     func refreshDevices() {
         #if os(iOS)
-        devices = Self.discoverAudioSessionInputs()
+        devices = Self.discoverAudioSessionInputs(probedSampleRates: probedSampleRates)
         #else
         devices = Self.discoverInputDevices()
         #endif
@@ -53,10 +62,31 @@ final class AudioInputDeviceService: ObservableObject {
 
     /// Routes audio input to the selected device so its channels and capture use it.
     /// iOS only (one input route at a time); macOS captures from any device directly.
+    /// Asks the device to run at `rate` so recording needs no resampling (recording RF-1).
+    /// iOS: preferred session rate (only for the routed device). macOS: device nominal rate.
+    func preferSampleRate(_ rate: Double, deviceID: String) {
+        #if os(iOS)
+        updateSession { session, logger in
+            guard session.currentRoute.inputs.first?.uid == deviceID, abs(session.sampleRate - rate) >= 1 else { return }
+            do {
+                try session.setPreferredSampleRate(rate)
+            } catch {
+                logger.error("Cannot set sample rate \(rate) Hz: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+        #elseif os(macOS)
+        let logger = self.logger
+        DispatchQueue.global(qos: .userInitiated).async {
+            Self.setCoreAudioNominalSampleRate(rate, deviceUID: deviceID, logger: logger)
+        }
+        #endif
+    }
+
     /// The new channels arrive asynchronously through `devices`.
     func preferInput(deviceID: String) {
         #if os(iOS)
         isRoutingInput = true
+        let probe = SampleRateProbe()
         updateSession(change: { session, logger in
             if let port = session.availableInputs?.first(where: { $0.uid == deviceID }),
                session.currentRoute.inputs.first?.uid != deviceID {
@@ -67,7 +97,14 @@ final class AudioInputDeviceService: ObservableObject {
                 }
             }
             Self.openAllInputChannels(session, logger: logger)
+            if session.currentRoute.inputs.first?.uid == deviceID {
+                probe.rates = Self.probeSampleRates(session)
+            }
         }, completion: { [weak self] in
+            if !probe.rates.isEmpty {
+                self?.probedSampleRates[deviceID] = probe.rates
+                self?.refreshDevices()
+            }
             self?.isRoutingInput = false
         })
         #endif
@@ -192,6 +229,20 @@ final class AudioInputDeviceService: ObservableObject {
     }
 
     /// iOS may open fewer channels than the device has (e.g., 1 or 2 of a mixer's inputs).
+    /// Asks for each candidate rate and keeps the ones the hardware applies; restores the previous rate.
+    nonisolated private static func probeSampleRates(_ session: AVAudioSession) -> [Double] {
+        let original = session.sampleRate
+        var supported: [Double] = []
+        for rate in probeCandidateRates {
+            guard (try? session.setPreferredSampleRate(rate)) != nil else { continue }
+            if abs(session.sampleRate - rate) < 1 {
+                supported.append(rate)
+            }
+        }
+        try? session.setPreferredSampleRate(original)
+        return supported
+    }
+
     nonisolated private static func openAllInputChannels(_ session: AVAudioSession, logger: Logger) {
         let maximum = session.maximumInputNumberOfChannels
         guard maximum > 0, session.inputNumberOfChannels < maximum,
@@ -203,7 +254,7 @@ final class AudioInputDeviceService: ObservableObject {
         }
     }
 
-    private static func discoverAudioSessionInputs() -> [AudioInputDevice] {
+    private static func discoverAudioSessionInputs(probedSampleRates: [String: [Double]]) -> [AudioInputDevice] {
         let session = AVAudioSession.sharedInstance()
         let routeInput = session.currentRoute.inputs.first
         return (session.availableInputs ?? [])
@@ -228,8 +279,8 @@ final class AudioInputDeviceService: ObservableObject {
                     channels: channels,
                     // Only wired USB interfaces/mixers count as external (RF-7); headsets and Bluetooth do not.
                     isExternal: port.portType == .usbAudio,
-                    // iOS does not list supported rates; the current hardware rate is what the route runs at.
-                    supportedSampleRates: isRouteInput ? [session.sampleRate] : []
+                    // Probed rates when known; otherwise the rate the route currently runs at.
+                    supportedSampleRates: probedSampleRates[port.uid] ?? (isRouteInput ? [session.sampleRate] : [])
                 )
             }
             .sorted { lhs, rhs in
@@ -327,27 +378,9 @@ final class AudioInputDeviceService: ObservableObject {
     #if os(macOS)
     /// Nominal sample rates reported by Core Audio for the device with this UID (same as `AVCaptureDevice.uniqueID`).
     private static func coreAudioNominalSampleRates(deviceUID: String) -> [Double] {
-        var deviceID = AudioObjectID(kAudioObjectUnknown)
-        var uid = deviceUID as CFString
+        guard let deviceID = coreAudioDeviceID(uid: deviceUID) else { return [] }
+        var size = UInt32(0)
         var address = AudioObjectPropertyAddress(
-            mSelector: kAudioHardwarePropertyTranslateUIDToDevice,
-            mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain
-        )
-        var size = UInt32(MemoryLayout<AudioObjectID>.size)
-        let translateStatus = withUnsafeMutablePointer(to: &uid) { uidPointer in
-            AudioObjectGetPropertyData(
-                AudioObjectID(kAudioObjectSystemObject),
-                &address,
-                UInt32(MemoryLayout<CFString>.size),
-                uidPointer,
-                &size,
-                &deviceID
-            )
-        }
-        guard translateStatus == noErr, deviceID != kAudioObjectUnknown else { return [] }
-
-        address = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyAvailableNominalSampleRates,
             mScope: kAudioObjectPropertyScopeInput,
             mElement: kAudioObjectPropertyElementMain
@@ -367,6 +400,50 @@ final class AudioInputDeviceService: ObservableObject {
             }
         }
         return rates.filter { $0 > 0 }.sorted()
+    }
+
+    /// Core Audio device for a UID (same as `AVCaptureDevice.uniqueID`).
+    nonisolated private static func coreAudioDeviceID(uid deviceUID: String) -> AudioObjectID? {
+        var deviceID = AudioObjectID(kAudioObjectUnknown)
+        var uid = deviceUID as CFString
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyTranslateUIDToDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        let translateStatus = withUnsafeMutablePointer(to: &uid) { uidPointer in
+            AudioObjectGetPropertyData(
+                AudioObjectID(kAudioObjectSystemObject),
+                &address,
+                UInt32(MemoryLayout<CFString>.size),
+                uidPointer,
+                &size,
+                &deviceID
+            )
+        }
+        guard translateStatus == noErr, deviceID != kAudioObjectUnknown else { return nil }
+        return deviceID
+    }
+
+    /// Sets the device's hardware sample rate (system-wide, as audio apps do) so capture needs no resampling.
+    nonisolated private static func setCoreAudioNominalSampleRate(_ rate: Double, deviceUID: String, logger: Logger) {
+        guard let deviceID = coreAudioDeviceID(uid: deviceUID) else { return }
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyNominalSampleRate,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var current = Float64(0)
+        var size = UInt32(MemoryLayout<Float64>.size)
+        if AudioObjectGetPropertyData(deviceID, &address, 0, nil, &size, &current) == noErr, current == rate {
+            return
+        }
+        var newRate = Float64(rate)
+        let status = AudioObjectSetPropertyData(deviceID, &address, 0, nil, UInt32(MemoryLayout<Float64>.size), &newRate)
+        if status != noErr {
+            logger.error("Cannot set sample rate \(rate) Hz: OSStatus \(status)")
+        }
     }
     #endif
 
