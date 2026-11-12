@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var selectedTab: AppTab = .record
     @State private var isShowingSourceSheet = false
     @Environment(\.scenePhase) private var scenePhase
+    @State private var windowID = UUID()
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel = RecordingViewModel()
 
@@ -32,6 +33,12 @@ struct ContentView: View {
         .task {
             recordingViewModel.attach(audioSource: audioSourceViewModel)
         }
+        // Recording menu and shortcuts act on this window's recording (RF-9).
+        .focusedSceneObject(recordingViewModel)
+        .focusedSceneValue(\.chooseRecordingSource, ChooseRecordingSourceAction(windowID: windowID) {
+            selectedTab = .record
+            isShowingSourceSheet = true
+        })
         // Idle meters stop in the background; a recording keeps going (RF-7).
         .onChange(of: scenePhase) { _, phase in
             recordingViewModel.setAppInForeground(phase != .background)

@@ -93,7 +93,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T3, T9
   - **Done when:** On iPhone/iPad the first recording shows a dismissible tip; after dismissing it never appears again; not shown on Mac.
 
-- [ ] **T16 — Mac Recording menu and shortcuts** (`Features/Recording/Views/RecordingCommands.swift`, `MyApp.swift`, `ContentView.swift`)
+- [x] **T16 — Mac Recording menu and shortcuts** (`Features/Recording/Views/RecordingCommands.swift`, `MyApp.swift`, `ContentView.swift`)
   - **RF:** RF-9
   - **Depends on:** T9
   - **Done when:** Recording menu with Record/Stop (⌘R), Pause/Resume (Space), Choose Source… (no shortcut); items enabled only when possible; Space does not fire inside text fields; iPad hardware keyboard works where supported.
