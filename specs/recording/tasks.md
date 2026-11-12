@@ -98,10 +98,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T9
   - **Done when:** Recording menu with Record/Stop (⌘R), Pause/Resume (Space), Choose Source… (no shortcut); items enabled only when possible; Space does not fire inside text fields; iPad hardware keyboard works where supported.
 
-- [ ] **T17 — Previews** (`Features/Recording/ViewModels/RecordingViewModel+Preview.swift`, `Features/Recording/Views/RecordingViews+Previews.swift`, `ContentView.swift`)
+- [x] **T17 — Previews** (`Features/Recording/ViewModels/RecordingViewModel+Preview.swift`, `Features/Recording/Views/RecordingViews+Previews.swift`, `ContentView.swift`)
   - **RF:** RF-1–RF-8, C5
   - **Depends on:** T9–T13, T15
   - **Done when:** Previews exist for idle with meters (mono/stereo, clipping), recording, paused (user / disconnected / interruption), low storage warning, saved/recovered notices, quality section, locked row, Sessions indicator, DND tip.
+  - **Result:** Quality previews live in `RecordingViews+Previews.swift`; Record tab states in `ContentView.swift`; preview view models never start capture or touch files.
 
 - [ ] **T18 — Cleanup and docs** (`RecordButton.swift`, `CONSTANTS.swift`, `AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2

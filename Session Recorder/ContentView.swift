@@ -11,10 +11,11 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var windowID = UUID()
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
-    @StateObject private var recordingViewModel = RecordingViewModel()
+    @StateObject private var recordingViewModel: RecordingViewModel
 
-    init(audioSourceViewModel: AudioSourceSelectionViewModel? = nil) {
+    init(audioSourceViewModel: AudioSourceSelectionViewModel? = nil, recordingViewModel: RecordingViewModel? = nil) {
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
+        _recordingViewModel = StateObject(wrappedValue: recordingViewModel ?? RecordingViewModel())
     }
 
     var body: some View {
@@ -184,17 +185,49 @@ struct ContentView: View {
 }
 
 #Preview("Record tab") {
-    ContentView(audioSourceViewModel: .previewStereo)
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewIdle)
+}
+
+#Preview("Idle, mono clipping") {
+    ContentView(audioSourceViewModel: .previewMono, recordingViewModel: .previewIdleMonoClipping)
+}
+
+#Preview("Recording, DND tip") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewRecording)
+}
+
+#Preview("Paused by user") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewPausedByUser)
+}
+
+#Preview("Paused, device disconnected") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewPausedDisconnected)
+}
+
+#Preview("Paused by a call") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewPausedInterruption)
+}
+
+#Preview("Low storage warning") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewLowStorage)
+}
+
+#Preview("Saved notice") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewSaved)
+}
+
+#Preview("Recovered notice") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewRecovered)
 }
 
 #Preview("Record tab, no input") {
-    ContentView(audioSourceViewModel: .previewNoInput)
+    ContentView(audioSourceViewModel: .previewNoInput, recordingViewModel: .preview(levels: []))
 }
 
 #Preview("Record tab, auto-selected external") {
-    ContentView(audioSourceViewModel: .previewAutoSelectedExternal)
+    ContentView(audioSourceViewModel: .previewAutoSelectedExternal, recordingViewModel: .previewIdle)
 }
 
 #Preview("Record tab, fallback after disconnect") {
-    ContentView(audioSourceViewModel: .previewFallbackToBuiltIn)
+    ContentView(audioSourceViewModel: .previewFallbackToBuiltIn, recordingViewModel: .preview(levels: [.silent]))
 }

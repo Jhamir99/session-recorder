@@ -56,6 +56,10 @@ final class RecordingViewModel: ObservableObject {
     /// The ~10 min low-storage warning is shown once per recording (RF-8).
     var isLowStorageWarningShown = false
     private var liveInfoTask: Task<Void, Never>?
+    /// Previews only: display state is set directly; no capture, files or source observation.
+    private var isPreview = false
+    /// Previews only: whether Resume is possible (replaces the device/interruption check).
+    private var previewCanResume = false
     /// False while the app is in the background; idle meters stop then to save battery (NFR-6).
     private var isAppInForeground = true
     #if os(macOS)
@@ -77,6 +81,10 @@ final class RecordingViewModel: ObservableObject {
     /// Connects to the shared source selection; meters and quality follow it. Safe to call more than once.
     func attach(audioSource: AudioSourceSelectionViewModel) {
         guard self.audioSource !== audioSource else { return }
+        if isPreview {
+            self.audioSource = audioSource
+            return
+        }
         recoverInterruptedRecordingsOnce()
         self.audioSource = audioSource
         // objectWillChange fires before the change; receiving on the run loop reads the new values.
@@ -105,13 +113,17 @@ final class RecordingViewModel: ObservableObject {
     var canResume: Bool {
         RecordingLogic.canResume(
             state: state,
-            isRecordingDeviceConnected: isRecordingDeviceReady && !isInputInterrupted
+            isRecordingDeviceConnected: isPreview ? previewCanResume : isRecordingDeviceReady && !isInputInterrupted
         )
     }
 
     // MARK: Quality (RF-1)
 
     func selectQuality(_ newQuality: RecordingQuality) {
+        if isPreview {
+            quality = newQuality
+            return
+        }
         guard !state.hasActiveRecording, offeredQualities.contains(newQuality),
               let deviceID = audioSource?.selectedDeviceID else { return }
         quality = newQuality
@@ -146,7 +158,7 @@ final class RecordingViewModel: ObservableObject {
     // MARK: Recording (RF-3–RF-6)
 
     func startRecording() {
-        guard state == .idle else { return }
+        guard state == .idle, !isPreview else { return }
         notice = nil
         let source = meteringSource
         let channelCount = source?.channelNumbers.count ?? 0
@@ -263,6 +275,29 @@ final class RecordingViewModel: ObservableObject {
         self.notice = notice
     }
 
+    /// Previews only (see RecordingViewModel+Preview): shows a state without capture or files.
+    func applyPreview(
+        state: RecordingState,
+        liveInfo: RecordingLiveInfo,
+        notice: RecordingNotice?,
+        levels: [ChannelLevel],
+        quality: RecordingQuality,
+        offeredQualities: [RecordingQuality],
+        canResume: Bool,
+        showsDoNotDisturbTip: Bool
+    ) {
+        isPreview = true
+        self.state = state
+        self.liveInfo = liveInfo
+        self.notice = notice
+        meters.levels = levels
+        meteredChannelCount = levels.count
+        self.quality = quality
+        self.offeredQualities = offeredQualities
+        previewCanResume = canResume
+        self.showsDoNotDisturbTip = showsDoNotDisturbTip
+    }
+
     // MARK: Mac sleep (RF-7)
 
     private func preventIdleSleep(_ prevent: Bool) {
@@ -313,6 +348,7 @@ final class RecordingViewModel: ObservableObject {
     }
 
     private func sourceDidChange() {
+        guard !isPreview else { return }
         // The source is locked while recording; capture keeps the recording device and channels.
         guard !state.hasActiveRecording else {
             recordingSourceDidChange()
