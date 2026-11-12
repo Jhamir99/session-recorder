@@ -25,6 +25,8 @@ final class RecordingViewModel: ObservableObject {
     /// Quality for the next (or current) recording on the selected device (RF-1).
     @Published private(set) var quality: RecordingQuality?
     @Published private(set) var offeredQualities: [RecordingQuality] = []
+    /// iPhone/iPad: tip to turn on Do Not Disturb, shown during recordings until dismissed once (RF-3).
+    @Published private(set) var showsDoNotDisturbTip = false
     /// iOS: a call or another app has the audio input (RF-8); recording and resuming wait for it to end.
     @Published private(set) var isInputInterrupted = false
     /// Native capture format of the device (shown in debug builds only).
@@ -187,6 +189,9 @@ final class RecordingViewModel: ObservableObject {
         state = .recording
         audioSource?.isSourceLocked = true
         preventIdleSleep(true)
+        #if os(iOS)
+        showsDoNotDisturbTip = !settings.isDoNotDisturbTipDismissed
+        #endif
         updateLiveInfo()
         startLiveInfoUpdates()
     }
@@ -239,12 +244,19 @@ final class RecordingViewModel: ObservableObject {
         liveInfo = .zero
         audioSource?.isSourceLocked = false
         preventIdleSleep(false)
+        showsDoNotDisturbTip = false
         // Source changes were ignored while recording; apply the current source now.
         sourceDidChange()
     }
 
     func dismissNotice() {
         notice = nil
+    }
+
+    /// The tip never appears again after this (RF-3).
+    func dismissDoNotDisturbTip() {
+        settings.dismissDoNotDisturbTip()
+        showsDoNotDisturbTip = false
     }
 
     func show(_ notice: RecordingNotice) {

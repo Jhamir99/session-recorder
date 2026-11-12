@@ -88,7 +88,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T8
   - **Done when:** `UIBackgroundModes = audio` set for iOS; recording continues with the iPhone locked / app in background; idle capture stops in background when not recording; Mac does not idle-sleep while recording.
 
-- [ ] **T15 — Do Not Disturb tip** (`Features/Recording/Views/RecordingStatusView.swift` or `ContentView.swift`)
+- [x] **T15 — Do Not Disturb tip** (`Features/Recording/Views/RecordingStatusView.swift` or `ContentView.swift`)
   - **RF:** RF-3
   - **Depends on:** T3, T9
   - **Done when:** On iPhone/iPad the first recording shows a dismissible tip; after dismissing it never appears again; not shown on Mac.

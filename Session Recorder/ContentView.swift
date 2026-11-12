@@ -66,6 +66,10 @@ struct ContentView: View {
                     recordingNoticeView(notice)
                 }
 
+                if recordingViewModel.showsDoNotDisturbTip {
+                    doNotDisturbTip
+                }
+
                 #if DEBUG
                 // Capture spike (recording plan §3): native format delivered by the device.
                 if let format = recordingViewModel.nativeFormatDescription {
@@ -107,6 +111,24 @@ struct ContentView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    // iPhone/iPad only (the view model never shows it on Mac): calls pause the recording (RF-3, RF-8).
+    private var doNotDisturbTip: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "moon.fill")
+                .foregroundStyle(.indigo)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Tip: turn on Do Not Disturb while recording. Calls pause the recording.")
+                    .font(.footnote)
+                Button("Got It", action: recordingViewModel.dismissDoNotDisturbTip)
+                    .font(.footnote.weight(.semibold))
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
+        .padding(.top, 8)
     }
 
     // Done button is needed on Mac, where sheets cannot be dismissed by swiping.
