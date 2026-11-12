@@ -39,6 +39,8 @@ final class RecordingViewModel: ObservableObject {
     /// Last hardware rate requested, to avoid asking again on every source change.
     private var appliedSampleRate: (deviceID: String, rate: Double)?
     private var cancellables: Set<AnyCancellable> = []
+    /// Recovery of interrupted recordings already ran in this process (RF-8).
+    static var hasRecoveredInterruptedRecordings = false
 
     // Current recording (nil while idle).
     private var writer: RecordingFileWriter?
@@ -49,6 +51,8 @@ final class RecordingViewModel: ObservableObject {
     private(set) var recordingDeviceName: String?
     /// The recording device disconnected; capture restarts when it reconnects (see +Interruptions).
     var isWaitingForDeviceReconnect = false
+    /// The ~10 min low-storage warning is shown once per recording (RF-8).
+    var isLowStorageWarningShown = false
     private var liveInfoTask: Task<Void, Never>?
 
     init(
@@ -65,6 +69,7 @@ final class RecordingViewModel: ObservableObject {
     /// Connects to the shared source selection; meters and quality follow it. Safe to call more than once.
     func attach(audioSource: AudioSourceSelectionViewModel) {
         guard self.audioSource !== audioSource else { return }
+        recoverInterruptedRecordingsOnce()
         self.audioSource = audioSource
         // objectWillChange fires before the change; receiving on the run loop reads the new values.
         audioSource.objectWillChange
@@ -162,6 +167,7 @@ final class RecordingViewModel: ObservableObject {
         self.writer = writer
         recordingStartDate = startDate
         recordingDeviceID = source?.deviceID
+        isLowStorageWarningShown = false
         recordingDeviceName = audioSource?.devices.first(where: { $0.id == source?.deviceID })?.displayLabel
         isWaitingForDeviceReconnect = false
         capture.startWriting(to: writer)
@@ -250,6 +256,7 @@ final class RecordingViewModel: ObservableObject {
             fileSizeBytes: writer.fileSizeBytes,
             remainingSeconds: RecordingLogic.remainingSeconds(freeBytes: fileStore.freeBytes(), bytesPerSecond: bytesPerSecond)
         )
+        checkStorage(remainingSeconds: liveInfo.remainingSeconds)
     }
 
     // MARK: Source and meters (RF-2)

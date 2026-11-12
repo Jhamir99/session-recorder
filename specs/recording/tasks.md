@@ -77,10 +77,11 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T8
   - **Done when:** Unplugging pauses with a notice, Resume is disabled until the same device returns, Stop saves; calls/other apps pause on iOS and never auto-resume; Mac keeps recording; capture runtime errors stop and save.
 
-- [ ] **T13 — Low storage and recovery after termination** (`RecordingViewModel+Interruptions.swift`, `SessionFileStore.swift`, `MyApp.swift`)
+- [x] **T13 — Low storage and recovery after termination** (`RecordingViewModel+Interruptions.swift`, `SessionFileStore.swift`, `MyApp.swift`)
   - **RF:** RF-8, NFR-4
   - **Depends on:** T6, T8
   - **Done when:** Warning once at ~10 min left; auto stop + save + notice at ~1 min; on launch, leftover in-progress files with audio become sessions with a recovery notice (empty ones are deleted).
+  - **Result:** Recovery runs once per process from `RecordingViewModel.attach` (no `MyApp.swift` change needed).
 
 - [ ] **T14 — Background recording and Mac sleep** (Xcode: Background Modes → Audio; `RecordingViewModel.swift`)
   - **RF:** RF-7

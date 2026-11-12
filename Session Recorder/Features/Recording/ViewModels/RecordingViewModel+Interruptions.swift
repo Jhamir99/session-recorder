@@ -48,6 +48,36 @@ extension RecordingViewModel {
         show(RecordingNotice(kind: .deviceDisconnected(deviceName: recordingDeviceName ?? "The audio device")))
     }
 
+    // MARK: Low storage (RF-8)
+
+    /// Called every second while recording or paused: warns once at ~10 min left, stops and saves at ~1 min.
+    func checkStorage(remainingSeconds: TimeInterval) {
+        switch RecordingLogic.storageDecision(remainingSeconds: remainingSeconds, warningAlreadyShown: isLowStorageWarningShown) {
+        case .none:
+            break
+        case .warn:
+            isLowStorageWarningShown = true
+            show(RecordingNotice(kind: .lowStorageWarning))
+        case .stop:
+            finishRecording { name in
+                RecordingNotice(kind: name.map { .storageFull(sessionName: $0) } ?? .startFailed(.notEnoughStorage))
+            }
+        }
+    }
+
+    // MARK: Recovery after termination (RF-8, NFR-4)
+
+    /// Saves recordings left in progress by a crash or termination. Runs once per launch, before any
+    /// recording starts (a second window must not take the first window's file in progress).
+    func recoverInterruptedRecordingsOnce() {
+        guard !Self.hasRecoveredInterruptedRecordings else { return }
+        Self.hasRecoveredInterruptedRecordings = true
+        let names = fileStore.recoverInterruptedRecordings()
+        if let name = names.last {
+            show(RecordingNotice(kind: .recovered(sessionName: name)))
+        }
+    }
+
     private func isListed(_ deviceID: String, in audioSource: AudioSourceSelectionViewModel) -> Bool {
         audioSource.service.devices.contains(where: { $0.id == deviceID })
     }
