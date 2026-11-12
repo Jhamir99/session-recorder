@@ -73,6 +73,8 @@ struct RecordingNotice: Identifiable, Equatable {
         case interrupted
         case lowStorageWarning
         case storageFull(sessionName: String)
+        /// Writing or capture failed; the recording was stopped and saved when it had audio.
+        case recordingFailed(sessionName: String?)
     }
 
     let id = UUID()
@@ -81,7 +83,7 @@ struct RecordingNotice: Identifiable, Equatable {
     var isError: Bool {
         switch kind {
         case .saved, .recovered: false
-        case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning, .storageFull: true
+        case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning, .storageFull, .recordingFailed: true
         }
     }
 
@@ -109,6 +111,10 @@ struct RecordingNotice: Identifiable, Equatable {
             "Storage is almost full: about 10 minutes of recording left."
         case .storageFull(let name):
             "Storage is full. Recording stopped and saved: \(name)"
+        case .recordingFailed(let name?):
+            "Recording stopped because of an audio error. Saved: \(name)"
+        case .recordingFailed(nil):
+            "Recording stopped because of an audio error."
         }
     }
 }

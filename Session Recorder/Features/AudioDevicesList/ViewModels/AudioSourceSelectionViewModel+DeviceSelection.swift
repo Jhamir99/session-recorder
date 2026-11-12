@@ -58,6 +58,14 @@ extension AudioSourceSelectionViewModel {
             }
         }
 
+        // While a recording exists the source is locked, but the recording device itself may come back:
+        // select it again (no notice) so input is routed to it and the row shows it (recording RF-8).
+        if isSourceLocked, selectedDeviceID == nil, let id = replacedDeviceID, rawDevices.contains(where: { $0.id == id }) {
+            replacedDeviceID = nil
+            autoSelectDevice(id: id, notice: nil)
+            return
+        }
+
         if !isSourceLocked, let id = AudioDeviceSelectionHelper.reselectionOnReconnect(
             replacedDeviceID: replacedDeviceID,
             userChangedSourceManually: userChangedSourceManually,

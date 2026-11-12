@@ -72,7 +72,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T9
   - **Done when:** While recording/paused the Sessions tab shows `REC`/`PAUSED` + elapsed; tapping it selects the Record tab.
 
-- [ ] **T12 — Interruptions: disconnect and iOS audio interruptions** (`Features/Recording/ViewModels/RecordingViewModel+Interruptions.swift`, `AudioCaptureService.swift`)
+- [x] **T12 — Interruptions: disconnect and iOS audio interruptions** (`Features/Recording/ViewModels/RecordingViewModel+Interruptions.swift`, `AudioCaptureService.swift`)
   - **RF:** RF-8
   - **Depends on:** T8
   - **Done when:** Unplugging pauses with a notice, Resume is disabled until the same device returns, Stop saves; calls/other apps pause on iOS and never auto-resume; Mac keeps recording; capture runtime errors stop and save.

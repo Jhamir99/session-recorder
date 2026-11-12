@@ -13,8 +13,19 @@ final class AudioCaptureService: ObservableObject {
     @Published private(set) var isRunning = false
     /// Format delivered to the app, e.g. `48000 Hz · 10 ch · Float32 non-interleaved` (debug line).
     @Published private(set) var nativeFormatDescription: String?
-    /// Set when writing to the file failed; writing stops (handled with interruptions, T12).
-    @Published private(set) var writeErrorDescription: String?
+    /// iOS: a call or another app took the audio input; capture resumes when the interruption ends.
+    @Published private(set) var isInterrupted = false
+
+    /// Events that affect a recording (RF-8). Writing is already paused or stopped when they arrive.
+    enum Event {
+        /// The capture device disconnected.
+        case deviceDisconnected
+        /// iOS: a call or another app took the audio input.
+        case interruptionBegan
+        /// Writing or capture failed; nothing more is written.
+        case failed(String)
+    }
+    let events = PassthroughSubject<Event, Never>()
 
     enum StartError: Error {
         case deviceUnavailable
@@ -27,12 +38,25 @@ final class AudioCaptureService: ObservableObject {
     private let processingQueue = DispatchQueue(label: "SessionRecorder.AudioCapture", qos: .userInteractive)
     private var processor: CaptureSampleProcessor?
     private var current: (deviceID: String, channelNumbers: [Int])?
+    /// Processor and device readable from notification threads, so writing pauses without waiting
+    /// for the main thread (no audio from another input gets into the file).
+    nonisolated private let active = OSAllocatedUnfairLock<(processor: CaptureSampleProcessor, deviceID: String)?>(initialState: nil)
+    nonisolated(unsafe) private var observers: [NSObjectProtocol] = []
     #if os(iOS)
     private var engine: AVAudioEngine?
     private var configurationObserver: NSObjectProtocol?
     #else
     private var session: AVCaptureSession?
     #endif
+
+    init() {
+        observeInterruptions()
+    }
+
+    deinit {
+        let center = NotificationCenter.default
+        observers.forEach { center.removeObserver($0) }
+    }
 
     /// Starts capturing `channelNumbers` (1-based, selection order) of the device with `deviceID`.
     /// Does nothing if the same device and channels are already running.
@@ -52,7 +76,7 @@ final class AudioCaptureService: ObservableObject {
             onWriteError: { [weak self] description in
                 Task { @MainActor [weak self] in
                     self?.logger.error("Recording write failed: \(description, privacy: .public)")
-                    self?.writeErrorDescription = description
+                    self?.events.send(.failed(description))
                 }
             }
         )
@@ -64,6 +88,7 @@ final class AudioCaptureService: ObservableObject {
 
         self.processor = processor
         current = (deviceID, channelNumbers)
+        active.withLock { $0 = (processor, deviceID) }
         peaks = Array(repeating: 0, count: channelNumbers.count)
         nativeFormatDescription = nil
         isRunning = true
@@ -73,7 +98,6 @@ final class AudioCaptureService: ObservableObject {
 
     /// Starts writing the selected channels to `writer`, converted to its quality. Capture must be running.
     func startWriting(to writer: RecordingFileWriter) {
-        writeErrorDescription = nil
         processor?.setWriter(writer)
     }
 
@@ -88,6 +112,7 @@ final class AudioCaptureService: ObservableObject {
     }
 
     func stop() {
+        active.withLock { $0 = nil }
         processor?.setWriter(nil)
         #if os(iOS)
         stopEngine()
@@ -98,6 +123,91 @@ final class AudioCaptureService: ObservableObject {
         current = nil
         isRunning = false
         peaks = []
+    }
+
+    /// Restarts capture of the same device and channels, keeping the writer (device reconnected,
+    /// interruption ended). The paused state of writing is not changed.
+    func restartCapture() {
+        guard let processor, let current else { return }
+        #if os(iOS)
+        if let engine { runEngine(engine, processor: processor) }
+        #else
+        stopCaptureSession()
+        do {
+            try startCaptureSession(deviceID: current.deviceID, processor: processor)
+        } catch {
+            logger.error("Cannot restart capture: \(String(describing: error), privacy: .public)")
+        }
+        #endif
+    }
+
+    // MARK: Interruptions (RF-8)
+
+    /// Pauses writing right away (on the notification thread) and reports the event on the main actor.
+    nonisolated private func pauseWriting(andSend event: Event) {
+        active.withLock { $0?.processor }?.setWritingPaused(true)
+        Task { @MainActor [weak self] in
+            self?.events.send(event)
+        }
+    }
+
+    private func observeInterruptions() {
+        let center = NotificationCenter.default
+        #if os(iOS)
+        // The recording device left the route (iOS falls back to another input, e.g. the built-in mic).
+        observers.append(center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: nil) {
+            [weak self] notification in
+            guard let self,
+                  let rawReason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+                  AVAudioSession.RouteChangeReason(rawValue: rawReason) == .oldDeviceUnavailable,
+                  let deviceID = active.withLock({ $0?.deviceID }),
+                  let previous = notification.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription,
+                  previous.inputs.contains(where: { $0.uid == deviceID }),
+                  !AVAudioSession.sharedInstance().currentRoute.inputs.contains(where: { $0.uid == deviceID })
+            else { return }
+            pauseWriting(andSend: .deviceDisconnected)
+        })
+        // A call or another app took the audio input: the system deactivates the session (iOS 27 API,
+        // replaces the interruption notification). Deactivations requested by the app are ignored.
+        observers.append(center.addObserver(forName: AVAudioSession.didBecomeInactiveNotification, object: nil, queue: nil) {
+            [weak self] notification in
+            guard let self,
+                  let context = notification.userInfo?[AVAudioSession.deactivationContextKey] as? AVAudioSession.DeactivationContext,
+                  context.source == .system else { return }
+            pauseWriting(andSend: .interruptionBegan)
+            Task { @MainActor [weak self] in self?.isInterrupted = true }
+        })
+        // The interruption ended (with or without a recommendation to resume): meters come back, but the
+        // recording stays paused until the user resumes (RF-8).
+        observers.append(center.addObserver(forName: AVAudioSession.resumptionRecommendationNotification, object: nil, queue: nil) {
+            [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self, isInterrupted else { return }
+                isInterrupted = false
+                restartCapture()
+            }
+        })
+        #else
+        observers.append(center.addObserver(forName: AVCaptureDevice.wasDisconnectedNotification, object: nil, queue: nil) {
+            [weak self] notification in
+            guard let self, let device = notification.object as? AVCaptureDevice,
+                  device.uniqueID == active.withLock({ $0?.deviceID }) else { return }
+            pauseWriting(andSend: .deviceDisconnected)
+        })
+        // Runtime errors with the device still connected stop the recording (a disconnect is handled above).
+        observers.append(center.addObserver(forName: AVCaptureSession.runtimeErrorNotification, object: nil, queue: nil) {
+            [weak self] notification in
+            guard let self, let deviceID = active.withLock({ $0?.deviceID }),
+                  AVCaptureDevice(uniqueID: deviceID)?.isConnected == true else { return }
+            let error = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError
+            let description = error?.localizedDescription ?? "Capture error"
+            active.withLock { $0?.processor }?.setWriter(nil)
+            Task { @MainActor [weak self] in
+                self?.logger.error("Capture failed: \(description, privacy: .public)")
+                self?.events.send(.failed(description))
+            }
+        })
+        #endif
     }
 
     private func apply(_ update: CaptureSampleProcessor.Update) {
@@ -139,6 +249,8 @@ final class AudioCaptureService: ObservableObject {
         let runningEngine = engine
         let logger = self.logger
         processingQueue.async {
+            // After an interruption the session is inactive; activating an active session does nothing.
+            try? AVAudioSession.sharedInstance().setActive(true)
             runningEngine.stop()
             let input = runningEngine.inputNode
             input.removeTap(onBus: 0)

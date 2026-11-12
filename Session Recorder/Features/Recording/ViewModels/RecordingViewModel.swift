@@ -25,14 +25,16 @@ final class RecordingViewModel: ObservableObject {
     /// Quality for the next (or current) recording on the selected device (RF-1).
     @Published private(set) var quality: RecordingQuality?
     @Published private(set) var offeredQualities: [RecordingQuality] = []
+    /// iOS: a call or another app has the audio input (RF-8); recording and resuming wait for it to end.
+    @Published private(set) var isInputInterrupted = false
     /// Native capture format of the device (shown in debug builds only).
     @Published private(set) var nativeFormatDescription: String?
 
     let capture: AudioCaptureService
-    private let fileStore: SessionFileStore
+    let fileStore: SessionFileStore
     private let settings: RecordingSettingsRepository
     private let logger = Logger(subsystem: "SessionRecorder", category: "Recording")
-    private weak var audioSource: AudioSourceSelectionViewModel?
+    private(set) weak var audioSource: AudioSourceSelectionViewModel?
     private var lastClipDates: [Date?] = []
     /// Last hardware rate requested, to avoid asking again on every source change.
     private var appliedSampleRate: (deviceID: String, rate: Double)?
@@ -41,6 +43,12 @@ final class RecordingViewModel: ObservableObject {
     // Current recording (nil while idle).
     private var writer: RecordingFileWriter?
     private var recordingStartDate: Date?
+    /// Device being recorded; the source stays locked to it until stop (RF-8).
+    private(set) var recordingDeviceID: String?
+    /// Device name for notices (the device is no longer listed once it disconnects).
+    private(set) var recordingDeviceName: String?
+    /// The recording device disconnected; capture restarts when it reconnects (see +Interruptions).
+    var isWaitingForDeviceReconnect = false
     private var liveInfoTask: Task<Void, Never>?
 
     init(
@@ -70,12 +78,15 @@ final class RecordingViewModel: ObservableObject {
 
     /// Record button enabled: idle, valid source, permission granted.
     var canRecord: Bool {
-        state == .idle && meteringSource != nil
+        state == .idle && meteringSource != nil && !isInputInterrupted
     }
 
-    /// Resume enabled while paused (device connection is checked with interruptions, T12).
+    /// Resume enabled while paused, with the recording device back and no call in progress (RF-8).
     var canResume: Bool {
-        RecordingLogic.canResume(state: state, isRecordingDeviceConnected: true)
+        RecordingLogic.canResume(
+            state: state,
+            isRecordingDeviceConnected: isRecordingDeviceReady && !isInputInterrupted
+        )
     }
 
     // MARK: Quality (RF-1)
@@ -150,6 +161,9 @@ final class RecordingViewModel: ObservableObject {
 
         self.writer = writer
         recordingStartDate = startDate
+        recordingDeviceID = source?.deviceID
+        recordingDeviceName = audioSource?.devices.first(where: { $0.id == source?.deviceID })?.displayLabel
+        isWaitingForDeviceReconnect = false
         capture.startWriting(to: writer)
         state = .recording
         audioSource?.isSourceLocked = true
@@ -158,9 +172,14 @@ final class RecordingViewModel: ObservableObject {
     }
 
     func pauseRecording() {
+        pause(reason: .user)
+    }
+
+    /// Pauses writing; automatic pauses (disconnect, interruption) also come through here.
+    func pause(reason: RecordingPauseReason) {
         guard state == .recording else { return }
         capture.setWritingPaused(true)
-        state = .paused(.user)
+        state = .paused(reason)
     }
 
     func resumeRecording() {
@@ -171,23 +190,31 @@ final class RecordingViewModel: ObservableObject {
 
     /// Finishes the file and saves the session with a date-based name (RF-6).
     func stopRecording() {
+        finishRecording { name in name.map { RecordingNotice(kind: .saved(sessionName: $0)) } }
+    }
+
+    /// Stops and saves; `makeNotice` gets the saved session name (nil when nothing was saved).
+    func finishRecording(notice makeNotice: (String?) -> RecordingNotice?) {
         guard state.hasActiveRecording, let writer, let startDate = recordingStartDate else { return }
         capture.stopWriting()
         writer.close()
         liveInfoTask?.cancel()
         liveInfoTask = nil
 
+        var savedName: String?
         do {
-            if let name = try fileStore.finishRecording(at: writer.url, startDate: startDate, hasAudio: writer.framesWritten > 0) {
-                notice = RecordingNotice(kind: .saved(sessionName: name))
-            }
+            savedName = try fileStore.finishRecording(at: writer.url, startDate: startDate, hasAudio: writer.framesWritten > 0)
         } catch {
             // The file stays in progress and is recovered on next launch (RF-8), so nothing is lost.
             logger.error("Cannot save session: \(error.localizedDescription, privacy: .public)")
         }
+        notice = makeNotice(savedName)
 
         self.writer = nil
         recordingStartDate = nil
+        recordingDeviceID = nil
+        recordingDeviceName = nil
+        isWaitingForDeviceReconnect = false
         state = .idle
         liveInfo = .zero
         audioSource?.isSourceLocked = false
@@ -197,6 +224,10 @@ final class RecordingViewModel: ObservableObject {
 
     func dismissNotice() {
         notice = nil
+    }
+
+    func show(_ notice: RecordingNotice) {
+        self.notice = notice
     }
 
     // MARK: Live info (RF-4)
@@ -233,7 +264,10 @@ final class RecordingViewModel: ObservableObject {
 
     private func sourceDidChange() {
         // The source is locked while recording; capture keeps the recording device and channels.
-        guard !state.hasActiveRecording else { return }
+        guard !state.hasActiveRecording else {
+            recordingSourceDidChange()
+            return
+        }
         updateQuality()
         updateMetering()
     }
@@ -259,6 +293,12 @@ final class RecordingViewModel: ObservableObject {
             .store(in: &cancellables)
         capture.$nativeFormatDescription
             .sink { [weak self] format in self?.nativeFormatDescription = format }
+            .store(in: &cancellables)
+        capture.$isInterrupted
+            .sink { [weak self] interrupted in self?.isInputInterrupted = interrupted }
+            .store(in: &cancellables)
+        capture.events
+            .sink { [weak self] event in self?.handleCaptureEvent(event) }
             .store(in: &cancellables)
     }
 

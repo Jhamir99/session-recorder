@@ -97,6 +97,7 @@ on enter recording|paused: audioSource.isSourceLocked = true; row locked
 on enter idle:             audioSource.isSourceLocked = false; RF-7 rules apply again
 ```
 - Elapsed time = written frames / sample rate (exact; paused time excluded).
+- Interruptions (T12): capture pauses writing on the notification thread (no audio from a fallback input is written), then the view model pauses with a notice. iOS disconnect = route change `oldDeviceUnavailable` for the recording port; iOS interruption = `didBecomeInactiveNotification` with system source, ended = `resumptionRecommendationNotification` (iOS 27 API; capture restarts, recording stays paused). Mac disconnect = `AVCaptureDevice.wasDisconnectedNotification`; runtime error with the device connected = stop and save. When the same device reconnects it is reselected without a notice and capture restarts; Resume waits until routing finished.
 - Permission revoked while recording: iOS terminates the app → recovery on next launch (RF-8). On Mac, a capture runtime error → stop and save.
 
 ## 6) UI
