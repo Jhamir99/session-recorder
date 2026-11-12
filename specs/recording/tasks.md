@@ -20,7 +20,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T1
   - **Done when:** Per-device quality and the DND-tip flag are read/written in `UserDefaults` with versioned keys; device IDs and numbers only.
 
-- [ ] **T4 — Supported sample rates per device** (`Features/AudioDevicesList/AudioDeviceModels.swift`, `AudioInputDeviceService.swift`)
+- [x] **T4 — Supported sample rates per device** (`Features/AudioDevicesList/AudioDeviceModels.swift`, `AudioInputDeviceService.swift`)
   - **RF:** RF-1
   - **Depends on:** none
   - **Done when:** `AudioInputDevice` exposes the device's supported sample rates on Mac and iOS; previews and existing behavior unchanged; builds on both platforms.

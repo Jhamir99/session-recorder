@@ -132,7 +132,8 @@ final class AudioInputDeviceService: ObservableObject {
                     id: device.uniqueID,
                     displayName: device.localizedName,
                     channels: inputChannels(for: device),
-                    isExternal: isExternalDevice(device)
+                    isExternal: isExternalDevice(device),
+                    supportedSampleRates: supportedSampleRates(for: device)
                 )
             }
             .sorted { lhs, rhs in
@@ -158,6 +159,70 @@ final class AudioInputDeviceService: ObservableObject {
         return false
         #endif
     }
+
+    /// Common rates checked against the device's continuous sample-rate ranges.
+    private static let standardSampleRates: [Double] = [
+        8_000, 11_025, 16_000, 22_050, 32_000, 44_100, 48_000, 88_200, 96_000, 176_400, 192_000
+    ]
+
+    private static func supportedSampleRates(for device: AVCaptureDevice) -> [Double] {
+        #if os(macOS)
+        let coreAudioRates = coreAudioNominalSampleRates(deviceUID: device.uniqueID)
+        if !coreAudioRates.isEmpty {
+            return coreAudioRates
+        }
+        #endif
+        let rates = device.formats.compactMap { format in
+            CMAudioFormatDescriptionGetStreamBasicDescription(format.formatDescription)?.pointee.mSampleRate
+        }
+        return Array(Set(rates.filter { $0 > 0 })).sorted()
+    }
+
+    #if os(macOS)
+    /// Nominal sample rates reported by Core Audio for the device with this UID (same as `AVCaptureDevice.uniqueID`).
+    private static func coreAudioNominalSampleRates(deviceUID: String) -> [Double] {
+        var deviceID = AudioObjectID(kAudioObjectUnknown)
+        var uid = deviceUID as CFString
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyTranslateUIDToDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        let translateStatus = withUnsafeMutablePointer(to: &uid) { uidPointer in
+            AudioObjectGetPropertyData(
+                AudioObjectID(kAudioObjectSystemObject),
+                &address,
+                UInt32(MemoryLayout<CFString>.size),
+                uidPointer,
+                &size,
+                &deviceID
+            )
+        }
+        guard translateStatus == noErr, deviceID != kAudioObjectUnknown else { return [] }
+
+        address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyAvailableNominalSampleRates,
+            mScope: kAudioObjectPropertyScopeInput,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        guard AudioObjectGetPropertyDataSize(deviceID, &address, 0, nil, &size) == noErr, size > 0 else { return [] }
+        var ranges = [AudioValueRange](repeating: AudioValueRange(), count: Int(size) / MemoryLayout<AudioValueRange>.size)
+        guard AudioObjectGetPropertyData(deviceID, &address, 0, nil, &size, &ranges) == noErr else { return [] }
+
+        var rates = Set<Double>()
+        for range in ranges {
+            if range.mMinimum == range.mMaximum {
+                rates.insert(range.mMinimum)
+            } else {
+                standardSampleRates
+                    .filter { $0 >= range.mMinimum && $0 <= range.mMaximum }
+                    .forEach { rates.insert($0) }
+            }
+        }
+        return rates.filter { $0 > 0 }.sorted()
+    }
+    #endif
 
     private static func inputChannels(for device: AVCaptureDevice) -> [AudioInputChannel] {
         #if os(macOS)
