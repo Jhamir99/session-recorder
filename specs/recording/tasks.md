@@ -109,7 +109,8 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T9
   - **Done when:** `RecordButton.swift` and `STATUSES` are removed; docs list `Features/Recording/`, the storage decision, and the updated status.
 
-- [ ] **T19 — Verification pass**
+- [x] **T19 — Verification pass**
   - **RF:** RF-1–RF-9, NFR-1–NFR-7
   - **Depends on:** T1–T18
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; manual checks on a real Mac and iPhone/iPad with the mixer and the built-in mic cover every Completion Criterion in the spec, including a ≥ 1 h recording and checking file format/rate/bit depth in another app.
+  - **Result (2026-11-13):** Clean builds for macOS and iOS Simulator; logic script 26/26. On device (user): Mac and iPhone with the Xone and built-in mics, iPad, other app playback, 16-bit/96 kHz. iPhone 1 h recording checked: CAF 24-bit/48 kHz stereo, 1:00:11, 1.04 GB, no digital-silence gaps.
