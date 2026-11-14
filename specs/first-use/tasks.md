@@ -45,7 +45,8 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T7
   - **Done when:** audio-devices-list RF-4/NFR-2 reflect the new flow; docs list `Features/FirstUse/` and the updated status.
 
-- [ ] **T9 — Verification pass**
+- [x] **T9 — Verification pass**
   - **RF:** RF-1–RF-6, NFR-1–NFR-5
   - **Depends on:** T1–T8
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; on a real iPhone and Mac (permission reset): Continue → allow, Continue → deny → Open Settings → allow → return, Not Now → Allow Audio Input, restricted text if available, USB-C note with/without the mixer.
+  - **Result (2026-11-14):** Clean builds for macOS and iOS Simulator; access logic 13/13. On device (user, iPhone and Mac): Continue → allow; Continue → deny → Open Settings → allow → return; Not Now → Allow Audio Input; USB-C note with/without the mixer. Restricted state checked in previews only; iPad sheet presentation not tested.
