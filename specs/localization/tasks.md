@@ -40,7 +40,8 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** T6
   - **Done when:** Docs explain that new texts must be localizable and translated in the catalog.
 
-- [ ] **T8 — Verification pass**
+- [x] **T8 — Verification pass**
   - **RF:** RF-1–RF-6, NFR-1–NFR-5
   - **Depends on:** T1–T7
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; `es` export has 0 untranslated strings; checked on a real iPhone and Mac in Spanish and English (menus, notices, plurals, microphone prompt, VoiceOver spot check, large text).
+  - **Result (2026-11-14):** Clean builds for macOS and iOS Simulator; catalog synced from iOS + macOS builds: 195 strings, 0 untranslated, 0 stale (the standard `-exportLocalizations` cannot run because it also builds visionOS). On device (user): iPhone and Mac in Spanish and English, menus, notices, plurals, microphone prompt, VoiceOver, large text.
