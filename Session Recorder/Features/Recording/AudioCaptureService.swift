@@ -103,8 +103,9 @@ final class AudioCaptureService: ObservableObject {
     }
 
     /// Paused: capture and meters keep running, nothing is written; resuming continues in the same file.
-    func setWritingPaused(_ paused: Bool) {
-        processor?.setWritingPaused(paused)
+    /// `fadeSeconds`: fade-out before the pause / fade-in after resuming (settings RF-4).
+    func setWritingPaused(_ paused: Bool, fadeSeconds: Double = 0) {
+        processor?.setWritingPaused(paused, fadeSeconds: fadeSeconds)
     }
 
     /// When this returns no write is in progress or will happen, so the file can be closed.
@@ -368,6 +369,10 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
     private var writer: RecordingFileWriter?
     private var isWritingPaused = false
     private var sampleRateConverter: AVAudioConverter?
+    /// Fade at pause/resume (settings RF-4), in frames at the recording rate: done / total.
+    /// Pausing with a fade keeps writing until the fade-out is complete; resuming fades in.
+    private var fadeOut: (done: Int, length: Int)?
+    private var fadeIn: (done: Int, length: Int)?
 
     init(
         channelIndexes: [Int],
@@ -404,14 +409,33 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
             self.writer = writer
             isWritingPaused = false
             sampleRateConverter = nil
+            fadeOut = nil
+            fadeIn = nil
         }
     }
 
-    func setWritingPaused(_ paused: Bool) {
+    /// `fadeSeconds` > 0: pausing fades out over that time before writing stops; resuming fades in.
+    /// 0 (fade off, or a disconnect/interruption): writing stops/starts at once.
+    func setWritingPaused(_ paused: Bool, fadeSeconds: Double = 0) {
         writeLock.withLock {
-            isWritingPaused = paused
-            // Do not carry resampler state across the pause.
-            if !paused { sampleRateConverter?.reset() }
+            let fadeFrames = writer.map { Int((fadeSeconds * $0.processingFormat.sampleRate).rounded()) } ?? 0
+            if paused {
+                fadeIn = nil
+                if fadeFrames > 0, !isWritingPaused, writer != nil {
+                    fadeOut = (0, fadeFrames)
+                } else {
+                    fadeOut = nil
+                    isWritingPaused = true
+                }
+            } else {
+                fadeOut = nil
+                if isWritingPaused {
+                    // Do not carry resampler state across the pause.
+                    sampleRateConverter?.reset()
+                    fadeIn = fadeFrames > 0 ? (0, fadeFrames) : nil
+                }
+                isWritingPaused = false
+            }
         }
     }
 
@@ -421,10 +445,41 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
             guard let writer, !isWritingPaused else { return }
             do {
                 let output = try recordingBuffer(from: buffer, targetFormat: writer.processingFormat)
-                try writer.write(output)
+                applyFades(to: output)
+                if output.frameLength > 0 { try writer.write(output) }
             } catch {
                 self.writer = nil
                 onWriteError(String(describing: error))
+            }
+        }
+    }
+
+    /// Multiplies only the frames inside a fade ramp (bit-exact elsewhere, settings NFR-4). A fade-out ends
+    /// writing exactly at its last frame. Called with `writeLock` held.
+    private func applyFades(to buffer: AVAudioPCMBuffer) {
+        guard let channels = buffer.floatChannelData else { return }
+        let channelCount = Int(buffer.format.channelCount)
+        let frames = Int(buffer.frameLength)
+        if let fade = fadeIn {
+            let count = min(frames, fade.length - fade.done)
+            for frame in 0..<count {
+                let gain = SettingsLogic.fadeGain(frameIndex: fade.done + frame, rampLength: fade.length, fadingIn: true)
+                for channel in 0..<channelCount { channels[channel][frame] *= gain }
+            }
+            fadeIn = fade.done + count >= fade.length ? nil : (fade.done + count, fade.length)
+        }
+        if let fade = fadeOut {
+            let count = min(frames, fade.length - fade.done)
+            for frame in 0..<count {
+                let gain = SettingsLogic.fadeGain(frameIndex: fade.done + frame, rampLength: fade.length, fadingIn: false)
+                for channel in 0..<channelCount { channels[channel][frame] *= gain }
+            }
+            if fade.done + count >= fade.length {
+                buffer.frameLength = AVAudioFrameCount(count)
+                fadeOut = nil
+                isWritingPaused = true
+            } else {
+                fadeOut = (fade.done + count, fade.length)
             }
         }
     }

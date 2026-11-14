@@ -41,6 +41,7 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 
 ### RF-5: Keep screen on while recording (Recording, iPhone/iPad only)
 - When on (default), the screen shall not dim or lock automatically while recording or paused; normal behavior returns when the recording stops.
+- Changing the option during a recording applies immediately.
 - Recording continues if the user locks the device anyway (recording RF-7).
 - Not shown on Mac (the Mac already avoids idle sleep while recording, recording RF-7).
 

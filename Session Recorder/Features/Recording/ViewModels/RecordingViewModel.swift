@@ -1,6 +1,9 @@
 import Combine
 import Foundation
 import os
+#if os(iOS)
+import UIKit
+#endif
 
 /// Live meter levels (~30 updates per second). Kept out of `RecordingViewModel` so views observing it
 /// (Record tab, source sheet with open menus) are not rebuilt on every level update; only the meters observe this.
@@ -90,7 +93,21 @@ final class RecordingViewModel: ObservableObject {
     }
 
     func attach(settings: AppSettingsStore) {
+        guard settingsStore !== settings else { return }
         settingsStore = settings
+        #if os(iOS)
+        // "Keep screen on" applies at once, also during a recording (settings RF-5).
+        settings.$settings
+            .map(\.keepScreenOn)
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                preventIdleSleep(state.hasActiveRecording)
+            }
+            .store(in: &cancellables)
+        #endif
     }
 
     /// Peak hold "Until Reset": tapping the meters clears the held peaks (settings RF-3).
@@ -274,13 +291,19 @@ final class RecordingViewModel: ObservableObject {
     /// Pauses writing; automatic pauses (disconnect, interruption) also come through here.
     func pause(reason: RecordingPauseReason) {
         guard state == .recording else { return }
-        capture.setWritingPaused(true)
+        // Only a user pause fades out; after a disconnect/interruption there is no more input to fade.
+        capture.setWritingPaused(true, fadeSeconds: reason == .user ? pauseFadeSeconds : 0)
         state = .paused(reason)
+    }
+
+    /// Fade at pause/resume from Settings (RF-4).
+    private var pauseFadeSeconds: Double {
+        settingsStore?.settings.pauseFade.seconds ?? 0
     }
 
     func resumeRecording() {
         guard canResume else { return }
-        capture.setWritingPaused(false)
+        capture.setWritingPaused(false, fadeSeconds: pauseFadeSeconds)
         state = .recording
     }
 
@@ -360,7 +383,12 @@ final class RecordingViewModel: ObservableObject {
 
     // MARK: Mac sleep (RF-7)
 
+    /// Mac: no idle system sleep while a recording exists (RF-7). iPhone/iPad: keep the screen on while
+    /// recording when enabled in Settings (settings RF-5); the recording continues if the device is locked anyway.
     private func preventIdleSleep(_ prevent: Bool) {
+        #if os(iOS)
+        UIApplication.shared.isIdleTimerDisabled = prevent && (settingsStore?.settings.keepScreenOn ?? false)
+        #endif
         #if os(macOS)
         if prevent, sleepPreventionActivity == nil {
             sleepPreventionActivity = ProcessInfo.processInfo.beginActivity(

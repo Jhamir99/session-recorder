@@ -33,12 +33,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Off / 1 s / 3 s / Until reset behave as specified; tapping the meters resets Until reset.
 
 ### Recording options
-- [ ] **T6 — Fade at pause and resume** (`AudioCaptureService.swift`, `RecordingViewModel.swift`)
+- [x] **T6 — Fade at pause and resume** (`AudioCaptureService.swift`, `RecordingViewModel.swift`)
   - **RF:** RF-4, NFR-4
   - **Depends on:** T2
   - **Done when:** Short/Long fades remove the click; Off keeps today's behavior; disconnect/interruption pauses have no fade-out; a scratch check confirms samples outside the ramps are identical.
 
-- [ ] **T7 — Keep screen on (iPhone/iPad)** (`RecordingViewModel.swift`)
+- [x] **T7 — Keep screen on (iPhone/iPad)** (`RecordingViewModel.swift`)
   - **RF:** RF-5
   - **Depends on:** T2
   - **Done when:** With the option on, the screen does not lock while a recording exists; normal after stop; not shown on Mac.
