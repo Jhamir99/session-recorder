@@ -1,0 +1,326 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ long" : {
+
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld-bit" : {
+
+    },
+    "AAC bitrate" : {
+
+    },
+    "Actions" : {
+
+    },
+    "Allow Audio Input" : {
+
+    },
+    "Appearance" : {
+
+    },
+    "Audio Source" : {
+
+    },
+    "Audio source: %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Audio source: %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Back 15 Seconds" : {
+
+    },
+    "Back to recording" : {
+
+    },
+    "Bit depth" : {
+
+    },
+    "Bitrate" : {
+
+    },
+    "CLIP" : {
+
+    },
+    "Can't be played" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Capture: %@" : {
+
+    },
+    "Channels" : {
+
+    },
+    "Choose Source…" : {
+
+    },
+    "Close" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete “%@”?" : {
+
+    },
+    "Delete…" : {
+
+    },
+    "Device" : {
+
+    },
+    "Dismiss" : {
+
+    },
+    "Done" : {
+
+    },
+    "Estimated size" : {
+
+    },
+    "Export format" : {
+
+    },
+    "Export progress" : {
+
+    },
+    "Exporting…" : {
+
+    },
+    "Fade at pause" : {
+
+    },
+    "For the best quality, connect your mixer or audio interface over USB-C." : {
+
+    },
+    "Format" : {
+
+    },
+    "Forward 15 Seconds" : {
+
+    },
+    "Got It" : {
+
+    },
+    "Keep screen on while recording" : {
+
+    },
+    "Last Used" : {
+
+    },
+    "Library" : {
+
+    },
+    "Loading" : {
+
+    },
+    "Low storage warning" : {
+
+    },
+    "Meter style" : {
+
+    },
+    "Mode" : {
+
+    },
+    "Mono" : {
+
+    },
+    "Move to Trash" : {
+
+    },
+    "Name" : {
+
+    },
+    "New session names: %@ 2026-11-14 22.30.15" : {
+
+    },
+    "No audio input devices are available." : {
+
+    },
+    "No sessions yet" : {
+
+    },
+    "None" : {
+
+    },
+    "Not Now" : {
+
+    },
+    "OK" : {
+
+    },
+    "Open Settings" : {
+
+    },
+    "Opens audio source settings" : {
+
+    },
+    "PAUSED" : {
+
+    },
+    "Pause" : {
+
+    },
+    "Peak hold" : {
+
+    },
+    "Play" : {
+
+    },
+    "Play Selection" : {
+
+    },
+    "Play/Pause" : {
+
+    },
+    "Playback is unavailable while recording." : {
+
+    },
+    "Quality" : {
+
+    },
+    "REC" : {
+
+    },
+    "Record" : {
+
+    },
+    "Record your sessions" : {
+
+    },
+    "Recording" : {
+
+    },
+    "Recording time limit" : {
+
+    },
+    "Rename" : {
+
+    },
+    "Rename Session" : {
+
+    },
+    "Rename…" : {
+
+    },
+    "Returns to the Record tab." : {
+
+    },
+    "Sample rate" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save creates a new session. The original is kept." : {
+
+    },
+    "Save…" : {
+
+    },
+    "Select a session" : {
+
+    },
+    "Session" : {
+
+    },
+    "Session Recorder uses audio input to show levels and record from your mixer, audio interface or microphone." : {
+
+    },
+    "Session name" : {
+
+    },
+    "Sessions" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Share “%@”" : {
+
+    },
+    "Share…" : {
+
+    },
+    "Show in Finder" : {
+
+    },
+    "Sort" : {
+
+    },
+    "Sort By" : {
+
+    },
+    "Stereo" : {
+
+    },
+    "Stop" : {
+
+    },
+    "The format used by default when you share a session. You can still change it before sharing." : {
+
+    },
+    "The selection must be at least 1 second long." : {
+
+    },
+    "The session will be moved to the Trash." : {
+
+    },
+    "The source cannot change while recording" : {
+
+    },
+    "Theme" : {
+
+    },
+    "This file is damaged or is not a supported audio file." : {
+
+    },
+    "This session will be deleted from this device. This can't be undone." : {
+
+    },
+    "Tip: turn on Do Not Disturb while recording. Calls pause the recording." : {
+
+    },
+    "Trim…" : {
+
+    },
+    "Waveform" : {
+
+    },
+    "Your recorded sessions will appear here." : {
+
+    },
+    "Your recordings stay on this device." : {
+
+    },
+    "·" : {
+
+    }
+  },
+  "version" : "1.0"
+}

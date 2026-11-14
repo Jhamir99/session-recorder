@@ -5,7 +5,7 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
 
 ## Tasks
 
-- [ ] **T1 — Project setup** (`Localizable.xcstrings`, `InfoPlist.xcstrings`, `project.pbxproj`)
+- [x] **T1 — Project setup** (`Localizable.xcstrings`, `InfoPlist.xcstrings`, `project.pbxproj`)
   - **RF:** RF-1
   - **Depends on:** none
   - **Done when:** `es` is a known region; both catalogs exist and the app builds on Mac and iOS.
