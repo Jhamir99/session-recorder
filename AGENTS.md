@@ -32,7 +32,10 @@ SwiftUI app (early stage) for DJs/musicians to record sessions from a USB-C audi
 - CLI build (iOS Simulator, pick an available one): `xcodebuild -project "Session Recorder.xcodeproj" -scheme "Session Recorder" -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build` (list available ones with `xcrun simctl list devices available`)
 
 ## Conventions / constraints
-- UI text and code comments in English.
+- UI text and code comments in English. The app is localized (English base + Spanish, `Session Recorder/Localizable.xcstrings`; microphone prompt in `InfoPlist.xcstrings`):
+  - Literals in SwiftUI (`Text("…")`, `Button("…")`, …) are extracted automatically; computed texts must use `String(localized: "…", comment: "…")`, and helper views take `LocalizedStringKey`, not `String`.
+  - Texts that must not be translated (REC, CLIP, L/R/M, numbers, format names) use `Text(verbatim:)`.
+  - Every new text needs its Spanish translation in the catalog (Xcode syncs the catalog when building; from the command line: `xcrun xcstringstool sync Localizable.xcstrings --stringsdata …` with the `.stringsdata` of an iOS and a macOS build).
 - Keep code simple and names descriptive; avoid speculative abstractions.
 - No dependencies, frameworks, or build step. Do not add backend/external services.
 - Make only requested, focused changes; avoid rewrites.

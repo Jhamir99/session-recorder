@@ -6,6 +6,7 @@ This document describes the repository layout and feature code organization. Kee
 - `AGENTS.md` — canonical agent instructions for this repo.
 - `README.md` — project overview and product vision (scope, planned features, open questions).
 - `Session Recorder.xcodeproj/` — Xcode project (scheme/target: `Session Recorder`).
+- `Session Recorder/Localizable.xcstrings`, `Session Recorder/InfoPlist.xcstrings` — String Catalogs (English source + Spanish).
 - `Session-Recorder-Info.plist` — Info.plist keys that cannot be generated from build settings (iOS `UIBackgroundModes = audio`, Files visibility `UIFileSharingEnabled` + `LSSupportsOpeningDocumentsInPlace`); merged with the generated Info.plist.
 - `Session Recorder/` — app source root used by the Xcode target (synchronized root group).
 - `docs/` — project-level documentation (e.g., `constitution.md`, `project-structure.md`).

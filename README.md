@@ -15,7 +15,7 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 - Settings (⌘, on Mac, gear on iPhone/iPad): meter style and peak hold, fade at pause/resume, keep screen on, session name prefix, recording time limit, low-storage warning, default export format, theme and waveform style; library sort order and a storage status line.
 
-Next: Spanish localization (follows the system language).
+- English and Spanish (follows the system or per-app language).
 
 ## Product Vision
 

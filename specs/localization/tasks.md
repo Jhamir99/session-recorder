@@ -35,7 +35,7 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** T4, T5
   - **Done when:** No truncated or overlapping Spanish text on iPhone, iPad and Mac, including large Dynamic Type; Spanish previews exist for the main screens.
 
-- [ ] **T7 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T7 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2, NFR-5
   - **Depends on:** T6
   - **Done when:** Docs explain that new texts must be localizable and translated in the catalog.
