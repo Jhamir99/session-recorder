@@ -81,7 +81,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Bars / Line switch live in the detail and trim views.
 
 ### Finishing
-- [ ] **T15 — Previews** (`Features/Settings/Views/SettingsViews+Previews.swift`)
+- [x] **T15 — Previews** (`Features/Settings/Views/SettingsViews+Previews.swift`)
   - **RF:** C5
   - **Depends on:** T3–T14
   - **Done when:** Previews for the settings form, segmented meter with peak hold, line waveform and storage line.
