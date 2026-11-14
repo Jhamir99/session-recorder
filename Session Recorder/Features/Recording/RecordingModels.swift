@@ -73,7 +73,9 @@ struct RecordingNotice: Identifiable, Equatable {
         case startFailed(RecordingStartError)
         case deviceDisconnected(deviceName: String)
         case interrupted
-        case lowStorageWarning
+        case lowStorageWarning(minutes: Int)
+        /// Settings RF-8: stopped at the recording time limit.
+        case timeLimitReached(limit: String, sessionName: String?)
         case storageFull(sessionName: String)
         /// Writing or capture failed; the recording was stopped and saved when it had audio.
         case recordingFailed(sessionName: String?)
@@ -86,6 +88,7 @@ struct RecordingNotice: Identifiable, Equatable {
         switch kind {
         case .saved, .recovered: false
         case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning, .storageFull, .recordingFailed: true
+        case .timeLimitReached: false
         }
     }
 
@@ -109,8 +112,12 @@ struct RecordingNotice: Identifiable, Equatable {
             "\(deviceName) disconnected. Recording paused."
         case .interrupted:
             "Recording paused by a call or another app."
-        case .lowStorageWarning:
-            "Storage is almost full: about 10 minutes of recording left."
+        case .lowStorageWarning(let minutes):
+            "Storage is almost full: about \(minutes) minutes of recording left."
+        case .timeLimitReached(let limit, let name?):
+            "Recording stopped after \(limit) (time limit). Saved: \(name)"
+        case .timeLimitReached(let limit, nil):
+            "Recording stopped after \(limit) (time limit)."
         case .storageFull(let name):
             "Storage is full. Recording stopped and saved: \(name)"
         case .recordingFailed(let name?):

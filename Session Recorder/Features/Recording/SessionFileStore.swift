@@ -38,13 +38,14 @@ final class SessionFileStore {
 
     /// Moves a finished recording to Sessions with a unique date-based name (RF-6).
     /// Returns nil and deletes the file when it contains no audio.
-    func finishRecording(at url: URL, startDate: Date, hasAudio: Bool) throws -> String? {
+    func finishRecording(at url: URL, startDate: Date, hasAudio: Bool, prefix: String = "Session") throws -> String? {
         guard hasAudio else {
             try? fileManager.removeItem(at: url)
             return nil
         }
         try fileManager.createDirectory(at: sessionsDirectory, withIntermediateDirectories: true)
         let name = RecordingLogic.sessionName(
+            prefix: prefix,
             startDate: startDate,
             calendar: .current,
             existingNames: existingSessionNames()
@@ -58,7 +59,7 @@ final class SessionFileStore {
 
     /// Saves recordings left in progress by a terminated app as sessions; deletes empty ones.
     /// Call at launch, before any new recording starts. Returns the recovered session names.
-    func recoverInterruptedRecordings() -> [String] {
+    func recoverInterruptedRecordings(prefix: String = "Session") -> [String] {
         let urls = (try? fileManager.contentsOfDirectory(at: inProgressDirectory, includingPropertiesForKeys: nil)) ?? []
         return urls
             .filter { $0.pathExtension == Self.fileExtension }
@@ -68,7 +69,7 @@ final class SessionFileStore {
                     ?? (try? url.resourceValues(forKeys: [.creationDateKey]).creationDate)
                     ?? Date()
                 do {
-                    return try finishRecording(at: url, startDate: startDate, hasAudio: Self.hasAudio(at: url))
+                    return try finishRecording(at: url, startDate: startDate, hasAudio: Self.hasAudio(at: url), prefix: prefix)
                 } catch {
                     logger.error("Cannot recover \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
                     return nil

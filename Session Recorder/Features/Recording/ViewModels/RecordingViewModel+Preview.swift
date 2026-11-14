@@ -56,7 +56,7 @@ extension RecordingViewModel {
     }
 
     static var previewLowStorage: RecordingViewModel {
-        preview(state: .recording, elapsedSeconds: 7200, notice: .lowStorageWarning)
+        preview(state: .recording, elapsedSeconds: 7200, notice: .lowStorageWarning(minutes: 10))
     }
 
     static var previewSaved: RecordingViewModel {

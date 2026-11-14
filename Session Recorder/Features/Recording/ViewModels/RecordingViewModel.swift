@@ -58,6 +58,8 @@ final class RecordingViewModel: ObservableObject {
     // Current recording (nil while idle).
     private var writer: RecordingFileWriter?
     private var recordingStartDate: Date?
+    /// Name prefix captured when the recording started (settings RF-7).
+    private var recordingNamePrefix = "Session"
     /// Device being recorded; the source stays locked to it until stop (RF-8).
     private(set) var recordingDeviceID: String?
     /// Device name for notices (the device is no longer listed once it disconnects).
@@ -260,6 +262,8 @@ final class RecordingViewModel: ObservableObject {
 
         self.writer = writer
         recordingStartDate = startDate
+        // The prefix in effect when recording starts names the session, even if Settings change meanwhile.
+        recordingNamePrefix = currentNamePrefix
         recordingDeviceID = source?.deviceID
         isLowStorageWarningShown = false
         recordingDeviceName = audioSource?.devices.first(where: { $0.id == source?.deviceID })?.displayLabel
@@ -296,6 +300,13 @@ final class RecordingViewModel: ObservableObject {
         state = .paused(reason)
     }
 
+    /// Valid name prefix from Settings (settings RF-7); "Session" if missing or invalid.
+    var currentNamePrefix: String {
+        guard let prefix = settingsStore?.settings.namePrefix,
+              case .success(let valid) = SettingsLogic.validatePrefix(prefix) else { return "Session" }
+        return valid
+    }
+
     /// Fade at pause/resume from Settings (RF-4).
     private var pauseFadeSeconds: Double {
         settingsStore?.settings.pauseFade.seconds ?? 0
@@ -322,7 +333,12 @@ final class RecordingViewModel: ObservableObject {
 
         var savedName: String?
         do {
-            savedName = try fileStore.finishRecording(at: writer.url, startDate: startDate, hasAudio: writer.framesWritten > 0)
+            savedName = try fileStore.finishRecording(
+                at: writer.url,
+                startDate: startDate,
+                hasAudio: writer.framesWritten > 0,
+                prefix: recordingNamePrefix
+            )
         } catch {
             // The file stays in progress and is recovered on next launch (RF-8), so nothing is lost.
             logger.error("Cannot save session: \(error.localizedDescription, privacy: .public)")

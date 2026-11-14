@@ -43,12 +43,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T2
   - **Done when:** With the option on, the screen does not lock while a recording exists; normal after stop; not shown on Mac.
 
-- [ ] **T8 — Name prefix** (`RecordingLogic.swift`, `SessionFileStore.swift`, `RecordingViewModel.swift`)
+- [x] **T8 — Name prefix** (`RecordingLogic.swift`, `SessionFileStore.swift`, `RecordingViewModel.swift`)
   - **RF:** RF-7
   - **Depends on:** T2
   - **Done when:** New and recovered sessions use the prefix captured at start; invalid prefixes are refused with a message. (RF-6 "Quality for new devices" removed 2026-11-14.)
 
-- [ ] **T9 — Time limit and low-storage threshold** (`RecordingViewModel+Interruptions.swift`, `RecordingLogic.swift`, `RecordingModels.swift`)
+- [x] **T9 — Time limit and low-storage threshold** (`RecordingViewModel+Interruptions.swift`, `RecordingLogic.swift`, `RecordingModels.swift`)
   - **RF:** RF-8, RF-9
   - **Depends on:** T2
   - **Done when:** Reaching the limit stops, saves and shows the notice; the warning appears at the chosen threshold; the 1-minute stop is unchanged.
