@@ -11,7 +11,9 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 - Session library: list (visible in Files on iPhone/iPad, Show in Finder on Mac), playback with waveform and lock screen controls, rename, delete (Trash on Mac), trim to a new session, and share/export as CAF, WAV, AIFF, FLAC, ALAC or AAC; Mac **Session** menu and shortcuts.
 
-Next: first-use explanation and permission screens (see "UI").
+- First use: a short explanation before the audio-input prompt, notices with **Allow Audio Input** / **Open Settings** when access is missing, and a note suggesting a USB-C mixer when only the built-in microphone is available.
+
+Next: settings (level meter style) and Spanish localization.
 
 ## Product Vision
 

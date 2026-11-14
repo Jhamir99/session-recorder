@@ -40,7 +40,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4–T6
   - **Done when:** Previews exist for the explanation, each notice state and the USB-C note.
 
-- [ ] **T8 — Docs** (`specs/audio-devices-list/spec.md`, `AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T8 — Docs** (`specs/audio-devices-list/spec.md`, `AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2
   - **Depends on:** T7
   - **Done when:** audio-devices-list RF-4/NFR-2 reflect the new flow; docs list `Features/FirstUse/` and the updated status.

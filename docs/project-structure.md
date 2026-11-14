@@ -34,7 +34,7 @@ Session Recorder/Features/<FeatureName>/
     <SubView>.swift                   (focused subviews)
 ```
 
-Not every feature needs every file. Keep it simple (Constitution C1). Current examples: `Features/AudioDevicesList/` (device and channel selection) and `Features/Recording/` (capture service, session file store, recording logic/settings, `RecordingViewModel` + `+Interruptions`, views and `RecordingCommands`) and `Features/SessionLibrary/` (library store, waveform/player/export services, library/detail/export view models, views and `SessionLibraryCommands`).
+Not every feature needs every file. Keep it simple (Constitution C1). Current examples: `Features/AudioDevicesList/` (device and channel selection) and `Features/Recording/` (capture service, session file store, recording logic/settings, `RecordingViewModel` + `+Interruptions`, views and `RecordingCommands`) and `Features/SessionLibrary/` (library store, waveform/player/export services, library/detail/export view models, views and `SessionLibraryCommands`) and `Features/FirstUse/` (access logic, first-use flag, Settings link, explanation and access notice).
 
 ## Boundaries (Constitution C4)
 - **Views** render state and emit user intent; they do not perform device discovery, permission I/O, persistence, or core selection rules.

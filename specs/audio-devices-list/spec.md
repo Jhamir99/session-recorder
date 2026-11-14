@@ -37,8 +37,8 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 - When no valid saved selection exists for a multi-channel device, the system shall select **Stereo** with channels 1 and 2 (left, right); channel 1 shall be the initial choice of the Mono tab (changed 2026-11-12; previously Mono was selected first).
 
 ### RF-4: Audio-input permission
-- When the user selects a device, the system shall attempt to obtain/use audio-input permission as needed for that source.
-- If audio-input permission is not granted, then the system shall show a message in the channel/selection area stating that permission must be granted and shall provide a button to try granting permission again; the system shall not show device channels in that state.
+- Selecting a device does not show the system permission prompt (changed 2026-11-14 by `specs/first-use/`): access is asked only from the first-use explanation (**Continue**) or **Allow Audio Input**.
+- If audio-input permission is not granted, then the system shall show the first-use access notice in the channel/selection area (**Allow Audio Input** when not asked yet, **Open Settings** when denied, no button when restricted; first-use RF-3); the system shall not show device channels in that state.
 - When audio-input permission status changes while the app/view is open, the system shall update the UI automatically.
 - The system shall prevent recording-related use of the source until permission is granted.
 
@@ -64,13 +64,13 @@ Session Recorder (SwiftUI, Apple platforms) needs to let DJs/musicians choose a 
 - When a device that was replaced by a fallback reconnects and the user has not manually changed the source since then, the system shall select that device again and restore its saved channel selection (RF-3).
 - When the user manually selects a device, the system shall keep that choice; automatic changes happen only on later connect/disconnect events as defined above.
 - When a device is selected automatically, the system shall apply the same channel restore/default rules as a manual selection (RF-3).
-- When a device is selected automatically and audio-input permission has not been granted, the system shall not show the system permission prompt; it shall show the permission message and retry action (RF-4).
+- When a device is selected automatically and audio-input permission has not been granted, the system shall not show the system permission prompt; it shall show the access notice (RF-4).
 - When the selection changes automatically because of a connect/disconnect, the system shall inform the user with a small message naming the newly selected device.
 - While a recording is in progress (future recording feature), the system shall not change the selected device automatically.
 
 ## Non-Functional Requirements
 - **NFR-1:** Behavior works across supported Apple platforms with platform-appropriate presentation.
-- **NFR-2:** Permission requests occur in user-initiated device/source-selection context.
+- **NFR-2:** Permission requests occur only after a user action (first-use Continue / Allow Audio Input).
 - **NFR-3:** Labels are clear for non-technical users and precise for multi-channel interfaces.
 - **NFR-4:** Device, channel, and permission-state changes appear promptly/automatically.
 - **NFR-5:** Persisted data contains no personal data (only device/channel IDs, including the last selected device ID).
