@@ -91,7 +91,8 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T15
   - **Done when:** Docs list `Features/Settings/` and the updated status.
 
-- [ ] **T17 — Verification pass**
+- [x] **T17 — Verification pass**
   - **RF:** RF-1–RF-14, NFR-1–NFR-5
   - **Depends on:** T1–T16
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; every Completion Criterion in the spec verified on a real iPhone and Mac.
+  - **Result (2026-11-14):** Clean builds for macOS and iOS Simulator; settings logic 24/24, fade 9/9, recording logic 27/27. On device (user, iPhone and Mac): every option, persistence after restart, Mac Settings window updating the open window, fades without clicks, screen on, prefix, time limit (debug override), export default, order, storage line, theme, waveform.
