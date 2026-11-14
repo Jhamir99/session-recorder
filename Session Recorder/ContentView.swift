@@ -37,6 +37,9 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        #if os(macOS)
+        .overlay { ExportDimmingOverlay(library: libraryViewModel) }
+        #endif
         // Injected at the root so tabs and sheets presented from them share the same state.
         .environmentObject(audioSourceViewModel)
         .task {

@@ -86,12 +86,12 @@ enum RecordingLogic {
 
     // MARK: Session name (RF-6)
 
-    /// `Session YYYY-MM-DD HH.mm`, with ` (2)`, ` (3)`… when the name is taken.
+    /// `Session YYYY-MM-DD HH.mm.ss` (seconds since 2026-11-14), with ` (2)`, ` (3)`… when the name is taken.
     static func sessionName(startDate: Date, calendar: Calendar, existingNames: Set<String>) -> String {
-        let parts = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: startDate)
+        let parts = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: startDate)
         let base = String(
-            format: "Session %04d-%02d-%02d %02d.%02d",
-            parts.year ?? 0, parts.month ?? 0, parts.day ?? 0, parts.hour ?? 0, parts.minute ?? 0
+            format: "Session %04d-%02d-%02d %02d.%02d.%02d",
+            parts.year ?? 0, parts.month ?? 0, parts.day ?? 0, parts.hour ?? 0, parts.minute ?? 0, parts.second ?? 0
         )
         guard existingNames.contains(base) else { return base }
         var number = 2

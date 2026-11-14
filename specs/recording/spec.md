@@ -58,9 +58,9 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 - Pause/Resume shall be available any number of times during a recording.
 
 ### RF-6: Stop and automatic save
-- When the user taps **Stop** (while recording or paused), the system shall finish the file and save the session automatically with a date-based name (for example, `Session 2026-11-11 22.30`), using the date and time when the recording started.
-- If a session with the same name already exists, the system shall add a number to make it unique (for example, `Session 2026-11-11 22.30 (2)`).
-- After saving, the system shall return to the idle state and show a small confirmation (for example, "Saved: Session 2026-11-11 22.30").
+- When the user taps **Stop** (while recording or paused), the system shall finish the file and save the session automatically with a date-based name (for example, `Session 2026-11-11 22.30.15`), using the date and time when the recording started.
+- If a session with the same name already exists, the system shall add a number to make it unique (for example, `Session 2026-11-11 22.30.15 (2)`).
+- After saving, the system shall return to the idle state and show a small confirmation (for example, "Saved: Session 2026-11-11 22.30.15").
 - Saved sessions shall be stored in the app's local storage so that the session library feature can list them and they can be made visible in Files (iPhone/iPad) / Finder (Mac).
 - If the recording contains no audio (stopped before any audio was written), the system shall discard it and not create a session.
 
@@ -129,7 +129,7 @@ Session Recorder lets DJs/musicians record sessions from a USB-C mixer/interface
 
 ## Decisions (approved 2026-11-12)
 - **Session storage format:** each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder (visible in Files/Finder). The file name is the session name; date and duration are read from the file. No separate metadata file for now.
-- **Name format:** `Session YYYY-MM-DD HH.mm` (dot instead of `:`, which is not safe in Mac file names).
+- **Name format:** `Session YYYY-MM-DD HH.mm.ss` (dot instead of `:`, which is not safe in Mac file names). Seconds added 2026-11-14; earlier sessions keep `HH.mm`.
 - **Quality persistence:** saved per device; when nothing is saved, 24-bit/48 kHz is selected (RF-1).
 - **Sample rates (2026-11-12):** 44.1, 48, 88.2 and 96 kHz, only those the device supports; default 24-bit/48 kHz. iOS does not list supported rates, so they are probed when a device is selected.
 - **Pause/resume fades (2026-11-12):** no fade for now; a crossfade option may be added later in settings.

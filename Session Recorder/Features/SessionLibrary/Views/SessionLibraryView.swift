@@ -19,6 +19,9 @@ struct SessionLibraryView<Indicator: View>: View {
             .sheet(item: $viewModel.renamingSession) { session in
                 RenameSessionSheet(session: session, viewModel: viewModel)
             }
+            .sheet(item: $viewModel.sharingSession) { session in
+                ExportSheet(session: session) { viewModel.isExportInProgress = $0 }
+            }
             .confirmationDialog(
                 "Delete “\(viewModel.deletingSession?.name ?? "")”?",
                 isPresented: Binding(
@@ -80,6 +83,7 @@ struct SessionLibraryView<Indicator: View>: View {
                 isRecordingActive: isRecordingActive,
                 trimContext: viewModel.trimContext,
                 onRename: { viewModel.startRename(session) },
+                onShare: { viewModel.startShare(session) },
                 onDelete: { viewModel.requestDelete(session) }
             )
             .id(session.id)
@@ -106,18 +110,8 @@ struct SessionLibraryView<Indicator: View>: View {
     private func row(for session: SessionItem) -> some View {
         rowContent(for: session)
             .contextMenu {
-                Button("Rename…", systemImage: "pencil") {
-                    viewModel.startRename(session)
-                }
-                #if os(macOS)
-                Button("Show in Finder", systemImage: "folder") {
-                    SessionLibraryStore.revealInFinder(session.url)
-                }
-                #endif
-                Divider()
-                Button("Delete…", systemImage: "trash", role: .destructive) {
-                    viewModel.requestDelete(session)
-                }
+                contextMenuItems(for: session)
+                    .labelStyle(.titleAndIcon)
             }
             #if os(iOS)
             // No full swipe: deleting always asks for confirmation (RF-4).
@@ -131,6 +125,28 @@ struct SessionLibraryView<Indicator: View>: View {
                 .tint(.blue)
             }
             #endif
+    }
+
+    @ViewBuilder
+    private func contextMenuItems(for session: SessionItem) -> some View {
+        Group {
+                Button("Rename…", systemImage: "pencil") {
+                    viewModel.startRename(session)
+                }
+                Button("Share…", systemImage: "square.and.arrow.up") {
+                    viewModel.startShare(session)
+                }
+                .disabled(session.isUnreadable)
+                #if os(macOS)
+                Button("Show in Finder", systemImage: "folder") {
+                    SessionLibraryStore.revealInFinder(session.url)
+                }
+                #endif
+                Divider()
+                Button("Delete…", systemImage: "trash", role: .destructive) {
+                    viewModel.requestDelete(session)
+                }
+        }
     }
 
     @ViewBuilder

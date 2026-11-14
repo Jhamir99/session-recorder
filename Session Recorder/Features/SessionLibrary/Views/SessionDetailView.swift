@@ -8,6 +8,7 @@ struct SessionDetailView: View {
     /// A recording exists: playback is disabled (RF-2).
     let isRecordingActive: Bool
     var onRename: (() -> Void)?
+    var onShare: (() -> Void)?
     var onDelete: (() -> Void)?
 
     init(
@@ -16,12 +17,14 @@ struct SessionDetailView: View {
         isRecordingActive: Bool,
         trimContext: TrimContext? = nil,
         onRename: (() -> Void)? = nil,
+        onShare: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) {
         _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff, trimContext: trimContext))
         self.session = session
         self.isRecordingActive = isRecordingActive
         self.onRename = onRename
+        self.onShare = onShare
         self.onDelete = onDelete
     }
 
@@ -75,6 +78,13 @@ struct SessionDetailView: View {
                     }
                 }
             } else {
+                // Quick Share next to the actions menu.
+                if let onShare {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Share…", systemImage: "square.and.arrow.up", action: onShare)
+                            .disabled(viewModel.session.isUnreadable)
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     actionsMenu
                 }
@@ -94,10 +104,23 @@ struct SessionDetailView: View {
     /// Session actions (more are added with delete, trim and share).
     private var actionsMenu: some View {
         Menu("Actions", systemImage: "ellipsis.circle") {
+            menuItems
+                // Mac menus hide item icons unless asked to show them.
+                .labelStyle(.titleAndIcon)
+        }
+    }
+
+    @ViewBuilder
+    private var menuItems: some View {
+        Group {
             Button("Trim…", systemImage: "scissors") {
                 viewModel.startTrim()
             }
             .disabled(viewModel.audioInfo == nil || viewModel.isTrimming)
+            if let onShare {
+                Button("Share…", systemImage: "square.and.arrow.up", action: onShare)
+                    .disabled(viewModel.session.isUnreadable)
+            }
             if let onRename {
                 Button("Rename…", systemImage: "pencil", action: onRename)
             }

@@ -10,6 +10,10 @@ final class SessionLibraryViewModel: ObservableObject {
     @Published var selectedSessionID: SessionItem.ID?
     /// Session whose rename sheet is open (RF-3).
     @Published var renamingSession: SessionItem?
+    /// Session whose share sheet is open (RF-6).
+    @Published var sharingSession: SessionItem?
+    /// An export is running: on Mac the whole window is darkened behind the progress card.
+    @Published var isExportInProgress = false
     /// Session waiting for delete confirmation (RF-4).
     @Published var deletingSession: SessionItem?
     /// Shown as an alert when a file operation fails.
@@ -24,8 +28,15 @@ final class SessionLibraryViewModel: ObservableObject {
     /// Stops the playback that currently owns the audio session (nil when nothing plays).
     private var stopActivePlayback: (@MainActor () -> Void)?
 
+    /// Exports left by an earlier run are removed once per launch (RF-6).
+    private static var hasRemovedLeftoverExports = false
+
     init(store: SessionLibraryStore = SessionLibraryStore()) {
         self.store = store
+        if !Self.hasRemovedLeftoverExports {
+            Self.hasRemovedLeftoverExports = true
+            Task.detached(priority: .utility) { SessionExportService().removeAllExports() }
+        }
     }
 
     /// Refreshes the list whenever a recording is saved or recovered (RF-1). Safe to call more than once.
@@ -110,6 +121,12 @@ final class SessionLibraryViewModel: ObservableObject {
             existingNames: { [weak self] in Set(self?.sessions.map(\.name) ?? []) },
             didSave: { [weak self] url in self?.refresh(selecting: url) }
         )
+    }
+
+    // MARK: Share (RF-6)
+
+    func startShare(_ session: SessionItem) {
+        sharingSession = session
     }
 
     // MARK: Delete (RF-4)

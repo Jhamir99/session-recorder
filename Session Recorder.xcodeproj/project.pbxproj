@@ -311,7 +311,7 @@
 				DEVELOPMENT_TEAM = C5997BJF7A;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Session-Recorder-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
@@ -353,7 +353,7 @@
 				DEVELOPMENT_TEAM = C5997BJF7A;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Session-Recorder-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";

@@ -45,7 +45,7 @@ New feature folder: `Session Recorder/Features/Recording/` (views in `Views/`, v
 | Remaining seconds | free bytes, bytes/s | free / bytes/s (≥ 0) | RF-4 |
 | Can start | permission, valid selection, remaining seconds | allowed, or error reason (`< 60 s` → not enough storage) | RF-3 |
 | Storage decision | remaining seconds, warning already shown | none / warn (≤ 600 s, once) / stop (≤ 60 s) | RF-8 |
-| Session name | start date, calendar/time zone, existing names | `Session YYYY-MM-DD HH.mm`, `… (2)` when taken | RF-6 |
+| Session name | start date, calendar/time zone, existing names | `Session YYYY-MM-DD HH.mm.ss`, `… (2)` when taken | RF-6 |
 | Can resume | pause reason, recording device connected | Resume enabled? | RF-8 |
 | Clip hold | last clip time, now | clip indicator visible (`< 2 s`) | RF-2 |
 | Meter value | peak (linear) | 0…1 on a dB scale (e.g., −60 dBFS…0) | RF-2 |

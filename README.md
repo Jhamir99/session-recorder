@@ -57,7 +57,7 @@ Next: the session library (list, playback, rename, delete, trim, share/export).
 - Backend, accounts, or cloud services.
 
 ### Session storage
-- Each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm` (date and time the recording started). Date and duration are read from the file; there is no separate metadata file for now.
+- Each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm.ss` (date and time the recording started). Date and duration are read from the file; there is no separate metadata file for now.
 - A recording in progress is written to the app's Application Support folder and moved to `Sessions` when it stops (or on the next launch, if the app was terminated while recording).
 
 ## Overview

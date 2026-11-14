@@ -86,12 +86,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Handles on the waveform with start/end/duration labels, Play Selection, Save disabled under 1 s; saving opens the new session and keeps the original.
 
 ### Share and export (RF-6)
-- [ ] **T16 — Export service** (`Features/SessionLibrary/SessionExportService.swift`)
+- [x] **T16 — Export service** (`Features/SessionLibrary/SessionExportService.swift`)
   - **RF:** RF-6, NFR-3, NFR-4
   - **Depends on:** T2
-  - **Done when:** Original/WAV/AIFF/FLAC/ALAC/AAC (128–320 kbps) are written to `tmp/Export/<uuid>/` with progress and cancel; partial files removed on failure/cancel; leftover exports removed at launch; each format checked with `afinfo` in a scratch script.
+  - **Done when:** Original/WAV/AIFF/FLAC/ALAC/AAC (128–256 kbps) are written to `tmp/Export/<uuid>/` with progress and cancel; partial files removed on failure/cancel; leftover exports removed at launch; each format checked with `afinfo` in a scratch script.
 
-- [ ] **T17 — Export sheet and sharing** (`ViewModels/SessionExportViewModel.swift`, `Views/ExportSheet.swift`, `SessionLibrarySettingsRepository.swift`)
+- [x] **T17 — Export sheet and sharing** (`ViewModels/SessionExportViewModel.swift`, `Views/ExportSheet.swift`, `SessionLibrarySettingsRepository.swift`)
   - **RF:** RF-6
   - **Depends on:** T8, T16
   - **Done when:** Share from detail and list context menu: format + bitrate, size estimate, Export with progress/Cancel, then Share… (system share sheet) and Save… on Mac; last format remembered (`library_export_format_v1`); temp files removed when the sheet closes.

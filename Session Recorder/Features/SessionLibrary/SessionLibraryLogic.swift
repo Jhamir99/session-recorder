@@ -27,9 +27,10 @@ nonisolated enum SessionLibraryLogic {
         creationDate ?? dateFromDefaultName(fileName, calendar: calendar) ?? modificationDate
     }
 
-    /// Parses `Session 2026-11-12 22.30` (with or without ` (2)`) in `calendar`'s time zone.
+    /// Parses `Session 2026-11-12 22.30.15` or the older `Session 2026-11-12 22.30` (with or without ` (2)`)
+    /// in `calendar`'s time zone.
     static func dateFromDefaultName(_ name: String, calendar: Calendar) -> Date? {
-        let pattern = #/^Session (\d{4})-(\d{2})-(\d{2}) (\d{2})\.(\d{2})/#
+        let pattern = #/^Session (\d{4})-(\d{2})-(\d{2}) (\d{2})\.(\d{2})(?:\.(\d{2}))?/#
         guard let match = name.firstMatch(of: pattern) else { return nil }
         var components = DateComponents()
         components.year = Int(match.1)
@@ -37,6 +38,7 @@ nonisolated enum SessionLibraryLogic {
         components.day = Int(match.3)
         components.hour = Int(match.4)
         components.minute = Int(match.5)
+        components.second = match.6.flatMap { Int($0) } ?? 0
         return calendar.date(from: components)
     }
 

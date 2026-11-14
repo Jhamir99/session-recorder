@@ -1,7 +1,7 @@
 # Spec: Session Library
 
 ## Context and Goal
-The `recording` feature saves each session as one `.caf` file (uncompressed PCM) in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm`. The Sessions tab currently shows only an empty state and the `REC` indicator. This feature turns it into the session library: list sessions, play them back with a waveform, rename, delete, trim (saving a new copy), and share/export them in the format the user chooses. Sessions also become visible in Files (iPhone/iPad) and reachable from Finder (Mac).
+The `recording` feature saves each session as one `.caf` file (uncompressed PCM) in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm.ss`. The Sessions tab currently shows only an empty state and the `REC` indicator. This feature turns it into the session library: list sessions, play them back with a waveform, rename, delete, trim (saving a new copy), and share/export them in the format the user chooses. Sessions also become visible in Files (iPhone/iPad) and reachable from Finder (Mac).
 
 ## Users
 - DJs/musicians who recorded sessions with the app and want to listen to them, keep the good ones, cut the start/end, and send or archive them.
@@ -59,7 +59,7 @@ The `recording` feature saves each session as one `.caf` file (uncompressed PCM)
 
 ### RF-6: Share and export
 - From the detail and the list (context action), the user shall be able to share a session through one flow:
-  1. choose a format: **Original (CAF)**, **WAV**, **AIFF**, **FLAC**, **Apple Lossless (ALAC)**, or **AAC (M4A)** with a bitrate of 128, 192, 256 or 320 kbps;
+  1. choose a format: **Original (CAF)**, **WAV**, **AIFF**, **FLAC**, **Apple Lossless (ALAC)**, or **AAC (M4A)** with a bitrate of 128, 192 or 256 kbps (320 kbps removed 2026-11-14: the encoder failed with it);
   2. see the estimated file size for the chosen format;
   3. hand the file to the system share sheet (AirDrop, Files/Save to Files, Mail, other apps; on Mac, the Mac share menu and "Save to…").
 - Lossless formats shall keep the session's sample rate, bit depth and channels. AAC shall keep the sample rate when supported by the encoder (otherwise 48 kHz or 44.1 kHz).

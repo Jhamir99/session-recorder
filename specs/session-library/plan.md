@@ -43,7 +43,7 @@ New feature folder: `Session Recorder/Features/SessionLibrary/` (views in `Views
 | Logic | Inputs (explicit) | Output | RF |
 |---|---|---|---|
 | Sort | items | newest recorded date first; name as tie-breaker | RF-1 |
-| Recorded date | file creation date?, file name | creation date; else date parsed from `Session YYYY-MM-DD HH.mm`; else modification date | RF-1 |
+| Recorded date | file creation date?, file name | creation date; else date parsed from `Session YYYY-MM-DD HH.mm.ss` (or older `HH.mm`); else modification date | RF-1 |
 | Rename validation | new name, current name, existing names | ok(trimmed) / empty / invalid characters (`/`, `:`) / duplicate (case-insensitive; same session ignored) | RF-3 |
 | Trimmed name | original name, existing names | `<name> (trimmed)`, `<name> (trimmed 2)`… | RF-5 |
 | Trim range | start, end, duration | clamped to `0…duration`, start < end, valid when `end − start ≥ 1 s`; frame range for a sample rate | RF-5 |

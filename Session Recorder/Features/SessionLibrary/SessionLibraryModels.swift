@@ -97,12 +97,11 @@ nonisolated enum ExportFormat: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-/// AAC bitrates offered when exporting (RF-6).
+/// AAC bitrates offered when exporting (RF-6). 320 kbps was removed (2026-11-14): the encoder failed with it.
 nonisolated enum AACBitrate: Int, CaseIterable, Identifiable, Codable {
     case kbps128 = 128
     case kbps192 = 192
     case kbps256 = 256
-    case kbps320 = 320
 
     var id: Int { rawValue }
     var bitsPerSecond: Int { rawValue * 1000 }
