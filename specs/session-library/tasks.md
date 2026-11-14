@@ -102,7 +102,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T9, T12, T13
   - **Done when:** Play/Pause (Space), ⌘← / ⌘→, Rename…, Delete (⌘⌫), Show in Finder work on Mac (and iPad keyboard); Space never conflicts with the Recording menu or a rename text field.
 
-- [ ] **T19 — Previews** (`ViewModels/SessionLibraryViewModel+Preview.swift`, `Views/SessionLibraryViews+Previews.swift`)
+- [x] **T19 — Previews** (`ViewModels/SessionLibraryViewModel+Preview.swift`, `Views/SessionLibraryViews+Previews.swift`)
   - **RF:** C5
   - **Depends on:** T4–T17
   - **Done when:** Previews exist for list (empty / sessions / unreadable / recording), detail (loading / ready / playing / disabled), trim, export (choose / progress / ready / error), rename and delete dialogs; previews touch no files or audio.

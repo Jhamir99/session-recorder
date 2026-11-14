@@ -61,7 +61,7 @@ final class SessionDetailViewModel: ObservableObject {
 
     /// Reads the header if the list had not yet, then loads the waveform (cache or computed).
     func load() {
-        guard loadTask == nil else { return }
+        guard loadTask == nil, !isPreview else { return }
         let url = session.url
         let service = waveformService
         loadTask = Task { [weak self] in
@@ -101,6 +101,22 @@ final class SessionDetailViewModel: ObservableObject {
         session.url = updated.url
         session.name = updated.name
         player.updateTitle(updated.name)
+    }
+
+    /// Previews: state is set directly; no file, waveform or audio is loaded.
+    private(set) var isPreview = false
+
+    /// Previews only (see SessionLibraryViewModel+Preview).
+    func applyPreview(waveform: WaveformData?, isWaveformComplete: Bool, isPlaying: Bool, isPlayable: Bool,
+                      isPlaybackBlocked: Bool, position: TimeInterval, trimRange: TrimRange?) {
+        isPreview = true
+        self.waveform = waveform
+        self.isWaveformComplete = isWaveformComplete
+        self.isPlaying = isPlaying
+        self.isPlayable = isPlayable
+        self.isPlaybackBlocked = isPlaybackBlocked
+        self.trimRange = trimRange
+        progress.time = position
     }
 
     /// Stops loading and playback when the detail closes (RF-2).

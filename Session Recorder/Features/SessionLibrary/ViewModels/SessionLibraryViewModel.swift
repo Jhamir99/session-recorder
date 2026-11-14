@@ -188,7 +188,22 @@ final class SessionLibraryViewModel: ObservableObject {
     /// Lists the folder off the main thread, then reads durations/formats (NFR-2).
     /// Audio info already known for an unchanged file is kept, so rows do not flicker.
     /// `selecting`: a file to select once listed (e.g. a new trimmed session).
+    /// Previews: sessions are set directly and the folder is never read.
+    var isPreview = false
+
+    /// Previews only (see +Preview): shows sessions and dialogs without reading files.
+    func applyPreview(sessions: [SessionItem], selectedID: SessionItem.ID? = nil,
+                      renaming: SessionItem? = nil, deleting: SessionItem? = nil) {
+        isPreview = true
+        self.sessions = sessions
+        hasLoaded = true
+        selectedSessionID = selectedID
+        renamingSession = renaming
+        deletingSession = deleting
+    }
+
     func refresh(selecting urlToSelect: URL? = nil) {
+        guard !isPreview else { return }
         refreshGeneration += 1
         let generation = refreshGeneration
         let store = store

@@ -99,6 +99,11 @@ final class SessionExportViewModel: ObservableObject {
         cancelExport()
     }
 
+    /// Previews only: shows a phase without exporting.
+    func applyPreview(phase: Phase) {
+        self.phase = phase
+    }
+
     /// Mac Save… moved the file to the chosen place: nothing temporary is left to share.
     func exportWasMoved() {
         discardExport()
