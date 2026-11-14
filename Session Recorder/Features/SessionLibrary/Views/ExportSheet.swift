@@ -27,8 +27,8 @@ struct ExportSheet: View {
     /// Reports when an export starts/ends (Mac darkens the whole app window meanwhile).
     private let onExportingChange: (Bool) -> Void
 
-    init(session: SessionItem, onExportingChange: @escaping (Bool) -> Void = { _ in }) {
-        _viewModel = StateObject(wrappedValue: SessionExportViewModel(session: session))
+    init(session: SessionItem, initialChoice: ExportChoice? = nil, onExportingChange: @escaping (Bool) -> Void = { _ in }) {
+        _viewModel = StateObject(wrappedValue: SessionExportViewModel(session: session, initialChoice: initialChoice))
         self.onExportingChange = onExportingChange
     }
 

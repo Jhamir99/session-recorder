@@ -7,6 +7,8 @@ final class SessionLibraryViewModel: ObservableObject {
     @Published private(set) var sessions: [SessionItem] = []
     /// False until the first listing finished (avoids flashing the empty state).
     @Published private(set) var hasLoaded = false
+    /// `12 sessions · 4.2 GB · 85 GB available` at the bottom of the list (settings RF-12).
+    @Published private(set) var storageSummary: String?
     @Published var selectedSessionID: SessionItem.ID?
     /// Session whose rename sheet is open (RF-3).
     @Published var renamingSession: SessionItem?
@@ -27,6 +29,8 @@ final class SessionLibraryViewModel: ObservableObject {
     private var audioInfoTask: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
     private weak var recording: RecordingViewModel?
+    /// App settings (export default; settings RF-10). Set by ContentView.
+    weak var settingsStore: AppSettingsStore?
     private var activeDetailObservation: AnyCancellable?
     /// Stops the playback that currently owns the audio session (nil when nothing plays).
     private var stopActivePlayback: (@MainActor () -> Void)?
@@ -132,6 +136,23 @@ final class SessionLibraryViewModel: ObservableObject {
         sharingSession = session
     }
 
+    // MARK: Order (settings RF-11)
+
+    /// Saved in Settings storage (`library_sort_order_v1`); changing it re-sorts the list at once.
+    var sortOrder: SessionSortOrder {
+        get { settingsStore?.sortOrder ?? .newestFirst }
+        set {
+            settingsStore?.sortOrder = newValue
+            sessions = SettingsLogic.sorted(sessions, by: newValue)
+        }
+    }
+
+    /// Format the share sheet opens with: the fixed default from Settings, or nil for the last used one.
+    var initialExportChoice: ExportChoice? {
+        if case .fixed(let choice) = settingsStore?.settings.exportDefault { return choice }
+        return nil
+    }
+
     // MARK: Delete (RF-4)
 
     /// Asks for confirmation first (the dialog names the session).
@@ -210,9 +231,16 @@ final class SessionLibraryViewModel: ObservableObject {
         let known = Dictionary(sessions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         audioInfoTask?.cancel()
         audioInfoTask = Task { [weak self] in
-            let listed = await Task.detached(priority: .userInitiated) { store.listSessions() }.value
+            let (listed, freeBytes) = await Task.detached(priority: .userInitiated) {
+                (store.listSessions(), SessionLibraryStore.freeBytes(at: store.sessionsDirectory.deletingLastPathComponent()))
+            }.value
             guard let self, generation == refreshGeneration else { return }
-            sessions = listed.map { item in
+            storageSummary = SettingsLogic.storageSummary(
+                sessionCount: listed.count,
+                totalBytes: listed.reduce(0) { $0 + $1.fileSizeBytes },
+                freeBytes: freeBytes
+            )
+            sessions = SettingsLogic.sorted(listed, by: sortOrder).map { item in
                 guard let previous = known[item.id], previous.fileSizeBytes == item.fileSizeBytes,
                       previous.audio != .loading else { return item }
                 var kept = item

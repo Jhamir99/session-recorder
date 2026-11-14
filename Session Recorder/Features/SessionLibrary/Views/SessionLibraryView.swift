@@ -31,7 +31,7 @@ struct SessionLibraryView<Indicator: View>: View {
                 RenameSessionSheet(session: session, viewModel: viewModel)
             }
             .sheet(item: $viewModel.sharingSession) { session in
-                ExportSheet(session: session) { viewModel.isExportInProgress = $0 }
+                ExportSheet(session: session, initialChoice: viewModel.initialExportChoice) { viewModel.isExportInProgress = $0 }
             }
             .confirmationDialog(
                 "Delete “\(viewModel.deletingSession?.name ?? "")”?",
@@ -66,6 +66,9 @@ struct SessionLibraryView<Indicator: View>: View {
             sessionList
                 .safeAreaInset(edge: .top) { indicator }
                 .frame(width: 280)
+                .toolbar {
+                    ToolbarItem(placement: .navigation) { sortMenu }
+                }
             Divider()
             NavigationStack {
                 detail
@@ -79,6 +82,7 @@ struct SessionLibraryView<Indicator: View>: View {
                 .navigationTitle("Sessions")
                 // iPhone (one column): gear in the list's bar, top right.
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) { sortMenu }
                     if let onOpenSettings, isCompact {
                         ToolbarItem(placement: .primaryAction) {
                             Button("Settings", systemImage: "gearshape", action: onOpenSettings)
@@ -148,7 +152,34 @@ struct SessionLibraryView<Indicator: View>: View {
             List(viewModel.sessions, selection: $viewModel.selectedSessionID) { session in
                 row(for: session)
             }
+            // Finder-like status line (settings RF-12).
+            .safeAreaInset(edge: .bottom) {
+                if let summary = viewModel.storageSummary {
+                    Text(summary)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(.bar)
+                }
+            }
         }
+    }
+
+    /// Newest First / Oldest First / Name (settings RF-11).
+    private var sortMenu: some View {
+        Menu {
+            Picker("Sort By", selection: $viewModel.sortOrder) {
+                ForEach(SessionSortOrder.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Label("Sort", systemImage: "arrow.up.arrow.down")
+        }
+        .disabled(viewModel.sessions.isEmpty)
     }
 
     private func row(for session: SessionItem) -> some View {

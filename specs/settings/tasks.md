@@ -54,17 +54,17 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Reaching the limit stops, saves and shows the notice; the warning appears at the chosen threshold; the 1-minute stop is unchanged.
 
 ### Library
-- [ ] **T10 — Default export format** (`SessionExportViewModel.swift`)
+- [x] **T10 — Default export format** (`SessionExportViewModel.swift`)
   - **RF:** RF-10
   - **Depends on:** T2
   - **Done when:** "Last used" keeps today's behavior; a fixed format is preselected in the share sheet.
 
-- [ ] **T11 — Session order in the library** (`SessionLibraryLogic.swift`, `SessionLibraryViewModel.swift`, `SessionLibraryView.swift`, `AppSettingsRepository.swift`)
+- [x] **T11 — Session order in the library** (`SessionLibraryLogic.swift`, `SessionLibraryViewModel.swift`, `SessionLibraryView.swift`, `AppSettingsRepository.swift`)
   - **RF:** RF-11
   - **Depends on:** T1
   - **Done when:** Toolbar sort menu with Newest First / Oldest First / Name (natural order), remembered under `library_sort_order_v1`.
 
-- [ ] **T12 — Storage status line** (`SessionLibraryViewModel.swift`, `SessionLibraryView.swift`)
+- [x] **T12 — Storage status line** (`SessionLibraryViewModel.swift`, `SessionLibraryView.swift`)
   - **RF:** RF-12
   - **Depends on:** T1
   - **Done when:** `N sessions · size · free available` at the bottom of the list on iPhone, iPad and Mac, updated with the list.

@@ -28,13 +28,15 @@ final class SessionExportViewModel: ObservableObject {
     init(
         session: SessionItem,
         service: SessionExportService = SessionExportService(),
-        settings: SessionLibrarySettingsRepository? = nil
+        settings: SessionLibrarySettingsRepository? = nil,
+        initialChoice: ExportChoice? = nil
     ) {
         let settings = settings ?? SessionLibrarySettingsRepository()
         self.session = session
         self.service = service
         self.settings = settings
-        self.choice = settings.exportChoice
+        // A fixed default from Settings (settings RF-10), otherwise the last used choice.
+        self.choice = initialChoice ?? settings.exportChoice
     }
 
     /// `About 412 MB` (FLAC/ALAC/AAC) or `1.04 GB` (PCM, exact); nil until the header is read.
