@@ -2,11 +2,13 @@ import AVFoundation
 import Foundation
 import MediaPlayer
 
-/// Apple-API boundary for playing one session file (plan §3): `AVAudioPlayer` streams from disk, so memory
-/// does not grow with the session length (NFR-3). Also publishes Now Playing info, handles the lock screen /
-/// Control Center / Mac media commands, and reports audio interruptions (RF-2).
+/// Apple-API boundary for playing one session file (plan §3). `AVPlayer` reads ahead and renders on its own
+/// threads, so a busy main thread (e.g. a sheet or menu opening for the first time) does not interrupt the
+/// audio, which happened with `AVAudioPlayer`. Memory does not grow with the session length (NFR-3).
+/// Also publishes Now Playing info, handles the lock screen / Control Center / Mac media commands, and
+/// reports audio interruptions (RF-2).
 @MainActor
-final class SessionPlayerService: NSObject, AVAudioPlayerDelegate {
+final class SessionPlayerService {
     /// Actions requested from outside the app (lock screen, Control Center, keyboard media keys).
     struct RemoteActions {
         var play: () -> Void
@@ -15,44 +17,67 @@ final class SessionPlayerService: NSObject, AVAudioPlayerDelegate {
         var seek: (TimeInterval) -> Void
     }
 
-    private var player: AVAudioPlayer?
+    private var player: AVPlayer?
     private var title = ""
+    private(set) var duration: TimeInterval = 0
     private var remoteTargets: [(MPRemoteCommand, Any)] = []
     /// iOS: the system deactivated the session (call); it must be activated again before playing.
     private var needsSessionActivation = false
     nonisolated(unsafe) private var observers: [NSObjectProtocol] = []
+    nonisolated(unsafe) private var endObserver: NSObjectProtocol?
     /// Called when playback reaches the end.
     var onFinish: (() -> Void)?
     /// Called when a call/another app or an unplugged headphone stops playback (no automatic resume).
     var onInterruption: (() -> Void)?
 
-    var isPlaying: Bool { player?.isPlaying ?? false }
-    var currentTime: TimeInterval { player?.currentTime ?? 0 }
-    var duration: TimeInterval { player?.duration ?? 0 }
+    var isPlaying: Bool { (player?.rate ?? 0) != 0 }
 
-    override init() {
-        super.init()
+    var currentTime: TimeInterval {
+        guard let seconds = player?.currentTime().seconds, seconds.isFinite else { return 0 }
+        return min(max(seconds, 0), duration)
+    }
+
+    init() {
         observeInterruptions()
     }
 
     deinit {
         let center = NotificationCenter.default
         observers.forEach { center.removeObserver($0) }
+        if let endObserver { center.removeObserver(endObserver) }
     }
 
-    func load(url: URL, title: String) throws {
-        let player = try AVAudioPlayer(contentsOf: url)
-        player.delegate = self
-        player.prepareToPlay()
+    /// `duration` comes from the file header (already read for the detail).
+    func load(url: URL, title: String, duration: TimeInterval) {
+        let item = AVPlayerItem(url: url)
+        let player = AVPlayer(playerItem: item)
+        // Local file: start as soon as play is requested, no network-style buffering wait.
+        player.automaticallyWaitsToMinimizeStalling = false
+        if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
+        endObserver = NotificationCenter.default.addObserver(
+            forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.updateNowPlaying()
+                self?.onFinish?()
+            }
+        }
         self.player = player
         self.title = title
+        self.duration = duration
+    }
+
+    /// The session was renamed while open: Now Playing shows the new name. The open file keeps playing.
+    func updateTitle(_ title: String) {
+        self.title = title
+        updateNowPlaying()
     }
 
     func play() {
         guard let player else { return }
         // At the end, start again from the beginning.
-        if player.currentTime >= player.duration - 0.05 {
-            player.currentTime = 0
+        if currentTime >= duration - 0.05 {
+            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
         }
         player.play()
         updateNowPlaying()
@@ -65,22 +90,19 @@ final class SessionPlayerService: NSObject, AVAudioPlayerDelegate {
 
     /// Stops playback, releases the file and clears Now Playing.
     func stop() {
-        player?.stop()
+        player?.pause()
         player = nil
+        if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
+        endObserver = nil
         deactivateRemoteControls()
     }
 
+    /// Exact seek (no tolerance), so the playhead and trim times match the audio.
     func seek(to time: TimeInterval) {
         guard let player else { return }
-        player.currentTime = min(max(time, 0), player.duration)
+        let target = CMTime(seconds: min(max(time, 0), duration), preferredTimescale: 48_000)
+        player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
         updateNowPlaying()
-    }
-
-    nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Task { @MainActor [weak self] in
-            self?.updateNowPlaying()
-            self?.onFinish?()
-        }
     }
 
     // MARK: Now Playing and remote commands (RF-2)
@@ -130,17 +152,17 @@ final class SessionPlayerService: NSObject, AVAudioPlayerDelegate {
     }
 
     private func updateNowPlaying() {
-        guard let player, !remoteTargets.isEmpty else { return }
+        guard player != nil, !remoteTargets.isEmpty else { return }
         let info = MPNowPlayingInfoCenter.default()
         info.nowPlayingInfo = [
             MPMediaItemPropertyTitle: title,
             MPMediaItemPropertyArtist: "Session Recorder",
-            MPMediaItemPropertyPlaybackDuration: player.duration,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: player.currentTime,
-            MPNowPlayingInfoPropertyPlaybackRate: player.isPlaying ? 1.0 : 0.0
+            MPMediaItemPropertyPlaybackDuration: duration,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
         ]
         #if os(macOS)
-        info.playbackState = player.isPlaying ? .playing : .paused
+        info.playbackState = isPlaying ? .playing : .paused
         #endif
     }
 
@@ -179,7 +201,7 @@ final class SessionPlayerService: NSObject, AVAudioPlayerDelegate {
     }
 
     private func interrupted() {
-        guard let player, player.isPlaying || remoteTargets.isEmpty == false else { return }
+        guard let player, isPlaying || remoteTargets.isEmpty == false else { return }
         needsSessionActivation = true
         player.pause()
         updateNowPlaying()

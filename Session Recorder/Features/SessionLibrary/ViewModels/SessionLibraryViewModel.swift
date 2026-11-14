@@ -8,6 +8,10 @@ final class SessionLibraryViewModel: ObservableObject {
     /// False until the first listing finished (avoids flashing the empty state).
     @Published private(set) var hasLoaded = false
     @Published var selectedSessionID: SessionItem.ID?
+    /// Session whose rename sheet is open (RF-3).
+    @Published var renamingSession: SessionItem?
+    /// Shown as an alert when a file operation fails.
+    @Published var notice: LibraryNotice?
 
     private let store: SessionLibraryStore
     /// Increases on every refresh so results of an older refresh are ignored.
@@ -64,6 +68,38 @@ final class SessionLibraryViewModel: ObservableObject {
         }
     }
 
+    // MARK: Rename (RF-3)
+
+    func startRename(_ session: SessionItem) {
+        renamingSession = session
+    }
+
+    /// Live validation for the rename sheet: trimmed name, or why it cannot be used.
+    func validateRename(_ text: String, for session: SessionItem) -> Result<String, RenameError> {
+        SessionLibraryLogic.validateRename(text, currentName: session.name, existingNames: Set(sessions.map(\.name)))
+    }
+
+    /// Renames the file; the row and the selection follow the new name. False if it was not renamed.
+    @discardableResult
+    func rename(_ session: SessionItem, to text: String) -> Bool {
+        guard case .success(let name) = validateRename(text, for: session) else { return false }
+        do {
+            let newURL = try store.rename(session.url, to: name)
+            if let index = sessions.firstIndex(where: { $0.id == session.id }) {
+                sessions[index].url = newURL
+                sessions[index].name = name
+            }
+            // The ID (file identifier) is kept, so the selection and an open detail stay as they are.
+            renamingSession = nil
+            refresh()
+            return true
+        } catch {
+            notice = LibraryNotice(kind: .operationFailed("Renaming"))
+            refresh()
+            return false
+        }
+    }
+
     var selectedSession: SessionItem? {
         sessions.first { $0.id == selectedSessionID }
     }
@@ -74,13 +110,13 @@ final class SessionLibraryViewModel: ObservableObject {
         refreshGeneration += 1
         let generation = refreshGeneration
         let store = store
-        let known = Dictionary(sessions.map { ($0.url, $0) }, uniquingKeysWith: { first, _ in first })
+        let known = Dictionary(sessions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         audioInfoTask?.cancel()
         audioInfoTask = Task { [weak self] in
             let listed = await Task.detached(priority: .userInitiated) { store.listSessions() }.value
             guard let self, generation == refreshGeneration else { return }
             sessions = listed.map { item in
-                guard let previous = known[item.url], previous.fileSizeBytes == item.fileSizeBytes,
+                guard let previous = known[item.id], previous.fileSizeBytes == item.fileSizeBytes,
                       previous.audio != .loading else { return item }
                 var kept = item
                 kept.audio = previous.audio
@@ -94,14 +130,25 @@ final class SessionLibraryViewModel: ObservableObject {
         }
     }
 
-    /// Reads headers one by one in the background and updates each row as soon as it is known.
+    /// Reads headers in the background in batches and applies each batch at once, so the list is not
+    /// recomputed once per session.
     private func loadAudioInfo(generation: Int) async {
         let pending = sessions.filter { $0.audio == .loading }.map(\.url)
-        for url in pending {
+        let batchSize = 25
+        for start in stride(from: 0, to: pending.count, by: batchSize) {
             guard !Task.isCancelled else { return }
-            let state = await Task.detached(priority: .utility) { SessionLibraryStore.readAudioState(at: url) }.value
-            guard generation == refreshGeneration, let index = sessions.firstIndex(where: { $0.url == url }) else { continue }
-            sessions[index].audio = state
+            let batch = Array(pending[start..<min(start + batchSize, pending.count)])
+            let states = await Task.detached(priority: .utility) {
+                batch.map { ($0, SessionLibraryStore.readAudioState(at: $0)) }
+            }.value
+            guard generation == refreshGeneration else { return }
+            var updated = sessions
+            for (url, state) in states {
+                if let index = updated.firstIndex(where: { $0.url == url }) {
+                    updated[index].audio = state
+                }
+            }
+            sessions = updated
         }
     }
 }

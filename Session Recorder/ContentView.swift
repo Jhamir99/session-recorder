@@ -12,7 +12,9 @@ struct ContentView: View {
     @State private var windowID = UUID()
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel: RecordingViewModel
-    @StateObject private var libraryViewModel: SessionLibraryViewModel
+    /// Owned but not observed here (`@State`, not `@StateObject`): only the Sessions tab observes it, so list
+    /// updates do not rebuild the whole window.
+    @State private var libraryViewModel: SessionLibraryViewModel
 
     init(
         audioSourceViewModel: AudioSourceSelectionViewModel? = nil,
@@ -21,7 +23,7 @@ struct ContentView: View {
     ) {
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
         _recordingViewModel = StateObject(wrappedValue: recordingViewModel ?? RecordingViewModel())
-        _libraryViewModel = StateObject(wrappedValue: libraryViewModel ?? SessionLibraryViewModel())
+        _libraryViewModel = State(initialValue: libraryViewModel ?? SessionLibraryViewModel())
     }
 
     var body: some View {
@@ -44,6 +46,7 @@ struct ContentView: View {
         // Recording starts from the Record tab in the recording audio configuration: stop library playback.
         .onChange(of: selectedTab) { _, tab in
             if tab == .record { libraryViewModel.stopPlayback() }
+            recordingViewModel.setRecordTabVisible(tab == .record)
         }
         // Recording menu and shortcuts act on this window's recording (RF-9).
         .focusedSceneObject(recordingViewModel)

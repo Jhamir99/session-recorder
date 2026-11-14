@@ -83,6 +83,14 @@ final class SessionDetailViewModel: ObservableObject {
         }
     }
 
+    /// The session was renamed (same file): keep playback and the waveform, update name and URL.
+    func sessionDidChange(_ updated: SessionItem) {
+        guard updated.id == session.id, updated.url != session.url || updated.name != session.name else { return }
+        session.url = updated.url
+        session.name = updated.name
+        player.updateTitle(updated.name)
+    }
+
     /// Stops loading and playback when the detail closes (RF-2).
     func cancel() {
         loadTask?.cancel()
@@ -157,13 +165,12 @@ final class SessionDetailViewModel: ObservableObject {
     }
 
     private func preparePlayer() {
-        do {
-            try player.load(url: session.url, title: session.name)
-            isPlayable = true
-        } catch {
-            logger.error("Cannot open player: \(error.localizedDescription, privacy: .public)")
+        guard let info = session.audioInfo else {
             isPlayable = false
+            return
         }
+        player.load(url: session.url, title: session.name, duration: info.duration)
+        isPlayable = true
     }
 
     /// Lock screen, Control Center and media keys control this detail's playback (RF-2).

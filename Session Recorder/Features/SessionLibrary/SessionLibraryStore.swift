@@ -19,7 +19,7 @@ nonisolated struct SessionLibraryStore: Sendable {
     /// Every `.caf` file, newest first, with audio info still `.loading` (fast: no audio is read).
     /// Other files and folders are ignored. A missing folder means no sessions.
     func listSessions(calendar: Calendar = .current) -> [SessionItem] {
-        let keys: [URLResourceKey] = [.isRegularFileKey, .creationDateKey, .contentModificationDateKey, .fileSizeKey]
+        let keys: [URLResourceKey] = [.isRegularFileKey, .creationDateKey, .contentModificationDateKey, .fileSizeKey, .fileIdentifierKey]
         let urls = (try? FileManager.default.contentsOfDirectory(
             at: sessionsDirectory,
             includingPropertiesForKeys: keys,
@@ -40,7 +40,8 @@ nonisolated struct SessionLibraryStore: Sendable {
                         calendar: calendar
                     ),
                     fileSizeBytes: Int64(values.fileSize ?? 0),
-                    audio: .loading
+                    audio: .loading,
+                    fileID: values.fileIdentifier
                 )
             }
         return SessionLibraryLogic.sorted(items)
@@ -60,6 +61,32 @@ nonisolated struct SessionLibraryStore: Sendable {
                 bitDepth: bitDepth > 0 ? bitDepth : 16
             )
         ))
+    }
+
+    // MARK: Rename (RF-3)
+
+    /// Renames the session file to `newName` (already validated) and returns the new URL.
+    /// Moving keeps the creation (recorded) date, so the waveform cache still matches.
+    func rename(_ url: URL, to newName: String) throws -> URL {
+        let destination = sessionsDirectory.appending(path: newName).appendingPathExtension(SessionFileStore.fileExtension)
+        guard destination.lastPathComponent != url.lastPathComponent else { return url }
+        let fileManager = FileManager.default
+        if destination.lastPathComponent.caseInsensitiveCompare(url.lastPathComponent) == .orderedSame {
+            // Only the letter case changes: on a case-insensitive volume the target "exists" (it is the
+            // same file), so move through a temporary name.
+            let temporary = sessionsDirectory.appending(path: ".rename-\(UUID().uuidString)")
+                .appendingPathExtension(SessionFileStore.fileExtension)
+            try fileManager.moveItem(at: url, to: temporary)
+            do {
+                try fileManager.moveItem(at: temporary, to: destination)
+            } catch {
+                try? fileManager.moveItem(at: temporary, to: url)
+                throw error
+            }
+        } else {
+            try fileManager.moveItem(at: url, to: destination)
+        }
+        return destination
     }
 
     #if os(macOS)

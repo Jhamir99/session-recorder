@@ -1,3 +1,4 @@
+import Accelerate
 import AVFoundation
 import Combine
 import os
@@ -484,11 +485,9 @@ nonisolated final class CaptureSampleProcessor: NSObject, AVCaptureAudioDataOutp
         if let channels = buffer.floatChannelData, !buffer.format.isInterleaved {
             let available = Int(buffer.format.channelCount)
             for (position, index) in channelIndexes.enumerated() where index < available {
+                // Vectorized max |sample| (a per-sample Swift loop was the app's main CPU cost while idle).
                 var peak: Float = 0
-                let samples = channels[index]
-                for frame in 0..<frameCount {
-                    peak = max(peak, abs(samples[frame]))
-                }
+                vDSP_maxmgv(channels[index], 1, &peak, vDSP_Length(frameCount))
                 pendingPeaks[position] = max(pendingPeaks[position], peak)
             }
         }

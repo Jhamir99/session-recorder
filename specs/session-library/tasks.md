@@ -64,7 +64,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Playback continues with the device locked; lock screen / Control Center (and Mac Now Playing) show the session name and position with play/pause/skip; a call pauses playback without auto-resume.
 
 ### Rename and delete (RF-3, RF-4)
-- [ ] **T12 — Rename** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, list + detail UI)
+- [x] **T12 — Rename** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, list + detail UI)
   - **RF:** RF-3
   - **Depends on:** T4, T8
   - **Done when:** Rename from list (swipe/context) and detail with inline validation (empty, `/` `:`, duplicate); the file is renamed, the date kept, the waveform cache still used.

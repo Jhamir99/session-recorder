@@ -16,6 +16,15 @@ struct SessionLibraryView<Indicator: View>: View {
             .task {
                 viewModel.refresh()
             }
+            .sheet(item: $viewModel.renamingSession) { session in
+                RenameSessionSheet(session: session, viewModel: viewModel)
+            }
+            .alert(
+                viewModel.notice?.text ?? "",
+                isPresented: Binding(get: { viewModel.notice != nil }, set: { if !$0 { viewModel.notice = nil } })
+            ) {
+                Button("OK", role: .cancel) {}
+            }
     }
 
     @ViewBuilder
@@ -47,8 +56,13 @@ struct SessionLibraryView<Indicator: View>: View {
     private var detail: some View {
         if let session = viewModel.selectedSession {
             // A new detail (and view model) per session file.
-            SessionDetailView(session: session, handoff: viewModel.playbackHandoff, isRecordingActive: isRecordingActive)
-                .id(session.id)
+            SessionDetailView(
+                session: session,
+                handoff: viewModel.playbackHandoff,
+                isRecordingActive: isRecordingActive,
+                onRename: { viewModel.startRename(session) }
+            )
+            .id(session.id)
         } else {
             ContentUnavailableView("Select a session", systemImage: "waveform")
         }
@@ -69,21 +83,102 @@ struct SessionLibraryView<Indicator: View>: View {
         }
     }
 
-    @ViewBuilder
     private func row(for session: SessionItem) -> some View {
+        rowContent(for: session)
+            .contextMenu {
+                Button("Rename…", systemImage: "pencil") {
+                    viewModel.startRename(session)
+                }
+                #if os(macOS)
+                Button("Show in Finder", systemImage: "folder") {
+                    SessionLibraryStore.revealInFinder(session.url)
+                }
+                #endif
+            }
+            #if os(iOS)
+            .swipeActions(edge: .trailing) {
+                Button("Rename", systemImage: "pencil") {
+                    viewModel.startRename(session)
+                }
+                .tint(.blue)
+            }
+            #endif
+    }
+
+    @ViewBuilder
+    private func rowContent(for session: SessionItem) -> some View {
         #if os(macOS)
         // Selection drives the detail next to the list (no navigation push on Mac).
         SessionRow(session: session)
             .tag(session.id)
-            .contextMenu {
-                Button("Show in Finder", systemImage: "folder") {
-                    SessionLibraryStore.revealInFinder(session.url)
-                }
-            }
         #else
         NavigationLink(value: session.id) {
             SessionRow(session: session)
         }
         #endif
+    }
+}
+
+/// Rename with live validation (RF-3): empty, `/` `:` and duplicate names are explained as you type.
+private struct RenameSessionSheet: View {
+    let session: SessionItem
+    @ObservedObject var viewModel: SessionLibraryViewModel
+    @State private var name: String
+    @Environment(\.dismiss) private var dismiss
+
+    init(session: SessionItem, viewModel: SessionLibraryViewModel) {
+        self.session = session
+        self.viewModel = viewModel
+        _name = State(initialValue: session.name)
+    }
+
+    private var validation: Result<String, RenameError> {
+        viewModel.validateRename(name, for: session)
+    }
+
+    private var canRename: Bool {
+        guard case .success(let newName) = validation else { return false }
+        return newName != session.name
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Name", text: $name)
+                        .onSubmit(rename)
+                } footer: {
+                    if case .failure(let error) = validation {
+                        Text(error.message)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            // Grouped style gives the field side margins on Mac (the default Mac form style has none).
+            .formStyle(.grouped)
+            .navigationTitle("Rename Session")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Rename", action: rename)
+                        .disabled(!canRename)
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(minWidth: 380, minHeight: 180)
+        #else
+        .presentationDetents([.medium])
+        #endif
+    }
+
+    private func rename() {
+        guard canRename else { return }
+        viewModel.rename(session, to: name)
     }
 }

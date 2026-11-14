@@ -29,13 +29,16 @@ nonisolated struct SessionAudioInfo: Equatable, Hashable {
 
 /// One session in the library: a `.caf` file in the Sessions folder (RF-1).
 nonisolated struct SessionItem: Identifiable, Equatable, Hashable {
-    /// The file URL; the session name is the file name, so a rename gives a new ID.
+    /// The file URL; the session name is the file name, so it changes on rename.
     var url: URL
     var name: String
     var recordedDate: Date
     var fileSizeBytes: Int64
     /// Filled asynchronously (`.loading` first) so the list appears immediately (NFR-2).
     var audio: AudioState
+    /// File system identifier: kept when the file is renamed, so the selection and an open detail
+    /// (with its playback) survive a rename (RF-3).
+    var fileID: UInt64? = nil
 
     enum AudioState: Equatable, Hashable {
         case loading
@@ -44,7 +47,8 @@ nonisolated struct SessionItem: Identifiable, Equatable, Hashable {
         case unreadable
     }
 
-    var id: URL { url }
+    /// Stable across renames when the file system provides an identifier; otherwise the path.
+    var id: String { fileID.map { "file-\($0)" } ?? url.path }
 
     var audioInfo: SessionAudioInfo? {
         if case .readable(let info) = audio { return info }

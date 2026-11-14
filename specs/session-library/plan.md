@@ -14,7 +14,7 @@ New feature folder: `Session Recorder/Features/SessionLibrary/` (views in `Views
 | `Features/SessionLibrary/SessionLibraryLogic.swift` | Create | **Pure logic**: sort newest first, rename validation (empty / `/` `:` / duplicate, case-insensitive), trimmed name + uniqueness, trim range rules (≥ 1 s, clamp, trimmed recorded date), export size estimate, AAC sample rate choice, waveform bucket math (peaks → bars for a width; range → bars), waveform cache key, recorded date fallback from the default name, time formatting (`H:MM:SS`, `M:SS.s` for trim). | RF-1–RF-6 |
 | `Features/SessionLibrary/SessionLibraryStore.swift` | Create | File operations on `Documents/Sessions/`: list `.caf` files with info (duration/format read off the main thread), rename (move), delete (Mac: `trashItem`, iOS: `removeItem`), trim (bit-exact copy of a frame range to a temp file, set recorded date, move into Sessions with a unique name), free storage. | RF-1, RF-3, RF-4, RF-5, NFR-4 |
 | `Features/SessionLibrary/WaveformService.swift` | Create | Computes peaks (10 per second, max of channels) by reading the file in chunks on a background task, reports progress, reads/writes the cache in `Caches/Waveforms/`. | RF-2, RF-5, NFR-2, NFR-3 |
-| `Features/SessionLibrary/SessionPlayerService.swift` | Create | Apple-API boundary for playback: `AVAudioPlayer` (play/pause/seek/±15 s, range playback for trim), Now Playing info + remote commands (`MediaPlayer`), pauses on audio interruptions without auto-resume. | RF-2, RF-5 |
+| `Features/SessionLibrary/SessionPlayerService.swift` | Create | Apple-API boundary for playback: `AVPlayer` (play/pause/seek/±15 s, range playback for trim), Now Playing info + remote commands (`MediaPlayer`), pauses on audio interruptions without auto-resume. | RF-2, RF-5 |
 | `Features/SessionLibrary/SessionExportService.swift` | Create | Converts a session to the chosen format in a temp folder (`AVAudioFile` read → write with format settings, chunked), progress + cancel, removes partial/temporary files. | RF-6, NFR-3, NFR-4 |
 | `Features/SessionLibrary/SessionLibrarySettingsRepository.swift` | Create | `UserDefaults`: last export format + AAC bitrate (`library_export_format_v1`). No personal data. | RF-6, NFR-5 |
 | `Features/SessionLibrary/ViewModels/SessionLibraryViewModel.swift` | Create | List state, refresh (on appear, app active, recording saved), selection, rename, delete, pending confirmations, notices. | RF-1, RF-3, RF-4 |
@@ -68,11 +68,12 @@ Application Support/InProgress/            recording in progress (recording feat
 - **Changes outside the app:** the list refreshes when the app becomes active and after every own operation (no folder watcher, C1).
 
 ### Playback and the audio session
-- `AVAudioPlayer` per opened session (streams from disk; memory does not grow with length, NFR-3).
+- `AVPlayer` per opened session (streams from disk; memory does not grow with length, NFR-3; exact seeks with zero tolerance).
 - **iOS:** recording meters keep the session in `.playAndRecord`/`.measurement` with `.mixWithOthers`. A mixable session cannot own Now Playing and would play through the receiver. While playing: the recording view model stops idle capture, then the device service switches to `.playback` (not mixable). When playback stops or the detail closes: back to the recording configuration and meters restart. All session calls stay on the service's serial queue.
 - **While a recording exists**, playback is disabled (spec RF-2). **While playing**, Record is unavailable; selecting the Record tab stops playback, so recording always starts from the normal configuration.
 - **Now Playing:** title = session name, duration, elapsed time, play/pause/skip remote commands. Audio interruptions pause playback; no automatic resume.
-- **Mac:** no audio session; Now Playing and remote commands also work.
+- **Mac:** no audio session; Now Playing and remote commands also work. Meters keep running while playing (stopping the capture device, which may also be the output, caused a crackle); Record is still unavailable while playing.
+- **iOS device list during playback:** the `.playback` session has no input route, so the device list is not refreshed while playing (it would show the mixer with 1 channel and recompute the channel selection); it refreshes when playback ends.
 
 ### Waveform
 - 10 peaks per second (max absolute value of all channels, quantized to 0…255). A 4 h session = 144 000 bytes. Enough for the detail and for trim handles (100 ms resolution; trim times are shown exactly).
@@ -118,7 +119,7 @@ any ──Record tab selected / detail closed / session deleted──▶ stopped
 | Detail | Name (title), date, duration, `Stereo · 24-bit/48 kHz · 1.04 GB`; waveform; player; toolbar/menu: Trim, Share, Rename, Delete, Show in Finder (Mac). | RF-2–RF-7 |
 | Trim | Handles on the waveform; start/end/duration labels; Play Selection; Cancel / Save as New Session. | RF-5 |
 | Share sheet | Format picker, AAC bitrate (only for AAC), "About 412 MB", Export → progress + Cancel → Share… (+ Save… on Mac). | RF-6 |
-| Rename | Alert with text field, inline validation message. | RF-3 |
+| Rename | Small sheet with a text field; validation shown as you type (an alert cannot validate live); Rename disabled while invalid or unchanged. | RF-3 |
 | Delete | Confirmation dialog naming the session; iOS text says it cannot be undone; Mac says it moves to the Trash. | RF-4 |
 | Mac menu | **Session** menu: Play/Pause (Space), Skip Back (⌘←), Skip Forward (⌘→), Rename…, Delete (⌘⌫), Show in Finder. Space for playback is enabled only when no recording exists and no rename is in progress; the Recording menu's Space is enabled only while a recording exists, so they never overlap. | RF-8 |
 | Accessibility | Waveform exposes position as an adjustable value; buttons have labels; large Dynamic Type supported. | NFR-1 |
@@ -127,7 +128,7 @@ any ──Record tab selected / detail closed / session deleted──▶ stopped
 | Decision | Rejected alternative |
 |---|---|
 | Recorded date from the file creation date (no metadata file). | A metadata JSON per session or a CAF info chunk — a new persisted format for one value (C1). |
-| `AVAudioPlayer` for playback. | `AVAudioEngine` player node — more control than needed; `AVPlayer` — no benefit for local CAF. |
+| `AVPlayer` for playback (changed 2026-11-14): it reads ahead and renders on its own threads. | `AVAudioPlayer` — audio crackled/cut when the main thread was briefly busy (first menu/sheet); `AVAudioEngine` player node — more control than needed. |
 | `.playback` session only while playing, meters stopped meanwhile. | Keeping `.playAndRecord` + `.mixWithOthers` — no Now Playing/background playback and receiver output on iPhone. |
 | Waveform peaks cached in Caches (approved 2026-11-14). | Computing on every open (seconds for long sessions); storing next to the session (would appear in Files). |
 | Trim and export with `AVAudioFile` chunked read/write. | `AVAssetExportSession` — no FLAC/AIFF/WAV control and not bit-exact for trim. |

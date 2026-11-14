@@ -3,16 +3,22 @@ import SwiftUI
 /// Session detail (RF-2): date, duration, format, size, waveform and player. Actions come later.
 struct SessionDetailView: View {
     @StateObject private var viewModel: SessionDetailViewModel
+    /// Latest list item (e.g. after a rename); the view model keeps its own state for the same file.
+    private let session: SessionItem?
     /// A recording exists: playback is disabled (RF-2).
     let isRecordingActive: Bool
+    var onRename: (() -> Void)?
 
-    init(session: SessionItem, handoff: PlaybackHandoff, isRecordingActive: Bool) {
+    init(session: SessionItem, handoff: PlaybackHandoff, isRecordingActive: Bool, onRename: (() -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff))
+        self.session = session
         self.isRecordingActive = isRecordingActive
+        self.onRename = onRename
     }
 
     init(viewModel: SessionDetailViewModel, isRecordingActive: Bool = false) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.session = nil
         self.isRecordingActive = isRecordingActive
     }
 
@@ -33,10 +39,32 @@ struct SessionDetailView: View {
             viewModel.setPlaybackBlocked(isRecordingActive)
             viewModel.load()
         }
+        .onChange(of: session) { _, updated in
+            if let updated { viewModel.sessionDidChange(updated) }
+        }
         .onChange(of: isRecordingActive) { _, active in
             viewModel.setPlaybackBlocked(active)
         }
         .onDisappear { viewModel.cancel() }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                actionsMenu
+            }
+        }
+    }
+
+    /// Session actions (more are added with delete, trim and share).
+    private var actionsMenu: some View {
+        Menu("Actions", systemImage: "ellipsis.circle") {
+            if let onRename {
+                Button("Rename…", systemImage: "pencil", action: onRename)
+            }
+            #if os(macOS)
+            Button("Show in Finder", systemImage: "folder") {
+                SessionLibraryStore.revealInFinder(viewModel.session.url)
+            }
+            #endif
+        }
     }
 
     private var infoSection: some View {

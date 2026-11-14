@@ -67,6 +67,10 @@ final class AudioInputDeviceService: ObservableObject {
     /// block while a change (route, rate, channels) is running and would freeze the UI on the main thread.
     func refreshDevices() {
         #if os(iOS)
+        // While the library plays, the `.playback` session has no input route, so devices would look
+        // reduced (1 channel) and the selection would be recomputed mid-playback. Keep the last list;
+        // it is refreshed when playback ends.
+        guard !isPlaybackMode else { return }
         let probedSampleRates = self.probedSampleRates
         sessionQueue.async { [weak self] in
             let devices = Self.discoverAudioSessionInputs(probedSampleRates: probedSampleRates)
@@ -194,7 +198,7 @@ final class AudioInputDeviceService: ObservableObject {
             Task { @MainActor [weak self] in
                 // While the app is not active, iOS reports a temporarily reduced route (fewer channels);
                 // devices are refreshed when the app becomes active again.
-                guard UIApplication.shared.applicationState == .active else { return }
+                guard UIApplication.shared.applicationState == .active, self?.isPlaybackMode == false else { return }
                 self?.updateRoutedSession { session, logger in
                     Self.openAllInputChannels(session, logger: logger)
                 }

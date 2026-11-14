@@ -66,6 +66,9 @@ final class RecordingViewModel: ObservableObject {
     private var previewCanResume = false
     /// False while the app is in the background; idle meters stop then to save battery (NFR-6).
     private var isAppInForeground = true
+    /// Idle meters run only while the Record tab is visible (recording plan §3). This also keeps input
+    /// capture from running next to library playback on the Sessions tab.
+    private var isRecordTabVisible = true
     #if os(macOS)
     /// Keeps the Mac from idle-sleeping while a recording exists (RF-7).
     private var sleepPreventionActivity: NSObjectProtocol?
@@ -105,6 +108,24 @@ final class RecordingViewModel: ObservableObject {
         guard isPlaybackActive != active else { return }
         isPlaybackActive = active
         sourceDidChange()
+    }
+
+    /// The Record tab became visible or hidden; a recording in progress is not affected.
+    func setRecordTabVisible(_ visible: Bool) {
+        guard isRecordTabVisible != visible else { return }
+        isRecordTabVisible = visible
+        sourceDidChange()
+    }
+
+    /// iOS: the audio session switches to playback, so capture stops while the library plays.
+    /// Mac: input and output are independent; stopping the capture device while it may also be the output
+    /// caused a brief crackle, so meters keep running (Record stays unavailable while playing).
+    private var stopsMetersForPlayback: Bool {
+        #if os(iOS)
+        isPlaybackActive
+        #else
+        false
+        #endif
     }
 
     /// Recording continues in the background (iOS background audio mode); idle meters do not (RF-7, NFR-6).
@@ -187,6 +208,10 @@ final class RecordingViewModel: ObservableObject {
         ) {
             notice = RecordingNotice(kind: .startFailed(error))
             return
+        }
+        // Meters may be off (e.g. ⌘R from the Sessions tab on Mac): start capture for the recording.
+        if !capture.isRunning, let source {
+            try? capture.start(deviceID: source.deviceID, channelNumbers: source.channelNumbers)
         }
         guard let quality, capture.isRunning else {
             notice = RecordingNotice(kind: .startFailed(.deviceUnavailable))
@@ -374,7 +399,7 @@ final class RecordingViewModel: ObservableObject {
     private func updateMetering() {
         // iOS: the engine is stopped while the session changes (route, rate, channels) and restarted
         // once with the final format, instead of restarting on every intermediate change.
-        guard isAppInForeground, !isPlaybackActive, let source = meteringSource, audioSource?.service.isRoutingInput != true else {
+        guard isAppInForeground, isRecordTabVisible, !stopsMetersForPlayback, let source = meteringSource, audioSource?.service.isRoutingInput != true else {
             capture.stop()
             return
         }
