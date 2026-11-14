@@ -12,14 +12,14 @@ struct ChannelSelectionView: View {
     // Each element is its own form row inside the "Channels" section.
     @ViewBuilder
     private var channelSection: some View {
-        if viewModel.showsPermissionPrompt, let message = viewModel.userMessage, message.kind == .permissionRequired {
-            Text(message.text)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            Button("Try Again") {
-                viewModel.retryPermission()
-            }
-        } else if viewModel.permissionState == .granted {
+        if viewModel.permissionState != .granted {
+            // Same notice as the Record tab (first-use RF-3): Allow Audio Input or Open Settings.
+            AudioAccessNoticeView(
+                access: AudioAccessLogic.accessState(for: viewModel.permissionState),
+                onAllow: { Task { await viewModel.requestAccess() } },
+                onOpenSettings: { SystemSettingsLink.openAudioInputSettings() }
+            )
+        } else {
             Picker("Mode", selection: modeBinding) {
                 Text("Mono").tag(AudioChannelMode.mono)
                 Text("Stereo").tag(AudioChannelMode.stereo)

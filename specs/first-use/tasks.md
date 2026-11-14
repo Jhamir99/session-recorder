@@ -5,32 +5,32 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 
 ## Tasks
 
-- [ ] **T1 — Access logic and first-use flag** (`Features/FirstUse/AudioAccessLogic.swift`, `Features/FirstUse/FirstUseSettingsRepository.swift`)
+- [x] **T1 — Access logic and first-use flag** (`Features/FirstUse/AudioAccessLogic.swift`, `Features/FirstUse/FirstUseSettingsRepository.swift`)
   - **RF:** RF-1, RF-3, RF-6, NFR-3
   - **Depends on:** none
   - **Done when:** Pure functions cover access state, show-explanation, notice action and USB-C note rules (checked with a scratch script); the `first_use_explained_v1` flag can be read and set.
 
-- [ ] **T2 — Permission requests only on user action** (`AudioInputDeviceService.swift`, `AudioSourceSelectionViewModel+DeviceSelection.swift`)
+- [x] **T2 — Permission requests only on user action** (`AudioInputDeviceService.swift`, `AudioSourceSelectionViewModel+DeviceSelection.swift`)
   - **RF:** RF-2, RF-4, NFR-2
   - **Depends on:** none
   - **Done when:** Selecting a device no longer shows the system prompt; `requestAccess()` asks and, when granted, re-applies the automatic selection (meters appear without restart); the Mac refreshes the permission when the app becomes active.
 
-- [ ] **T3 — Settings link** (`Features/FirstUse/SystemSettingsLink.swift`)
+- [x] **T3 — Settings link** (`Features/FirstUse/SystemSettingsLink.swift`)
   - **RF:** RF-3, NFR-5
   - **Depends on:** none
   - **Done when:** iPhone/iPad open the app's settings page; Mac opens System Settings › Privacy & Security › Microphone.
 
-- [ ] **T4 — First-use view model and explanation screen** (`Features/FirstUse/ViewModels/FirstUseViewModel.swift`, `Features/FirstUse/Views/FirstUseExplanationView.swift`, `ContentView.swift`)
+- [x] **T4 — First-use view model and explanation screen** (`Features/FirstUse/ViewModels/FirstUseViewModel.swift`, `Features/FirstUse/Views/FirstUseExplanationView.swift`, `ContentView.swift`)
   - **RF:** RF-1, RF-2, RF-5
   - **Depends on:** T1, T2
   - **Done when:** On first launch (permission undecided) the explanation appears (full screen on iPhone, sheet on iPad/Mac); Continue asks and closes; Not Now closes without asking; it does not appear again; the Sessions tab works after Not Now.
 
-- [ ] **T5 — Access notice on the Record tab and in the source sheet** (`Features/FirstUse/Views/AudioAccessNoticeView.swift`, `ContentView.swift`, `ChannelSelectionView.swift`)
+- [x] **T5 — Access notice on the Record tab and in the source sheet** (`Features/FirstUse/Views/AudioAccessNoticeView.swift`, `ContentView.swift`, `ChannelSelectionView.swift`)
   - **RF:** RF-3, RF-4
   - **Depends on:** T3, T4
   - **Done when:** Not asked → Allow Audio Input; denied → Open Settings; restricted → no button; shown instead of the meters and in the source sheet (no Try Again); returning from Settings with access allowed updates the app.
 
-- [ ] **T6 — USB-C note** (`ContentView.swift`)
+- [x] **T6 — USB-C note** (`ContentView.swift`)
   - **RF:** RF-6
   - **Depends on:** T1
   - **Done when:** The note shows with the built-in microphone and no external device, hides when a mixer is connected or while recording.

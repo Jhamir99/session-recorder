@@ -1,5 +1,6 @@
 import AVFoundation
 #if os(macOS)
+import AppKit
 import CoreAudio
 #endif
 import Combine
@@ -165,7 +166,9 @@ final class AudioInputDeviceService: ObservableObject {
         permissionState = Self.currentPermissionState()
     }
 
-    func requestPermissionForDeviceSelection() async {
+    /// Shows the system prompt only while undecided; called only after a user action (first-use NFR-2:
+    /// Continue or Allow Audio Input).
+    func requestPermission() async {
         let mediaType: AVMediaType = .audio
         let status = AVCaptureDevice.authorizationStatus(for: mediaType)
         switch status {
@@ -222,8 +225,18 @@ final class AudioInputDeviceService: ObservableObject {
 
     private func observePermissionChangesIfNeeded() {
         #if os(macOS)
-        // macOS does not post a universal capture-permission change notification; UI refresh is driven
-        // by user retry/selection actions and app lifecycle checks.
+        // macOS posts no permission-change notification: check again when the app becomes active (e.g. after
+        // allowing the microphone in System Settings; first-use RF-4).
+        let observer = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.refreshPermissionState()
+            }
+        }
+        observers.append(observer)
         #else
         let observer = NotificationCenter.default.addObserver(
             forName: UIApplication.didBecomeActiveNotification,

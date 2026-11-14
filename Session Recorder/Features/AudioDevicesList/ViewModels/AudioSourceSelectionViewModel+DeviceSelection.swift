@@ -10,17 +10,23 @@ extension AudioSourceSelectionViewModel {
         userChangedSourceManually = true
         replacedDeviceID = nil
         store.saveLastSelectedDeviceID(id)
-        Task {
-            await service.requestPermissionForDeviceSelection()
-            applyStateAfterDeviceSelection()
-        }
+        // No system prompt here: access is asked only from Continue / Allow Audio Input (first-use NFR-2).
+        service.refreshPermissionState()
+        applyStateAfterDeviceSelection()
     }
 
-    func retryPermission() {
-        guard selectedDeviceID != nil else { return }
-        Task {
-            await service.requestPermissionForDeviceSelection()
+    /// Asks for audio-input access (first-use RF-1/RF-3). When granted, the selected or automatically
+    /// chosen source is applied, so meters appear without a restart (RF-2).
+    func requestAccess() async {
+        await service.requestPermission()
+        guard service.permissionState == .granted else {
             applyStateAfterDeviceSelection()
+            return
+        }
+        if let selectedDeviceID {
+            autoSelectDevice(id: selectedDeviceID, notice: nil)
+        } else if let id = AudioDeviceSelectionHelper.launchSelection(devices: rawDevices, lastSelectedDeviceID: store.lastSelectedDeviceID) {
+            autoSelectDevice(id: id, notice: nil)
         }
     }
 

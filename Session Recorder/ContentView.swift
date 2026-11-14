@@ -15,6 +15,10 @@ struct ContentView: View {
     /// Owned but not observed here (`@State`, not `@StateObject`): only the Sessions tab observes it, so list
     /// updates do not rebuild the whole window.
     @State private var libraryViewModel: SessionLibraryViewModel
+    @StateObject private var firstUseViewModel = FirstUseViewModel()
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
 
     init(
         audioSourceViewModel: AudioSourceSelectionViewModel? = nil,
@@ -37,6 +41,10 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .sheet(isPresented: showsExplanationSheet) { explanation }
+        #if os(iOS)
+        .fullScreenCover(isPresented: showsExplanationFullScreen) { explanation }
+        #endif
         #if os(macOS)
         .overlay { ExportDimmingOverlay(library: libraryViewModel) }
         .background(SpaceKeyHandler(onSpace: handleSpaceKey))
@@ -45,6 +53,7 @@ struct ContentView: View {
         .environmentObject(audioSourceViewModel)
         .task {
             libraryViewModel.attach(recording: recordingViewModel)
+            firstUseViewModel.attach(audioSource: audioSourceViewModel)
             recordingViewModel.attach(audioSource: audioSourceViewModel)
         }
         // Recording starts from the Record tab in the recording audio configuration: stop library playback.
@@ -90,6 +99,42 @@ struct ContentView: View {
     }
     #endif
 
+    private var audioAccess: AudioAccessState {
+        AudioAccessLogic.accessState(for: audioSourceViewModel.permissionState)
+    }
+
+    /// First-use explanation (RF-1): full screen on iPhone, a sheet on iPad and Mac.
+    private var explanation: some View {
+        FirstUseExplanationView(
+            onContinue: firstUseViewModel.continueFromExplanation,
+            onNotNow: firstUseViewModel.dismissExplanation
+        )
+    }
+
+    private var showsExplanationFullScreen: Binding<Bool> {
+        #if os(iOS)
+        Binding(
+            get: { firstUseViewModel.isShowingExplanation && horizontalSizeClass == .compact },
+            set: { if !$0 { firstUseViewModel.isShowingExplanation = false } }
+        )
+        #else
+        .constant(false)
+        #endif
+    }
+
+    private var showsExplanationSheet: Binding<Bool> {
+        Binding(
+            get: {
+                #if os(iOS)
+                firstUseViewModel.isShowingExplanation && horizontalSizeClass != .compact
+                #else
+                firstUseViewModel.isShowingExplanation
+                #endif
+            },
+            set: { if !$0 { firstUseViewModel.isShowingExplanation = false } }
+        )
+    }
+
     private var recordTab: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 8) {
@@ -104,7 +149,27 @@ struct ContentView: View {
                         .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
                 }
 
-                if recordingViewModel.meteredChannelCount > 0 {
+                // USB-C note: built-in microphone and no external device (first-use RF-6).
+                if AudioAccessLogic.showsExternalDeviceNote(
+                    access: audioAccess,
+                    selectedDevice: audioSourceViewModel.selectedDevice,
+                    devices: audioSourceViewModel.rawDevices,
+                    hasActiveRecording: recordingViewModel.state.hasActiveRecording
+                ) {
+                    Label("For the best quality, connect your mixer or audio interface over USB-C.", systemImage: "cable.connector")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                if audioAccess != .allowed {
+                    // In place of the meters while audio input is not allowed (first-use RF-3).
+                    AudioAccessNoticeView(
+                        access: audioAccess,
+                        onAllow: firstUseViewModel.requestAccess,
+                        onOpenSettings: firstUseViewModel.openSettings
+                    )
+                    .padding(.top, 8)
+                } else if recordingViewModel.meteredChannelCount > 0 {
                     LiveLevelMetersView(meters: recordingViewModel.meters)
                         .padding(.top, 8)
                 }
