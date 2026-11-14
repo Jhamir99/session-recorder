@@ -112,7 +112,8 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T19
   - **Done when:** Docs list `Features/SessionLibrary/` and the updated status.
 
-- [ ] **T21 — Verification pass**
+- [x] **T21 — Verification pass**
   - **RF:** RF-1–RF-8, NFR-1–NFR-6
   - **Depends on:** T1–T20
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; manual checks on a real iPhone and Mac cover every Completion Criterion in the spec, including a ≥ 1 h session and every export format opened in another app.
+  - **Result (2026-11-14):** Clean builds for macOS and iOS Simulator; scratch checks 144/144 (library logic, listing, rename, bit-exact trim, every export format, 1 h waveform, recording logic). On device (user): iPhone, Mac and iPad, 1 h session (waveform, locked playback, trim, FLAC/AAC export), all six formats opened in another app.
