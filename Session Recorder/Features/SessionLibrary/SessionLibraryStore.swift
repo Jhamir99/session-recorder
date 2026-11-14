@@ -89,6 +89,75 @@ nonisolated struct SessionLibraryStore: Sendable {
         return destination
     }
 
+    // MARK: Trim (RF-5)
+
+    enum TrimError: Error, Equatable {
+        case invalidRange
+        case notEnoughStorage
+        case cancelled
+    }
+
+    /// Copies `range` of the session into a new session named `newName` (already unique), with the same
+    /// format (bit-exact: 16/24-bit PCM survives the Float32 round trip unchanged) and `recordedDate` as its
+    /// creation date. Written to a temp file and moved into Sessions at the end, so a failure or
+    /// cancellation leaves nothing behind (NFR-4). Run off the main thread.
+    func trim(_ url: URL, range: TrimRange, newName: String, recordedDate: Date) throws -> URL {
+        let source = try AVAudioFile(forReading: url)
+        let frames = SessionLibraryLogic.frameRange(for: range, sampleRate: source.fileFormat.sampleRate, totalFrames: source.length)
+        guard frames.count > 0 else { throw TrimError.invalidRange }
+
+        let bytesPerFrame = Int64(source.fileFormat.streamDescription.pointee.mBytesPerFrame)
+        let neededBytes = frames.count * max(bytesPerFrame, 1) + 1_000_000
+        guard Self.freeBytes(at: sessionsDirectory) >= neededBytes else { throw TrimError.notEnoughStorage }
+
+        let fileManager = FileManager.default
+        let temporaryDirectory = fileManager.temporaryDirectory.appending(path: "Trim", directoryHint: .isDirectory)
+        try fileManager.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
+        let temporaryURL = temporaryDirectory.appending(path: UUID().uuidString).appendingPathExtension(SessionFileStore.fileExtension)
+        defer { try? fileManager.removeItem(at: temporaryURL) }
+
+        do {
+            // Scope the writer so the file is closed before it is moved.
+            try {
+                let output = try AVAudioFile(
+                    forWriting: temporaryURL,
+                    settings: source.fileFormat.settings,
+                    commonFormat: source.processingFormat.commonFormat,
+                    interleaved: source.processingFormat.isInterleaved
+                )
+                let chunkFrames = AVAudioFrameCount(max(source.processingFormat.sampleRate, 1))
+                guard let buffer = AVAudioPCMBuffer(pcmFormat: source.processingFormat, frameCapacity: chunkFrames) else {
+                    throw TrimError.invalidRange
+                }
+                source.framePosition = frames.start
+                var remaining = frames.count
+                while remaining > 0 {
+                    if Task.isCancelled { throw TrimError.cancelled }
+                    let toRead = AVAudioFrameCount(min(Int64(chunkFrames), remaining))
+                    try source.read(into: buffer, frameCount: toRead)
+                    guard buffer.frameLength > 0 else { break }
+                    try output.write(from: buffer)
+                    remaining -= Int64(buffer.frameLength)
+                }
+            }()
+            try fileManager.createDirectory(at: sessionsDirectory, withIntermediateDirectories: true)
+            let destination = sessionsDirectory.appending(path: newName).appendingPathExtension(SessionFileStore.fileExtension)
+            try fileManager.moveItem(at: temporaryURL, to: destination)
+            try? fileManager.setAttributes([.creationDate: recordedDate], ofItemAtPath: destination.path)
+            return destination
+        }
+    }
+
+    /// Free bytes on the volume of `url` (same measure as recording).
+    static func freeBytes(at url: URL) -> Int64 {
+        let keys: Set<URLResourceKey> = [.volumeAvailableCapacityForImportantUsageKey, .volumeAvailableCapacityKey]
+        guard let values = try? url.resourceValues(forKeys: keys) else { return 0 }
+        if let important = values.volumeAvailableCapacityForImportantUsage, important > 0 {
+            return important
+        }
+        return Int64(values.volumeAvailableCapacity ?? 0)
+    }
+
     // MARK: Delete (RF-4)
 
     /// Mac: moves the file to the Trash (restorable from Finder). iPhone/iPad: deletes it permanently

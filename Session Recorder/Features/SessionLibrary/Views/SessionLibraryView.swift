@@ -78,6 +78,7 @@ struct SessionLibraryView<Indicator: View>: View {
                 session: session,
                 handoff: viewModel.playbackHandoff,
                 isRecordingActive: isRecordingActive,
+                trimContext: viewModel.trimContext,
                 onRename: { viewModel.startRename(session) },
                 onDelete: { viewModel.requestDelete(session) }
             )

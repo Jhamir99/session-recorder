@@ -75,12 +75,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Delete from list and detail with a confirmation naming the session; Mac moves to the Trash, iOS deletes permanently (text says so); playback stops first; the detail returns to the list; the cache entry is removed.
 
 ### Trim (RF-5)
-- [ ] **T14 — Trim copy in the store** (`SessionLibraryStore.swift`)
+- [x] **T14 — Trim copy in the store** (`SessionLibraryStore.swift`)
   - **RF:** RF-5, NFR-4
   - **Depends on:** T3
   - **Done when:** A frame range is copied to a new CAF with identical settings via a temp file, named `<name> (trimmed)` (unique), with creation date = original + start; storage checked first; failure leaves no file; a scratch script confirms the samples match the original range.
 
-- [ ] **T15 — Trim UI** (`ViewModels/SessionDetailViewModel+Trim.swift`, `Views/TrimControlsView.swift`, `WaveformView.swift`)
+- [x] **T15 — Trim UI** (`ViewModels/SessionDetailViewModel+Trim.swift`, `Views/TrimControlsView.swift`, `WaveformView.swift`)
   - **RF:** RF-5
   - **Depends on:** T9, T14
   - **Done when:** Handles on the waveform with start/end/duration labels, Play Selection, Save disabled under 1 s; saving opens the new session and keeps the original.

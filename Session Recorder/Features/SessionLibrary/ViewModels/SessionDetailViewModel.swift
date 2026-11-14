@@ -21,18 +21,30 @@ final class SessionDetailViewModel: ObservableObject {
     @Published private(set) var isPlayable = false
     /// A recording exists: playback is disabled so it never affects the recording (RF-2).
     @Published private(set) var isPlaybackBlocked = false
+    /// Trim mode (RF-5): the selected range, nil when not trimming.
+    @Published var trimRange: TrimRange?
+    @Published var isSavingTrim = false
+    /// Shown as an alert when saving the trimmed session fails.
+    @Published var trimErrorMessage: String?
     let progress = PlaybackProgress()
 
     private let waveformService: WaveformService
     private let logger = Logger(subsystem: "SessionRecorder", category: "SessionDetail")
     private var loadTask: Task<Void, Never>?
-    private let player = SessionPlayerService()
+    let player = SessionPlayerService()
     private var progressTask: Task<Void, Never>?
     private let handoff: PlaybackHandoff
+    let trimContext: TrimContext
     /// The audio session is set up for playback (until playback is stopped).
     private var ownsPlayback = false
 
-    init(session: SessionItem, waveformService: WaveformService = WaveformService(), handoff: PlaybackHandoff? = nil) {
+    init(
+        session: SessionItem,
+        waveformService: WaveformService = WaveformService(),
+        handoff: PlaybackHandoff? = nil,
+        trimContext: TrimContext? = nil
+    ) {
+        self.trimContext = trimContext ?? .none
         self.session = session
         self.waveformService = waveformService
         self.handoff = handoff ?? .none
@@ -110,6 +122,11 @@ final class SessionDetailViewModel: ObservableObject {
 
     /// Switches the audio session to playback first (stops recording meters), then plays.
     func play() {
+        startPlayback { $0.play() }
+    }
+
+    /// Runs `start` on the player once the audio session is ready for playback (whole session or a range).
+    func startPlayback(_ start: @escaping (SessionPlayerService) -> Void) {
         guard canPlay else { return }
         Task { [weak self] in
             guard let self else { return }
@@ -120,7 +137,7 @@ final class SessionDetailViewModel: ObservableObject {
             }
             guard ownsPlayback, canPlay else { return }
             await player.prepareToResume()
-            player.play()
+            start(player)
             isPlaying = player.isPlaying
             startProgressUpdates()
         }

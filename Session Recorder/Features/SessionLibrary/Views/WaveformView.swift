@@ -10,6 +10,10 @@ struct WaveformView: View {
     var isLoading = false
     var progress: PlaybackProgress?
     var onSeek: ((TimeInterval) -> Void)?
+    /// Trim mode (RF-5): handles at the range edges; outside the range is dimmed.
+    var trimRange: TrimRange?
+    var onTrimStart: ((TimeInterval) -> Void)?
+    var onTrimEnd: ((TimeInterval) -> Void)?
 
     @State private var width: CGFloat = 0
 
@@ -41,6 +45,16 @@ struct WaveformView: View {
                 Playhead(progress: progress, duration: duration)
             }
         }
+        .overlay {
+            if let trimRange {
+                TrimOverlay(
+                    range: trimRange,
+                    duration: duration,
+                    onStart: { onTrimStart?($0) },
+                    onEnd: { onTrimEnd?($0) }
+                )
+            }
+        }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         .contentShape(Rectangle())
         .gesture(seekGesture, isEnabled: onSeek != nil)
@@ -60,6 +74,58 @@ struct WaveformView: View {
         guard width > 0 else { return }
         onSeek?(SessionLibraryLogic.time(xPosition: x, width: width, duration: duration))
     }
+}
+
+/// Dims the parts outside the range and shows a draggable handle at each edge (RF-5).
+private struct TrimOverlay: View {
+    let range: TrimRange
+    let duration: TimeInterval
+    let onStart: (TimeInterval) -> Void
+    let onEnd: (TimeInterval) -> Void
+
+    private let handleWidth: CGFloat = 12
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let startX = SessionLibraryLogic.xPosition(time: range.start, duration: duration, width: width)
+            let endX = SessionLibraryLogic.xPosition(time: range.end, duration: duration, width: width)
+            ZStack(alignment: .leading) {
+                Rectangle().fill(.black.opacity(0.45)).frame(width: max(startX, 0))
+                Rectangle().fill(.black.opacity(0.45)).frame(width: max(width - endX, 0)).offset(x: endX)
+                Rectangle()
+                    .strokeBorder(.yellow, lineWidth: 2)
+                    .frame(width: max(endX - startX, 2))
+                    .offset(x: startX)
+                    .allowsHitTesting(false)
+                handle(atX: startX, width: width, onChange: onStart)
+                handle(atX: endX, width: width, onChange: onEnd)
+            }
+        }
+        .coordinateSpace(name: Self.space)
+    }
+
+    private func handle(atX x: CGFloat, width: CGFloat, onChange: @escaping (TimeInterval) -> Void) -> some View {
+        RoundedRectangle(cornerRadius: 3)
+            .fill(.yellow)
+            .frame(width: handleWidth)
+            .overlay {
+                Capsule().fill(.black.opacity(0.5)).frame(width: 2, height: 16)
+            }
+            // A wider invisible area makes the handle easy to grab on touch screens.
+            .contentShape(Rectangle().inset(by: -10))
+            .offset(x: x - handleWidth / 2)
+            // High priority: dragging a handle must not scroll or start the back gesture.
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 0, coordinateSpace: .named(Self.space))
+                    .onChanged { value in
+                        onChange(SessionLibraryLogic.time(xPosition: value.location.x, width: width, duration: duration))
+                    }
+            )
+            .accessibilityHidden(true)
+    }
+
+    fileprivate static let space = "trimOverlay"
 }
 
 /// Vertical line at the playback position; the only part that redraws while playing.

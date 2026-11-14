@@ -102,6 +102,16 @@ final class SessionLibraryViewModel: ObservableObject {
         }
     }
 
+    // MARK: Trim (RF-5)
+
+    /// Unique names come from the current list; the saved session is listed and opened.
+    var trimContext: TrimContext {
+        TrimContext(
+            existingNames: { [weak self] in Set(self?.sessions.map(\.name) ?? []) },
+            didSave: { [weak self] url in self?.refresh(selecting: url) }
+        )
+    }
+
     // MARK: Delete (RF-4)
 
     /// Asks for confirmation first (the dialog names the session).
@@ -133,7 +143,8 @@ final class SessionLibraryViewModel: ObservableObject {
 
     /// Lists the folder off the main thread, then reads durations/formats (NFR-2).
     /// Audio info already known for an unchanged file is kept, so rows do not flicker.
-    func refresh() {
+    /// `selecting`: a file to select once listed (e.g. a new trimmed session).
+    func refresh(selecting urlToSelect: URL? = nil) {
         refreshGeneration += 1
         let generation = refreshGeneration
         let store = store
@@ -150,7 +161,9 @@ final class SessionLibraryViewModel: ObservableObject {
                 return kept
             }
             hasLoaded = true
-            if let selectedSessionID, !sessions.contains(where: { $0.id == selectedSessionID }) {
+            if let urlToSelect, let item = sessions.first(where: { $0.url.standardizedFileURL == urlToSelect.standardizedFileURL }) {
+                selectedSessionID = item.id
+            } else if let selectedSessionID, !sessions.contains(where: { $0.id == selectedSessionID }) {
                 self.selectedSessionID = nil
             }
             await loadAudioInfo(generation: generation)

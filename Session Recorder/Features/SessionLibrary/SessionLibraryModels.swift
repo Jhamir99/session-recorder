@@ -127,6 +127,16 @@ struct PlaybackHandoff {
     static let none = PlaybackHandoff(begin: { _ in }, end: {})
 }
 
+/// What a session detail needs from the library to save a trimmed copy (RF-5).
+struct TrimContext {
+    /// Names of all sessions, for a unique `(trimmed)` name.
+    var existingNames: () -> Set<String>
+    /// Called with the new file so the library lists and opens it.
+    var didSave: (URL) -> Void
+
+    static let none = TrimContext(existingNames: { [] }, didSave: { _ in })
+}
+
 /// Selected part of a session for trimming, in seconds from the start (RF-5).
 nonisolated struct TrimRange: Equatable {
     var start: TimeInterval

@@ -14,10 +14,11 @@ struct SessionDetailView: View {
         session: SessionItem,
         handoff: PlaybackHandoff,
         isRecordingActive: Bool,
+        trimContext: TrimContext? = nil,
         onRename: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) {
-        _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff))
+        _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff, trimContext: trimContext))
         self.session = session
         self.isRecordingActive = isRecordingActive
         self.onRename = onRename
@@ -39,10 +40,13 @@ struct SessionDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
         }
-        .navigationTitle(viewModel.session.name)
+        .navigationTitle(viewModel.isTrimming ? "Trim" : viewModel.session.name)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        // While trimming, Cancel replaces Back; hiding Back also turns off the swipe-back gesture, which
+        // the handles would otherwise trigger when dragged.
+        .navigationBarBackButtonHidden(viewModel.isTrimming)
         .task {
             viewModel.setPlaybackBlocked(isRecordingActive)
             viewModel.load()
@@ -55,15 +59,45 @@ struct SessionDetailView: View {
         }
         .onDisappear { viewModel.cancel() }
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                actionsMenu
+            if viewModel.isTrimming {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { viewModel.cancelTrim() }
+                        .disabled(viewModel.isSavingTrim)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if viewModel.isSavingTrim {
+                        ProgressView()
+                    } else {
+                        // Prominent (filled) like the main action in system apps; Cancel stays plain.
+                        Button("Save") { viewModel.saveTrim() }
+                            .buttonStyle(.glassProminent)
+                            .disabled(!viewModel.canSaveTrim)
+                    }
+                }
+            } else {
+                ToolbarItem(placement: .primaryAction) {
+                    actionsMenu
+                }
             }
+        }
+        .alert(
+            viewModel.trimErrorMessage ?? "",
+            isPresented: Binding(
+                get: { viewModel.trimErrorMessage != nil },
+                set: { if !$0 { viewModel.trimErrorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
         }
     }
 
     /// Session actions (more are added with delete, trim and share).
     private var actionsMenu: some View {
         Menu("Actions", systemImage: "ellipsis.circle") {
+            Button("Trim…", systemImage: "scissors") {
+                viewModel.startTrim()
+            }
+            .disabled(viewModel.audioInfo == nil || viewModel.isTrimming)
             if let onRename {
                 Button("Rename…", systemImage: "pencil", action: onRename)
             }
@@ -126,19 +160,24 @@ struct SessionDetailView: View {
                 duration: viewModel.duration,
                 isLoading: !viewModel.isWaveformComplete,
                 progress: viewModel.progress,
-                onSeek: seekAction
+                onSeek: viewModel.isTrimming ? nil : seekAction,
+                trimRange: viewModel.trimRange,
+                onTrimStart: { viewModel.setTrimStart($0) },
+                onTrimEnd: { viewModel.setTrimEnd($0) }
             )
             .frame(maxWidth: .infinity)
             .frame(height: 80)
 
-            PlayerControlsView(
-                progress: viewModel.progress,
-                duration: viewModel.duration,
-                isPlaying: viewModel.isPlaying,
-                isEnabled: viewModel.canPlay,
-                onTogglePlayback: { viewModel.togglePlayback() },
-                onSkip: { viewModel.skip(by: $0) }
-            )
+            if let trimRange = viewModel.trimRange {
+                TrimControlsView(
+                    range: trimRange,
+                    canPlay: viewModel.canPlay,
+                    isPlaying: viewModel.isPlaying,
+                    onPlaySelection: { viewModel.isPlaying ? viewModel.pause() : viewModel.playSelection() }
+                )
+            } else {
+                playerControls
+            }
             if viewModel.isPlaybackBlocked {
                 Label("Playback is unavailable while recording.", systemImage: "record.circle")
                     .font(.footnote)
@@ -146,5 +185,16 @@ struct SessionDetailView: View {
                     .frame(maxWidth: .infinity)
             }
         }
+    }
+
+    private var playerControls: some View {
+        PlayerControlsView(
+            progress: viewModel.progress,
+            duration: viewModel.duration,
+            isPlaying: viewModel.isPlaying,
+            isEnabled: viewModel.canPlay,
+            onTogglePlayback: { viewModel.togglePlayback() },
+            onSkip: { viewModel.skip(by: $0) }
+        )
     }
 }

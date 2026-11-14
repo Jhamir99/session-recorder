@@ -117,7 +117,7 @@ any ──Record tab selected / detail closed / session deleted──▶ stopped
 | Sessions tab | `REC` indicator (recording RF-4) above the list; list newest first; empty state when none. iPhone: list → detail push; iPad/Mac: list + detail side by side. | RF-1, NFR-1 |
 | Row | Name, `12 Nov 2026, 22:30 · 1:02:15`; "Can't be played" for unreadable files. Swipe: Delete, Rename. Context menu: Rename, Share, Delete (and Show in Finder on Mac). | RF-1, RF-3, RF-4, RF-6 |
 | Detail | Name (title), date, duration, `Stereo · 24-bit/48 kHz · 1.04 GB`; waveform; player; toolbar/menu: Trim, Share, Rename, Delete, Show in Finder (Mac). | RF-2–RF-7 |
-| Trim | Handles on the waveform; start/end/duration labels; Play Selection; Cancel / Save as New Session. | RF-5 |
+| Trim | Handles on the waveform (selection framed, outside dimmed); start/end/duration labels; one Play Selection button; Cancel / Save (prominent) in the navigation bar, Back hidden so the swipe-back gesture does not fire while dragging handles. | RF-5 |
 | Share sheet | Format picker, AAC bitrate (only for AAC), "About 412 MB", Export → progress + Cancel → Share… (+ Save… on Mac). | RF-6 |
 | Rename | Small sheet with a text field; validation shown as you type (an alert cannot validate live); Rename disabled while invalid or unchanged. | RF-3 |
 | Delete | Confirmation dialog naming the session; iOS text says it cannot be undone; Mac says it moves to the Trash. | RF-4 |

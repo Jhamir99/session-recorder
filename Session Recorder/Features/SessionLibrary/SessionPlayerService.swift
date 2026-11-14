@@ -88,6 +88,25 @@ final class SessionPlayerService {
         updateNowPlaying()
     }
 
+    /// Plays `start...end` only (trim preview, RF-5); playback stops at `end` and reports `onFinish`.
+    func playRange(from start: TimeInterval, to end: TimeInterval) {
+        guard let player, let item = player.currentItem else { return }
+        item.forwardPlaybackEndTime = CMTime(seconds: end, preferredTimescale: 48_000)
+        player.seek(to: CMTime(seconds: start, preferredTimescale: 48_000), toleranceBefore: .zero, toleranceAfter: .zero)
+        player.play()
+        updateNowPlaying()
+    }
+
+    /// Moves where range playback stops (the selection end changed while playing).
+    func setRangeEnd(_ end: TimeInterval) {
+        player?.currentItem?.forwardPlaybackEndTime = CMTime(seconds: end, preferredTimescale: 48_000)
+    }
+
+    /// Back to playing the whole session.
+    func clearRangeEnd() {
+        player?.currentItem?.forwardPlaybackEndTime = .invalid
+    }
+
     /// Stops playback, releases the file and clears Now Playing.
     func stop() {
         player?.pause()
