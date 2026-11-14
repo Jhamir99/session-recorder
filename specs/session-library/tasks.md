@@ -6,17 +6,17 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 ## Tasks
 
 ### Foundation
-- [ ] **T1 — Library models** (`Features/SessionLibrary/SessionLibraryModels.swift`)
+- [x] **T1 — Library models** (`Features/SessionLibrary/SessionLibraryModels.swift`)
   - **RF:** RF-1–RF-6
   - **Depends on:** none
   - **Done when:** Value types exist for session item, session format, export format + AAC bitrate, trim range, waveform data and library notices/errors; no I/O.
 
-- [ ] **T2 — Pure library logic** (`Features/SessionLibrary/SessionLibraryLogic.swift`)
+- [x] **T2 — Pure library logic** (`Features/SessionLibrary/SessionLibraryLogic.swift`)
   - **RF:** RF-1–RF-6
   - **Depends on:** T1
   - **Done when:** Pure functions cover sorting, recorded date (creation date / name / modification fallback), rename validation (empty, `/` `:`, duplicate case-insensitive), trimmed name + uniqueness, trim range (clamp, ≥ 1 s, frames, trimmed date), export size estimate, AAC rate, waveform bars and position ↔ x, cache key, and formatting; verified with a scratch script.
 
-- [ ] **T3 — Library store: list and info** (`Features/SessionLibrary/SessionLibraryStore.swift`, `Features/Recording/SessionFileStore.swift`)
+- [x] **T3 — Library store: list and info** (`Features/SessionLibrary/SessionLibraryStore.swift`, `Features/Recording/SessionFileStore.swift`)
   - **RF:** RF-1, NFR-2
   - **Depends on:** T1, T2
   - **Done when:** Lists `.caf` files in the shared Sessions directory with name, recorded date, size, and (off the main thread) duration/format; unreadable files are marked; non-CAF files ignored; checked with a scratch script on a temp folder.

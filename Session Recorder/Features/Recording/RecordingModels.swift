@@ -10,7 +10,7 @@ struct RecordingQuality: Equatable, Hashable, Codable {
         "\(bitDepth)-bit/\(Self.formatSampleRate(sampleRate))"
     }
 
-    static func formatSampleRate(_ sampleRate: Double) -> String {
+    nonisolated static func formatSampleRate(_ sampleRate: Double) -> String {
         let kilohertz = sampleRate / 1000
         let text = kilohertz.rounded() == kilohertz
             ? String(Int(kilohertz))

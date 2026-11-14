@@ -7,7 +7,11 @@ import os
 /// - `Application Support/InProgress/<start date>.caf`: the recording in progress; moved to Sessions on stop.
 ///   The start date in its name lets an interrupted recording be recovered without extra persisted state.
 final class SessionFileStore {
-    static let fileExtension = "caf"
+    nonisolated static let fileExtension = "caf"
+    /// `Documents/Sessions/`: finished sessions (also listed by the session library).
+    nonisolated static var defaultSessionsDirectory: URL {
+        URL.documentsDirectory.appending(path: "Sessions", directoryHint: .isDirectory)
+    }
 
     let sessionsDirectory: URL
     let inProgressDirectory: URL
@@ -16,8 +20,7 @@ final class SessionFileStore {
 
     /// Directories can be injected for checks outside the app.
     init(sessionsDirectory: URL? = nil, inProgressDirectory: URL? = nil) {
-        self.sessionsDirectory = sessionsDirectory
-            ?? URL.documentsDirectory.appending(path: "Sessions", directoryHint: .isDirectory)
+        self.sessionsDirectory = sessionsDirectory ?? Self.defaultSessionsDirectory
         self.inProgressDirectory = inProgressDirectory
             ?? URL.applicationSupportDirectory.appending(path: "InProgress", directoryHint: .isDirectory)
     }
