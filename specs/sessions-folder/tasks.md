@@ -5,7 +5,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
 
 ## Tasks
 
-- [ ] **T1 — Folder logic and bookmark storage** (`Features/SessionsFolder/SessionsFolderLogic.swift`, `SessionsFolderRepository.swift`)
+- [x] **T1 — Folder logic and bookmark storage** (`Features/SessionsFolder/SessionsFolderLogic.swift`, `SessionsFolderRepository.swift`)
   - **RF:** RF-1–RF-3, RF-5, NFR-3
   - **Depends on:** none
   - **Done when:** Pure rules (folder in use, warning, inside-app check, unique names, move summary) checked with a scratch script; the bookmark can be saved and loaded.
