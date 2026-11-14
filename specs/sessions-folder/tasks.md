@@ -50,7 +50,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T3–T8
   - **Done when:** Catalog synced with 0 untranslated strings; previews for app folder + warning, chosen folder, unavailable, moving, move result.
 
-- [ ] **T10 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T10 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2
   - **Depends on:** T9
   - **Done when:** Docs list `Features/SessionsFolder/` and the updated status.

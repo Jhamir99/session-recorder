@@ -15,6 +15,8 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 - Settings (⌘, on Mac, gear on iPhone/iPad): meter style and peak hold, fade at pause/resume, keep screen on, session name prefix, recording time limit, low-storage warning, default export format, theme and waveform style; library sort order and a storage status line.
 
+- Sessions folder: keep sessions in the App Folder or choose any folder (On My iPhone/iPad, iCloud Drive, an external drive, any folder on Mac) so they are not deleted with the app; existing sessions can be moved; recordings fall back to the App Folder while the folder is unavailable; iCloud files are downloaded on demand; **Show in Files** (iPhone/iPad) / **Show in Finder** (Mac) from the session detail.
+
 - English and Spanish (follows the system or per-app language).
 
 ## Product Vision
@@ -63,8 +65,8 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 - Backend, accounts, or cloud services.
 
 ### Session storage
-- Each session is one `.caf` file in a `Sessions` folder inside the app's Documents folder, named `Session YYYY-MM-DD HH.mm.ss` (date and time the recording started). Date and duration are read from the file; there is no separate metadata file for now.
-- A recording in progress is written to the app's Application Support folder and moved to `Sessions` when it stops (or on the next launch, if the app was terminated while recording).
+- Each session is one `.caf` file in the sessions folder: by default a `Sessions` folder inside the app's Documents folder (the App Folder; deleted with the app on iPhone/iPad), or a folder the user chooses in Settings. Files are named `Session YYYY-MM-DD HH.mm.ss` (date and time the recording started). Date and duration are read from the file; there is no separate metadata file for now.
+- A recording in progress is written to the app's Application Support folder and moved to the sessions folder when it stops (the App Folder if the chosen folder is unavailable) (or on the next launch, if the app was terminated while recording).
 
 ## Overview
 
