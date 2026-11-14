@@ -45,7 +45,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T4
   - **Done when:** The detail menu opens the system file browser at the session's folder on iPhone/iPad; Mac keeps Show in Finder.
 
-- [ ] **T9 — Spanish texts and previews** (`Localizable.xcstrings`, `Views/SessionsFolderViews+Previews.swift`)
+- [x] **T9 — Spanish texts and previews** (`Localizable.xcstrings`, `Views/SessionsFolderViews+Previews.swift`)
   - **RF:** NFR-5, C5
   - **Depends on:** T3–T8
   - **Done when:** Catalog synced with 0 untranslated strings; previews for app folder + warning, chosen folder, unavailable, moving, move result.

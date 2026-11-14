@@ -319,7 +319,15 @@
       }
     },
     "App Folder" : {
-      "comment" : "Sessions folder: the app's own folder"
+      "comment" : "Sessions folder: the app's own folder",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta de la app"
+          }
+        }
+      }
     },
     "Appearance" : {
       "localizations" : {
@@ -505,7 +513,14 @@
       }
     },
     "Choose Folder…" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir carpeta…"
+          }
+        }
+      }
     },
     "Choose Source…" : {
       "localizations" : {
@@ -539,7 +554,14 @@
       }
     },
     "Connect the drive or check the folder. Meanwhile, new sessions are saved in the App Folder and listed here." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecta la unidad o revisa la carpeta. Mientras tanto, las nuevas sesiones se guardan en la carpeta de la app y aparecen aquí."
+          }
+        }
+      }
     },
     "Continue" : {
       "localizations" : {
@@ -636,7 +658,14 @@
       }
     },
     "Downloading…" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando…"
+          }
+        }
+      }
     },
     "Duration" : {
       "localizations" : {
@@ -680,7 +709,14 @@
       }
     },
     "Export" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportación"
+          }
+        }
+      }
     },
     "Export format" : {
       "localizations" : {
@@ -784,7 +820,14 @@
       }
     },
     "Keep Them" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dejarlas"
+          }
+        }
+      }
     },
     "Last Used" : {
       "localizations" : {
@@ -956,7 +999,14 @@
       }
     },
     "Move Sessions" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover sesiones"
+          }
+        }
+      }
     },
     "Move to Trash" : {
       "comment" : "Session menu",
@@ -970,10 +1020,26 @@
       }
     },
     "Move your sessions to the new folder?" : {
-      "comment" : "Sessions folder: move question"
+      "comment" : "Sessions folder: move question",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Mover tus sesiones a la nueva carpeta?"
+          }
+        }
+      }
     },
     "Moved %lld sessions." : {
-      "comment" : "Sessions folder: move result"
+      "comment" : "Sessions folder: move result",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se movieron %lld sesiones."
+          }
+        }
+      }
     },
     "Moved %lld sessions. %lld sessions could not be moved and stay in the previous folder." : {
       "comment" : "Sessions folder: move result with failures",
@@ -983,14 +1049,36 @@
             "state" : "new",
             "value" : "Moved %1$lld sessions. %2$lld sessions could not be moved and stay in the previous folder."
           }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se movieron %lld sesiones. %lld sesiones no se pudieron mover y siguen en la carpeta anterior."
+          }
         }
       }
     },
     "Moved %lld sessions. 1 session could not be moved and stays in the previous folder." : {
-      "comment" : "Sessions folder: move result with a failure"
+      "comment" : "Sessions folder: move result with a failure",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se movieron %lld sesiones. 1 sesión no se pudo mover y sigue en la carpeta anterior."
+          }
+        }
+      }
     },
     "Moved 1 session." : {
-      "comment" : "Sessions folder: move result"
+      "comment" : "Sessions folder: move result",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se movió 1 sesión."
+          }
+        }
+      }
     },
     "Moving sessions… %lld of %lld" : {
       "comment" : "Sessions folder: move progress",
@@ -999,6 +1087,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Moving sessions… %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moviendo sesiones… %lld de %lld"
           }
         }
       }
@@ -1696,13 +1790,35 @@
       }
     },
     "Sessions folder" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta de sesiones"
+          }
+        }
+      }
     },
     "Sessions in the App Folder are deleted if you delete the app. Choose another folder to keep them." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las sesiones de la carpeta de la app se borran si eliminas la app. Elige otra carpeta para conservarlas."
+          }
+        }
+      }
     },
     "Sessions you keep stay in the current folder and are not shown until you switch back." : {
-      "comment" : "Sessions folder: move question detail"
+      "comment" : "Sessions folder: move question detail",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las sesiones que dejes seguirán en la carpeta actual y no se mostrarán hasta que vuelvas a ella."
+          }
+        }
+      }
     },
     "Settings" : {
       "localizations" : {
@@ -1746,7 +1862,14 @@
       }
     },
     "Show in Files" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar en Archivos"
+          }
+        }
+      }
     },
     "Show in Finder" : {
       "localizations" : {
@@ -2059,13 +2182,35 @@
       }
     },
     "The sessions folder isn't available, so the session was saved in the App Folder: %@" : {
-      "comment" : "Recording notice"
+      "comment" : "Recording notice",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de sesiones no está disponible, así que la sesión se guardó en la carpeta de la app: %@"
+          }
+        }
+      }
     },
     "The sessions folder isn't available." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de sesiones no está disponible."
+          }
+        }
+      }
     },
     "The sessions folder isn't available. New sessions are saved in the App Folder." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de sesiones no está disponible. Las nuevas sesiones se guardan en la carpeta de la app."
+          }
+        }
+      }
     },
     "The source cannot change while recording" : {
       "comment" : "VoiceOver hint: locked source row",
@@ -2110,13 +2255,36 @@
       }
     },
     "This folder can't be used. Choose another one." : {
-      "comment" : "Sessions folder: picked folder not accessible"
+      "comment" : "Sessions folder: picked folder not accessible",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta carpeta no se puede usar. Elige otra."
+          }
+        }
+      }
     },
     "This session is in iCloud Drive and is being downloaded to this device." : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta sesión está en iCloud Drive y se está descargando en este dispositivo."
+          }
+        }
+      }
     },
     "This session will be deleted from the sessions folder. If the folder supports it, you can restore it from Recently Deleted in the Files app." : {
-      "comment" : "Delete confirmation, chosen folder"
+      "comment" : "Delete confirmation, chosen folder",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta sesión se eliminará de la carpeta de sesiones. Si la carpeta lo permite, podrás recuperarla desde Eliminado recientemente en la app Archivos."
+          }
+        }
+      }
     },
     "This session will be deleted from this device. This can't be undone." : {
       "comment" : "Delete confirmation",
@@ -2172,7 +2340,14 @@
       }
     },
     "Use App Folder" : {
-
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar carpeta de la app"
+          }
+        }
+      }
     },
     "Warns when this much recording time is left." : {
       "localizations" : {

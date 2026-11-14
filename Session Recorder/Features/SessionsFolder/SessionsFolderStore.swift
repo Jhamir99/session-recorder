@@ -207,6 +207,13 @@ final class SessionsFolderStore: ObservableObject {
         if newFolder != folder { folder = newFolder }
     }
 
+    /// Previews only (see SessionsFolderViews+Previews): shows a state without touching any folder.
+    func applyPreview(folder: SessionsFolderInUse, moveProgress: (done: Int, total: Int)? = nil, moveResult: String? = nil) {
+        self.folder = folder
+        self.moveProgress = moveProgress
+        self.moveResult = moveResult
+    }
+
     private func stopAccessingChosenFolder() {
         accessedURL?.stopAccessingSecurityScopedResource()
         accessedURL = nil
