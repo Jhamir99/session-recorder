@@ -1,12 +1,17 @@
 import SwiftUI
 
 /// Whole-session waveform (RF-2): bars mirrored around the center, drawn for the full duration so a
-/// partial waveform fills left to right. Playback position, seeking and trim handles are added later.
+/// partial waveform fills left to right. With `progress`, shows the playhead; with `onSeek`, tapping or
+/// dragging moves it. Trim handles are added later.
 struct WaveformView: View {
     let waveform: WaveformData?
     /// Session duration (the waveform may still be shorter while it is computed).
     let duration: TimeInterval
     var isLoading = false
+    var progress: PlaybackProgress?
+    var onSeek: ((TimeInterval) -> Void)?
+
+    @State private var width: CGFloat = 0
 
     private let barWidth: CGFloat = 2
     private let barSpacing: CGFloat = 1
@@ -31,10 +36,46 @@ struct WaveformView: View {
                 ProgressView()
             }
         }
+        .overlay {
+            if let progress {
+                Playhead(progress: progress, duration: duration)
+            }
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .contentShape(Rectangle())
+        .gesture(seekGesture, isEnabled: onSeek != nil)
         .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
         .accessibilityElement()
         .accessibilityLabel("Waveform")
         .accessibilityValue(isLoading ? "Loading" : "\(SessionLibraryLogic.formatPlaybackTime(duration)) long")
+    }
+
+    /// Tap or drag anywhere on the waveform to move the playback position.
+    private var seekGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in seek(atX: value.location.x) }
+    }
+
+    private func seek(atX x: CGFloat) {
+        guard width > 0 else { return }
+        onSeek?(SessionLibraryLogic.time(xPosition: x, width: width, duration: duration))
+    }
+}
+
+/// Vertical line at the playback position; the only part that redraws while playing.
+private struct Playhead: View {
+    @ObservedObject var progress: PlaybackProgress
+    let duration: TimeInterval
+
+    var body: some View {
+        GeometryReader { geometry in
+            let x = SessionLibraryLogic.xPosition(time: progress.time, duration: duration, width: geometry.size.width)
+            Rectangle()
+                .fill(.primary)
+                .frame(width: 2)
+                .offset(x: x - 1)
+        }
+        .allowsHitTesting(false)
     }
 }
 

@@ -1,15 +1,19 @@
 import SwiftUI
 
-/// Session detail (RF-2): date, duration, format, size and waveform. Player and actions come later.
+/// Session detail (RF-2): date, duration, format, size, waveform and player. Actions come later.
 struct SessionDetailView: View {
     @StateObject private var viewModel: SessionDetailViewModel
+    /// A recording exists: playback is disabled (RF-2).
+    let isRecordingActive: Bool
 
-    init(session: SessionItem) {
-        _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session))
+    init(session: SessionItem, handoff: PlaybackHandoff, isRecordingActive: Bool) {
+        _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff))
+        self.isRecordingActive = isRecordingActive
     }
 
-    init(viewModel: SessionDetailViewModel) {
+    init(viewModel: SessionDetailViewModel, isRecordingActive: Bool = false) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.isRecordingActive = isRecordingActive
     }
 
     var body: some View {
@@ -25,7 +29,13 @@ struct SessionDetailView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .task { viewModel.load() }
+        .task {
+            viewModel.setPlaybackBlocked(isRecordingActive)
+            viewModel.load()
+        }
+        .onChange(of: isRecordingActive) { _, active in
+            viewModel.setPlaybackBlocked(active)
+        }
         .onDisappear { viewModel.cancel() }
     }
 
@@ -55,6 +65,13 @@ struct SessionDetailView: View {
         }
     }
 
+    /// Seeking is possible once the player opened the file.
+    private var seekAction: ((TimeInterval) -> Void)? {
+        guard viewModel.canPlay else { return nil }
+        let viewModel = viewModel
+        return { viewModel.seek(to: $0) }
+    }
+
     @ViewBuilder
     private var waveformSection: some View {
         if viewModel.session.isUnreadable {
@@ -66,11 +83,28 @@ struct SessionDetailView: View {
         } else {
             WaveformView(
                 waveform: viewModel.waveform,
-                duration: viewModel.audioInfo?.duration ?? 0,
-                isLoading: !viewModel.isWaveformComplete
+                duration: viewModel.duration,
+                isLoading: !viewModel.isWaveformComplete,
+                progress: viewModel.progress,
+                onSeek: seekAction
             )
             .frame(maxWidth: .infinity)
             .frame(height: 80)
+
+            PlayerControlsView(
+                progress: viewModel.progress,
+                duration: viewModel.duration,
+                isPlaying: viewModel.isPlaying,
+                isEnabled: viewModel.canPlay,
+                onTogglePlayback: { viewModel.togglePlayback() },
+                onSkip: { viewModel.skip(by: $0) }
+            )
+            if viewModel.isPlaybackBlocked {
+                Label("Playback is unavailable while recording.", systemImage: "record.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ import SwiftUI
 ///   session list a second floating sidebar and the detail was laid out underneath it.
 struct SessionLibraryView<Indicator: View>: View {
     @ObservedObject var viewModel: SessionLibraryViewModel
+    /// A recording exists (recording or paused): playback is disabled.
+    let isRecordingActive: Bool
     /// Shown above the list (the `REC`/`PAUSED` indicator while a recording exists).
     @ViewBuilder var indicator: Indicator
 
@@ -45,7 +47,7 @@ struct SessionLibraryView<Indicator: View>: View {
     private var detail: some View {
         if let session = viewModel.selectedSession {
             // A new detail (and view model) per session file.
-            SessionDetailView(session: session)
+            SessionDetailView(session: session, handoff: viewModel.playbackHandoff, isRecordingActive: isRecordingActive)
                 .id(session.id)
         } else {
             ContentUnavailableView("Select a session", systemImage: "waveform")

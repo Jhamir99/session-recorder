@@ -48,12 +48,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4, T7
   - **Done when:** Selecting a session shows name, date, duration, format, size and the waveform filling progressively (loading state for long sessions).
 
-- [ ] **T9 — Player service + controls** (`Features/SessionLibrary/SessionPlayerService.swift`, `Views/PlayerControlsView.swift`, detail view model)
+- [x] **T9 — Player service + controls** (`Features/SessionLibrary/SessionPlayerService.swift`, `Views/PlayerControlsView.swift`, detail view model)
   - **RF:** RF-2
   - **Depends on:** T8
   - **Done when:** Play/pause, ±15 s, elapsed/total and seeking by tapping/dragging the waveform work; playback stops when leaving the detail or opening another session.
 
-- [ ] **T10 — Audio session hand-off with recording** (`AudioInputDeviceService.swift`, `RecordingViewModel.swift`, detail view model, `ContentView.swift`)
+- [x] **T10 — Audio session hand-off with recording** (`AudioInputDeviceService.swift`, `RecordingViewModel.swift`, detail view model, `ContentView.swift`)
   - **RF:** RF-2
   - **Depends on:** T9
   - **Done when:** iOS plays through the speaker/route (not the receiver) in `.playback`; meters stop while playing and restart after; Record is unavailable while playing and selecting the Record tab stops playback; playback is disabled with an explanation while a recording exists.

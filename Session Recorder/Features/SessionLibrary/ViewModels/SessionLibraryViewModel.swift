@@ -15,6 +15,8 @@ final class SessionLibraryViewModel: ObservableObject {
     private var audioInfoTask: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
     private weak var recording: RecordingViewModel?
+    /// Stops the playback that currently owns the audio session (nil when nothing plays).
+    private var stopActivePlayback: (@MainActor () -> Void)?
 
     init(store: SessionLibraryStore = SessionLibraryStore()) {
         self.store = store
@@ -27,6 +29,39 @@ final class SessionLibraryViewModel: ObservableObject {
         recording.sessionSaved
             .sink { [weak self] _ in self?.refresh() }
             .store(in: &cancellables)
+    }
+
+    // MARK: Playback hand-off (RF-2)
+
+    /// Playback stops recording meters and switches the audio session; ending restores both.
+    var playbackHandoff: PlaybackHandoff {
+        PlaybackHandoff(
+            begin: { [weak self] stop in await self?.beginPlayback(stop: stop) },
+            end: { [weak self] in await self?.endPlayback() }
+        )
+    }
+
+    /// Stops any playback (Record tab selected, recording started).
+    func stopPlayback() {
+        stopActivePlayback?()
+    }
+
+    private func beginPlayback(stop: @escaping @MainActor () -> Void) async {
+        let isFirst = stopActivePlayback == nil
+        stopActivePlayback = stop
+        guard isFirst else { return }
+        recording?.setPlaybackActive(true)
+        await recording?.audioSource?.service.setPlaybackMode(true)
+    }
+
+    private func endPlayback() async {
+        guard stopActivePlayback != nil else { return }
+        stopActivePlayback = nil
+        await recording?.audioSource?.service.setPlaybackMode(false)
+        // Another playback may have started meanwhile; keep the meters stopped then.
+        if stopActivePlayback == nil {
+            recording?.setPlaybackActive(false)
+        }
     }
 
     var selectedSession: SessionItem? {

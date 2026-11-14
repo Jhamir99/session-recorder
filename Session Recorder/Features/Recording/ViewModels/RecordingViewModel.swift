@@ -29,6 +29,8 @@ final class RecordingViewModel: ObservableObject {
     @Published private(set) var offeredQualities: [RecordingQuality] = []
     /// iPhone/iPad: tip to turn on Do Not Disturb, shown during recordings until dismissed once (RF-3).
     @Published private(set) var showsDoNotDisturbTip = false
+    /// The session library is playing (library RF-2): idle meters stop and Record is unavailable.
+    @Published private(set) var isPlaybackActive = false
     /// iOS: a call or another app has the audio input (RF-8); recording and resuming wait for it to end.
     @Published private(set) var isInputInterrupted = false
     /// Native capture format of the device (shown in debug builds only).
@@ -97,6 +99,14 @@ final class RecordingViewModel: ObservableObject {
         sourceDidChange()
     }
 
+    /// Library playback starts/ends: capture stops so the audio session can switch to playback, and
+    /// restarts afterwards. Never called while a recording exists (playback is disabled then).
+    func setPlaybackActive(_ active: Bool) {
+        guard isPlaybackActive != active else { return }
+        isPlaybackActive = active
+        sourceDidChange()
+    }
+
     /// Recording continues in the background (iOS background audio mode); idle meters do not (RF-7, NFR-6).
     func setAppInForeground(_ inForeground: Bool) {
         guard isAppInForeground != inForeground else { return }
@@ -108,7 +118,7 @@ final class RecordingViewModel: ObservableObject {
 
     /// Record button enabled: idle, valid source, permission granted.
     var canRecord: Bool {
-        state == .idle && meteringSource != nil && !isInputInterrupted
+        state == .idle && meteringSource != nil && !isInputInterrupted && !isPlaybackActive
     }
 
     /// Resume enabled while paused, with the recording device back and no call in progress (RF-8).
@@ -364,7 +374,7 @@ final class RecordingViewModel: ObservableObject {
     private func updateMetering() {
         // iOS: the engine is stopped while the session changes (route, rate, channels) and restarted
         // once with the final format, instead of restarting on every intermediate change.
-        guard isAppInForeground, let source = meteringSource, audioSource?.service.isRoutingInput != true else {
+        guard isAppInForeground, !isPlaybackActive, let source = meteringSource, audioSource?.service.isRoutingInput != true else {
             capture.stop()
             return
         }

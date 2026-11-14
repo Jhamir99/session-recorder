@@ -41,6 +41,10 @@ struct ContentView: View {
             libraryViewModel.attach(recording: recordingViewModel)
             recordingViewModel.attach(audioSource: audioSourceViewModel)
         }
+        // Recording starts from the Record tab in the recording audio configuration: stop library playback.
+        .onChange(of: selectedTab) { _, tab in
+            if tab == .record { libraryViewModel.stopPlayback() }
+        }
         // Recording menu and shortcuts act on this window's recording (RF-9).
         .focusedSceneObject(recordingViewModel)
         .focusedSceneValue(\.chooseRecordingSource, ChooseRecordingSourceAction(windowID: windowID) {
@@ -177,7 +181,7 @@ struct ContentView: View {
     }
 
     private var sessionsTab: some View {
-        SessionLibraryView(viewModel: libraryViewModel) {
+        SessionLibraryView(viewModel: libraryViewModel, isRecordingActive: recordingViewModel.state.hasActiveRecording) {
             // REC/PAUSED stays visible while a recording exists (recording RF-4).
             if recordingViewModel.state.hasActiveRecording {
                 RecordingIndicator(

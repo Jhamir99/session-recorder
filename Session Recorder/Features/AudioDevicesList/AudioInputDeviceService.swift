@@ -29,6 +29,8 @@ final class AudioInputDeviceService: ObservableObject {
     private var probedSampleRates: [String: [Double]] = [:]
     /// Session changes queued or running; `isRoutingInput` is true while this is above 0.
     private var pendingSessionChanges = 0
+    /// Session library playback owns the session (`.playback`); recording configuration is not restored.
+    private var isPlaybackMode = false
     /// Rates probed on iOS (the ones recording can offer).
     nonisolated private static let probeCandidateRates: [Double] = [44_100, 48_000, 88_200, 96_000]
 
@@ -97,6 +99,33 @@ final class AudioInputDeviceService: ObservableObject {
         let logger = self.logger
         DispatchQueue.global(qos: .userInitiated).async {
             Self.setCoreAudioNominalSampleRate(rate, deviceUID: deviceID, logger: logger)
+        }
+        #endif
+    }
+
+    /// Session library playback (library RF-2). iOS: `.playback` (not mixable), so audio plays through the
+    /// speaker/route and the app owns Now Playing; when it ends, the recording configuration comes back.
+    /// Returns once the session changed. Capture must be stopped before (the recording view model does it).
+    func setPlaybackMode(_ active: Bool) async {
+        #if os(iOS)
+        guard isPlaybackMode != active else { return }
+        isPlaybackMode = active
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            updateRoutedSession(change: { session, logger in
+                if active {
+                    do {
+                        try session.setCategory(.playback, mode: .default, options: [])
+                        try session.setActive(true)
+                    } catch {
+                        logger.error("Cannot configure playback: \(error.localizedDescription, privacy: .public)")
+                    }
+                } else {
+                    Self.configure(session, logger: logger)
+                    Self.openAllInputChannels(session, logger: logger)
+                }
+            }, beforeRefresh: {
+                continuation.resume()
+            })
         }
         #endif
     }
@@ -201,6 +230,8 @@ final class AudioInputDeviceService: ObservableObject {
                 // In the background iOS may deactivate the session and close the extra input channels
                 // without a route change, so restore them when the app is active again.
                 self?.refreshPermissionState()
+                // While the library plays, the playback configuration stays (restored when playback ends).
+                guard self?.isPlaybackMode == false else { return }
                 self?.updateRoutedSession { session, logger in
                     Self.configure(session, logger: logger)
                     Self.openAllInputChannels(session, logger: logger)

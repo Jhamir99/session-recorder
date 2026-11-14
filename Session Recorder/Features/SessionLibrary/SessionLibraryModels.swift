@@ -113,6 +113,16 @@ nonisolated struct ExportChoice: Equatable, Codable {
     static let `default` = ExportChoice(format: .original, aacBitrate: .kbps256)
 }
 
+/// How a session detail asks the app to switch between playback and recording audio (plan §3).
+/// `begin` gets a closure that stops this playback (e.g. when the Record tab is selected).
+struct PlaybackHandoff {
+    var begin: (_ stop: @escaping @MainActor () -> Void) async -> Void
+    var end: () async -> Void
+
+    /// Previews and checks: nothing to switch.
+    static let none = PlaybackHandoff(begin: { _ in }, end: {})
+}
+
 /// Selected part of a session for trimming, in seconds from the start (RF-5).
 nonisolated struct TrimRange: Equatable {
     var start: TimeInterval
