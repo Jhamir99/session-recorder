@@ -30,7 +30,7 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** T3
   - **Done when:** Sessions tab, detail, trim, rename/delete, share/export, settings and Mac Recording/Session menus are translated; the `es` export has no untranslated strings.
 
-- [ ] **T6 — Layout check in Spanish** (views as needed, previews)
+- [x] **T6 — Layout check in Spanish** (views as needed, previews)
   - **RF:** RF-6
   - **Depends on:** T4, T5
   - **Done when:** No truncated or overlapping Spanish text on iPhone, iPad and Mac, including large Dynamic Type; Spanish previews exist for the main screens.

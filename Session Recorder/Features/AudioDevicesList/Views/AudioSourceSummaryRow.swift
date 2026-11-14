@@ -26,7 +26,8 @@ struct AudioSourceSummaryRow: View {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(isWarning ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
-                        .lineLimit(1)
+                        // Two lines for longer translations / large text (localization RF-6).
+                        .lineLimit(2)
                 }
 
                 Spacer(minLength: 0)

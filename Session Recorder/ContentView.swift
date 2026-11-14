@@ -247,14 +247,6 @@ struct ContentView: View {
                     doNotDisturbTip
                 }
 
-                #if DEBUG
-                // Capture spike (recording plan §3): native format delivered by the device.
-                if let format = recordingViewModel.nativeFormatDescription {
-                    Text(verbatim: "Capture: \(format)")
-                        .font(.caption2.monospaced())
-                        .foregroundStyle(.secondary)
-                }
-                #endif
 
                 Spacer(minLength: 0)
 
@@ -399,4 +391,9 @@ struct ContentView: View {
 
 #Preview("Record tab, fallback after disconnect") {
     ContentView(audioSourceViewModel: .previewFallbackToBuiltIn, recordingViewModel: .preview(levels: [.silent]))
+}
+
+#Preview("Record tab (Spanish)") {
+    ContentView(audioSourceViewModel: .previewStereo, recordingViewModel: .previewRecording)
+        .environment(\.locale, Locale(identifier: "es"))
 }

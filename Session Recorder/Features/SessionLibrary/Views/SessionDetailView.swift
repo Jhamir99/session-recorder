@@ -149,7 +149,7 @@ struct SessionDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(viewModel.session.name)
                 .font(.title2.weight(.semibold))
-            Text(viewModel.session.recordedDate, format: .dateTime.weekday(.wide).day().month(.wide).year().hour().minute())
+            Text(viewModel.session.recordedDate, format: .dateTime.weekday(.wide).day().month(.wide).year().hour().minute().second())
                 .foregroundStyle(.secondary)
             Text(detailsLine)
                 .font(.subheadline)

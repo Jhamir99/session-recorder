@@ -33,3 +33,8 @@ import SwiftUI
         .padding()
         .environment(\.dynamicTypeSize, .accessibility2)
 }
+
+#Preview("Explanation (Spanish)") {
+    FirstUseExplanationView(onContinue: {}, onNotNow: {})
+        .environment(\.locale, Locale(identifier: "es"))
+}

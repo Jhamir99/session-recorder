@@ -36,8 +36,6 @@ final class RecordingViewModel: ObservableObject {
     @Published private(set) var isPlaybackActive = false
     /// iOS: a call or another app has the audio input (RF-8); recording and resuming wait for it to end.
     @Published private(set) var isInputInterrupted = false
-    /// Native capture format of the device (shown in debug builds only).
-    @Published private(set) var nativeFormatDescription: String?
 
     let capture: AudioCaptureService
     let fileStore: SessionFileStore
@@ -480,9 +478,6 @@ final class RecordingViewModel: ObservableObject {
     private func bindCapture() {
         capture.$peaks
             .sink { [weak self] peaks in self?.updateLevels(peaks: peaks) }
-            .store(in: &cancellables)
-        capture.$nativeFormatDescription
-            .sink { [weak self] format in self?.nativeFormatDescription = format }
             .store(in: &cancellables)
         capture.$isInterrupted
             .sink { [weak self] interrupted in self?.isInputInterrupted = interrupted }

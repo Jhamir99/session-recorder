@@ -161,8 +161,9 @@ struct SessionLibraryView<Indicator: View>: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        // Two lines at most: Spanish and large text sizes must not cut it (localization RF-6).
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                         .background(.bar)

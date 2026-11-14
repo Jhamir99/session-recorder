@@ -59,3 +59,9 @@ private func previewStore(_ change: (inout AppSettings) -> Void = { _ in }) -> A
         .foregroundStyle(.secondary)
         .padding()
 }
+
+#Preview("Settings (Spanish)") {
+    SettingsView(showsDoneButton: true)
+        .environmentObject(previewStore())
+        .environment(\.locale, Locale(identifier: "es"))
+}

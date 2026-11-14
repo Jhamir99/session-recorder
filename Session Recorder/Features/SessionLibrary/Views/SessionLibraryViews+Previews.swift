@@ -67,3 +67,13 @@ import SwiftUI
 #Preview("Export, failed") {
     ExportSheet(viewModel: .preview(phase: .failed("Not enough free storage to export.")))
 }
+
+#Preview("Detail (Spanish)") {
+    NavigationStack { SessionDetailView(viewModel: .preview()) }
+        .environment(\.locale, Locale(identifier: "es"))
+}
+
+#Preview("Export (Spanish)") {
+    ExportSheet(viewModel: .preview(phase: .choosing))
+        .environment(\.locale, Locale(identifier: "es"))
+}
