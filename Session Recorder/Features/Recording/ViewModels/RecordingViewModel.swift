@@ -92,6 +92,20 @@ final class RecordingViewModel: ObservableObject {
         bindCapture()
     }
 
+    /// Sessions folder in use (sessions-folder RF-4). Set by ContentView before `attach(audioSource:)`, so
+    /// recovered recordings also go to the chosen folder.
+    private(set) weak var foldersStore: SessionsFolderStore?
+
+    func attach(folders: SessionsFolderStore) {
+        foldersStore = folders
+    }
+
+    /// Folder for a session being saved now (re-checked: a drive may have been unplugged).
+    var sessionsFolderForSaving: URL? {
+        foldersStore?.refreshAvailability()
+        return foldersStore?.currentURL
+    }
+
     func attach(settings: AppSettingsStore) {
         guard settingsStore !== settings else { return }
         settingsStore = settings
@@ -335,7 +349,8 @@ final class RecordingViewModel: ObservableObject {
                 at: writer.url,
                 startDate: startDate,
                 hasAudio: writer.framesWritten > 0,
-                prefix: recordingNamePrefix
+                prefix: recordingNamePrefix,
+                directory: sessionsFolderForSaving
             )
         } catch {
             // The file stays in progress and is recovered on next launch (RF-8), so nothing is lost.

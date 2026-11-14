@@ -88,6 +88,8 @@ struct ContentView: View {
         .environmentObject(audioSourceViewModel)
         .task {
             recordingViewModel.attach(settings: settingsStore)
+            recordingViewModel.attach(folders: foldersStore)
+            libraryViewModel.attach(folders: foldersStore)
             libraryViewModel.settingsStore = settingsStore
             libraryViewModel.attach(recording: recordingViewModel)
             firstUseViewModel.attach(audioSource: audioSourceViewModel)

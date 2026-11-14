@@ -130,10 +130,12 @@ struct PlaybackHandoff {
 struct TrimContext {
     /// Names of all sessions, for a unique `(trimmed)` name.
     var existingNames: () -> Set<String>
+    /// Folder the trimmed session is saved in (the sessions folder in use).
+    var sessionsDirectory: () -> URL
     /// Called with the new file so the library lists and opens it.
     var didSave: (URL) -> Void
 
-    static let none = TrimContext(existingNames: { [] }, didSave: { _ in })
+    static let none = TrimContext(existingNames: { [] }, sessionsDirectory: { SessionFileStore.defaultSessionsDirectory }, didSave: { _ in })
 }
 
 /// Selected part of a session for trimming, in seconds from the start (RF-5).

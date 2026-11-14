@@ -23,7 +23,16 @@ final class SessionLibraryViewModel: ObservableObject {
     /// Shown as an alert when a file operation fails.
     @Published var notice: LibraryNotice?
 
-    private let store: SessionLibraryStore
+    /// Used when no sessions folder store is attached (previews, checks).
+    private let defaultStore: SessionLibraryStore
+    /// Sessions folder in use (sessions-folder RF-4); the list follows it.
+    private(set) weak var foldersStore: SessionsFolderStore?
+
+    /// Store for the folder in use now.
+    private var store: SessionLibraryStore {
+        guard let folder = foldersStore?.currentURL else { return defaultStore }
+        return SessionLibraryStore(sessionsDirectory: folder)
+    }
     /// Increases on every refresh so results of an older refresh are ignored.
     private var refreshGeneration = 0
     private var audioInfoTask: Task<Void, Never>?
@@ -39,7 +48,7 @@ final class SessionLibraryViewModel: ObservableObject {
     private static var hasRemovedLeftoverExports = false
 
     init(store: SessionLibraryStore = SessionLibraryStore()) {
-        self.store = store
+        self.defaultStore = store
         if !Self.hasRemovedLeftoverExports {
             Self.hasRemovedLeftoverExports = true
             Task.detached(priority: .utility) { SessionExportService().removeAllExports() }
@@ -126,6 +135,7 @@ final class SessionLibraryViewModel: ObservableObject {
     var trimContext: TrimContext {
         TrimContext(
             existingNames: { [weak self] in Set(self?.sessions.map(\.name) ?? []) },
+            sessionsDirectory: { [weak self] in self?.store.sessionsDirectory ?? SessionFileStore.defaultSessionsDirectory },
             didSave: { [weak self] url in self?.refresh(selecting: url) }
         )
     }
@@ -197,6 +207,41 @@ final class SessionLibraryViewModel: ObservableObject {
         return activeDetail.canPlay
     }
 
+    /// Lists the sessions folder in use; switching folders refreshes the list (sessions-folder RF-4).
+    func attach(folders: SessionsFolderStore) {
+        guard foldersStore !== folders else { return }
+        foldersStore = folders
+        folders.$folder
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.selectedSessionID = nil
+                self?.refresh()
+            }
+            .store(in: &cancellables)
+    }
+
+    /// The folder, or its parent while it does not exist yet (free space is read from its volume).
+    nonisolated private static func existingFolder(for url: URL) -> URL {
+        FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) ? url : url.deletingLastPathComponent()
+    }
+
+    /// Delete confirmation (session-library RF-4, sessions-folder RF-4).
+    var deleteConfirmation: (button: String, message: String) {
+        #if os(macOS)
+        return (String(localized: "Move to Trash", comment: "Delete confirmation"),
+                String(localized: "The session will be moved to the Trash.", comment: "Delete confirmation"))
+        #else
+        if foldersStore?.isAppFolder ?? true {
+            return (String(localized: "Delete", comment: "Delete confirmation"),
+                    String(localized: "This session will be deleted from this device. This can't be undone.", comment: "Delete confirmation"))
+        }
+        return (String(localized: "Delete", comment: "Delete confirmation"),
+                String(localized: "This session will be deleted from the sessions folder. If the folder supports it, you can restore it from Recently Deleted in the Files app.", comment: "Delete confirmation, chosen folder"))
+        #endif
+    }
+
     /// A sheet or dialog is open (rename, share, delete): keyboard shortcuts must not act behind it (RF-8).
     var hasOpenDialog: Bool {
         renamingSession != nil || sharingSession != nil || deletingSession != nil
@@ -232,7 +277,7 @@ final class SessionLibraryViewModel: ObservableObject {
         audioInfoTask?.cancel()
         audioInfoTask = Task { [weak self] in
             let (listed, freeBytes) = await Task.detached(priority: .userInitiated) {
-                (store.listSessions(), SessionLibraryStore.freeBytes(at: store.sessionsDirectory.deletingLastPathComponent()))
+                (store.listSessions(), SessionLibraryStore.freeBytes(at: Self.existingFolder(for: store.sessionsDirectory)))
             }.value
             guard let self, generation == refreshGeneration else { return }
             storageSummary = SettingsLogic.storageSummary(

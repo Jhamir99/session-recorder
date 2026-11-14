@@ -36,21 +36,28 @@ final class SessionFileStore {
         return try RecordingFileWriter(url: url, quality: quality, channelCount: channelCount)
     }
 
-    /// Moves a finished recording to Sessions with a unique date-based name (RF-6).
-    /// Returns nil and deletes the file when it contains no audio.
-    func finishRecording(at url: URL, startDate: Date, hasAudio: Bool, prefix: String = "Session") throws -> String? {
+    /// Moves a finished recording to the sessions folder (`directory`, default the App Folder; sessions-folder
+    /// RF-4) with a unique date-based name (RF-6). Returns nil and deletes the file when it contains no audio.
+    func finishRecording(
+        at url: URL,
+        startDate: Date,
+        hasAudio: Bool,
+        prefix: String = "Session",
+        directory: URL? = nil
+    ) throws -> String? {
         guard hasAudio else {
             try? fileManager.removeItem(at: url)
             return nil
         }
-        try fileManager.createDirectory(at: sessionsDirectory, withIntermediateDirectories: true)
+        let folder = directory ?? sessionsDirectory
+        try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
         let name = RecordingLogic.sessionName(
             prefix: prefix,
             startDate: startDate,
             calendar: .current,
-            existingNames: existingSessionNames()
+            existingNames: existingSessionNames(in: folder)
         )
-        let destination = sessionsDirectory.appending(path: name).appendingPathExtension(Self.fileExtension)
+        let destination = folder.appending(path: name).appendingPathExtension(Self.fileExtension)
         try fileManager.moveItem(at: url, to: destination)
         return name
     }
@@ -59,7 +66,7 @@ final class SessionFileStore {
 
     /// Saves recordings left in progress by a terminated app as sessions; deletes empty ones.
     /// Call at launch, before any new recording starts. Returns the recovered session names.
-    func recoverInterruptedRecordings(prefix: String = "Session") -> [String] {
+    func recoverInterruptedRecordings(prefix: String = "Session", directory: URL? = nil) -> [String] {
         let urls = (try? fileManager.contentsOfDirectory(at: inProgressDirectory, includingPropertiesForKeys: nil)) ?? []
         return urls
             .filter { $0.pathExtension == Self.fileExtension }
@@ -69,7 +76,7 @@ final class SessionFileStore {
                     ?? (try? url.resourceValues(forKeys: [.creationDateKey]).creationDate)
                     ?? Date()
                 do {
-                    return try finishRecording(at: url, startDate: startDate, hasAudio: Self.hasAudio(at: url), prefix: prefix)
+                    return try finishRecording(at: url, startDate: startDate, hasAudio: Self.hasAudio(at: url), prefix: prefix, directory: directory)
                 } catch {
                     logger.error("Cannot recover \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
                     return nil
@@ -97,8 +104,8 @@ final class SessionFileStore {
 
     // MARK: Names
 
-    private func existingSessionNames() -> Set<String> {
-        let urls = (try? fileManager.contentsOfDirectory(at: sessionsDirectory, includingPropertiesForKeys: nil)) ?? []
+    private func existingSessionNames(in folder: URL) -> Set<String> {
+        let urls = (try? fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
         return Set(urls.map { $0.deletingPathExtension().lastPathComponent })
     }
 

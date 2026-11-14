@@ -134,13 +134,13 @@
         }
       }
     },
-    "10 Minutes Left": {
-      "comment": "Settings option value",
+    "10 Minutes": {
+      "comment": "Low storage warning: minutes of recording left",
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quedan 10 minutos"
+            "value": "10 minutos"
           }
         }
       }
@@ -167,13 +167,13 @@
         }
       }
     },
-    "30 Minutes Left": {
-      "comment": "Settings option value",
+    "30 Minutes": {
+      "comment": "Low storage warning: minutes of recording left",
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quedan 30 minutos"
+            "value": "30 minutos"
           }
         }
       }
@@ -189,13 +189,13 @@
         }
       }
     },
-    "60 Minutes Left": {
-      "comment": "Settings option value",
+    "60 Minutes": {
+      "comment": "Low storage warning: minutes of recording left",
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quedan 60 minutos"
+            "value": "60 minutos"
           }
         }
       }
@@ -306,6 +306,9 @@
           }
         }
       }
+    },
+    "App Folder": {
+      "comment": "Sessions folder: the app's own folder"
     },
     "Appearance": {
       "localizations": {
@@ -468,6 +471,7 @@
         }
       }
     },
+    "Choose Folder…": {},
     "Choose Source…": {
       "localizations": {
         "es": {
@@ -656,6 +660,7 @@
         }
       }
     },
+    "Export": {},
     "Export format": {
       "localizations": {
         "es": {
@@ -936,6 +941,26 @@
           }
         }
       }
+    },
+    "Moved %lld sessions.": {
+      "comment": "Sessions folder: move result"
+    },
+    "Moved %lld sessions. %lld sessions could not be moved and stay in the previous folder.": {
+      "comment": "Sessions folder: move result with failures",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Moved %1$lld sessions. %2$lld sessions could not be moved and stay in the previous folder."
+          }
+        }
+      }
+    },
+    "Moved %lld sessions. 1 session could not be moved and stays in the previous folder.": {
+      "comment": "Sessions folder: move result with a failure"
+    },
+    "Moved 1 session.": {
+      "comment": "Sessions folder: move result"
     },
     "Name": {
       "comment": "Settings option value",
@@ -1629,6 +1654,8 @@
         }
       }
     },
+    "Sessions folder": {},
+    "Sessions in the App Folder are deleted if you delete the app. Choose another folder to keep them.": {},
     "Settings": {
       "localizations": {
         "es": {
@@ -1970,6 +1997,7 @@
       }
     },
     "The session will be moved to the Trash.": {
+      "comment": "Delete confirmation",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -1979,6 +2007,7 @@
         }
       }
     },
+    "The sessions folder isn't available. New sessions are saved in the App Folder.": {},
     "The source cannot change while recording": {
       "comment": "VoiceOver hint: locked source row",
       "localizations": {
@@ -2021,7 +2050,14 @@
         }
       }
     },
+    "This folder can't be used. Choose another one.": {
+      "comment": "Sessions folder: picked folder not accessible"
+    },
+    "This session will be deleted from the sessions folder. If the folder supports it, you can restore it from Recently Deleted in the Files app.": {
+      "comment": "Delete confirmation, chosen folder"
+    },
     "This session will be deleted from this device. This can't be undone.": {
+      "comment": "Delete confirmation",
       "localizations": {
         "es": {
           "stringUnit": {
@@ -2073,6 +2109,7 @@
         }
       }
     },
+    "Use App Folder": {},
     "Warns when this much recording time is left.": {
       "localizations": {
         "es": {

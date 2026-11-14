@@ -42,16 +42,12 @@ struct SessionLibraryView<Indicator: View>: View {
                 titleVisibility: .visible,
                 presenting: viewModel.deletingSession
             ) { session in
-                Button(SessionLibraryStore.deleteMovesToTrash
-                       ? String(localized: "Move to Trash", comment: "Delete confirmation")
-                       : String(localized: "Delete", comment: "Delete confirmation"), role: .destructive) {
+                Button(viewModel.deleteConfirmation.button, role: .destructive) {
                     viewModel.delete(session)
                 }
                 Button("Cancel", role: .cancel) {}
             } message: { _ in
-                Text(SessionLibraryStore.deleteMovesToTrash
-                     ? "The session will be moved to the Trash."
-                     : "This session will be deleted from this device. This can't be undone.")
+                Text(viewModel.deleteConfirmation.message)
             }
             .alert(
                 viewModel.notice?.text ?? "",

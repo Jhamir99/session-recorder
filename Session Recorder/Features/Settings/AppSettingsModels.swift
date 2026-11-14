@@ -111,9 +111,9 @@ nonisolated enum LowStorageWarning: String, CaseIterable, Identifiable, Codable 
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .tenMinutes: String(localized: "10 Minutes Left", comment: "Settings option value")
-        case .thirtyMinutes: String(localized: "30 Minutes Left", comment: "Settings option value")
-        case .sixtyMinutes: String(localized: "60 Minutes Left", comment: "Settings option value")
+        case .tenMinutes: String(localized: "10 Minutes", comment: "Low storage warning: minutes of recording left")
+        case .thirtyMinutes: String(localized: "30 Minutes", comment: "Low storage warning: minutes of recording left")
+        case .sixtyMinutes: String(localized: "60 Minutes", comment: "Low storage warning: minutes of recording left")
         }
     }
 

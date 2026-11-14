@@ -20,7 +20,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T2
   - **Done when:** Current folder shown; Choose Folder… / Use App Folder work and are remembered after restart; warning on iPhone/iPad only with the App Folder.
 
-- [ ] **T4 — Library and recording use the folder** (`SessionFileStore.swift`, `RecordingViewModel*`, `SessionLibraryStore.swift`, library view models)
+- [x] **T4 — Library and recording use the folder** (`SessionFileStore.swift`, `RecordingViewModel*`, `SessionLibraryStore.swift`, library view models)
   - **RF:** RF-4
   - **Depends on:** T2
   - **Done when:** New/recovered sessions are saved in the chosen folder; list, play, rename, delete (text per location), trim and share work there.

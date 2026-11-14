@@ -94,7 +94,7 @@ extension RecordingViewModel {
     func recoverInterruptedRecordingsOnce() {
         guard !Self.hasRecoveredInterruptedRecordings else { return }
         Self.hasRecoveredInterruptedRecordings = true
-        let names = fileStore.recoverInterruptedRecordings(prefix: currentNamePrefix)
+        let names = fileStore.recoverInterruptedRecordings(prefix: currentNamePrefix, directory: sessionsFolderForSaving)
         names.forEach { sessionSaved.send($0) }
         if let name = names.last {
             show(RecordingNotice(kind: .recovered(sessionName: name)))

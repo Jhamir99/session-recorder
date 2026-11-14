@@ -73,10 +73,11 @@ extension SessionDetailViewModel {
         let name = SessionLibraryLogic.trimmedName(for: session.name, existingNames: trimContext.existingNames())
         let date = SessionLibraryLogic.trimmedRecordedDate(originalDate: session.recordedDate, range: trimRange)
         let context = trimContext
+        let directory = trimContext.sessionsDirectory()
         Task { [weak self] in
             do {
                 let newURL = try await Task.detached(priority: .userInitiated) {
-                    try SessionLibraryStore().trim(url, range: trimRange, newName: name, recordedDate: date)
+                    try SessionLibraryStore(sessionsDirectory: directory).trim(url, range: trimRange, newName: name, recordedDate: date)
                 }.value
                 self?.isSavingTrim = false
                 self?.trimRange = nil

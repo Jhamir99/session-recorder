@@ -168,6 +168,11 @@ nonisolated struct SessionLibraryStore: Sendable {
         #if os(macOS)
         try FileManager.default.trashItem(at: url, resultingItemURL: nil)
         #else
+        // A chosen folder (iCloud Drive, other providers) may support "Recently Deleted"; the App Folder does not.
+        if !SessionsFolderLogic.isInsideAppStorage(url, appContainer: SessionsFolderService.appContainer),
+           (try? FileManager.default.trashItem(at: url, resultingItemURL: nil)) != nil {
+            return
+        }
         try FileManager.default.removeItem(at: url)
         #endif
     }
