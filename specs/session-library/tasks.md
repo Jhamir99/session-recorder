@@ -22,12 +22,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Lists `.caf` files in the shared Sessions directory with name, recorded date, size, and (off the main thread) duration/format; unreadable files are marked; non-CAF files ignored; checked with a scratch script on a temp folder.
 
 ### List (RF-1)
-- [ ] **T4 — Library view model + Sessions tab list** (`ViewModels/SessionLibraryViewModel.swift`, `Views/SessionLibraryView.swift`, `Views/SessionRow.swift`, `ContentView.swift`)
+- [x] **T4 — Library view model + Sessions tab list** (`ViewModels/SessionLibraryViewModel.swift`, `Views/SessionLibraryView.swift`, `Views/SessionRow.swift`, `ContentView.swift`)
   - **RF:** RF-1, NFR-1
   - **Depends on:** T3
   - **Done when:** The Sessions tab shows sessions newest first (name, date, duration / "Can't be played"), the empty state when none, and the `REC` indicator; list + detail navigation adapts (stack on iPhone, split on iPad/Mac) with a placeholder detail.
 
-- [ ] **T5 — Keep the list in sync** (`RecordingViewModel.swift`, `SessionLibraryViewModel.swift`, `ContentView.swift`)
+- [x] **T5 — Keep the list in sync** (`RecordingViewModel.swift`, `SessionLibraryViewModel.swift`, `ContentView.swift`)
   - **RF:** RF-1
   - **Depends on:** T4
   - **Done when:** Saved and recovered recordings appear without leaving the tab; changes made in Files/Finder show when the app becomes active; an open detail of a removed session returns to the list.

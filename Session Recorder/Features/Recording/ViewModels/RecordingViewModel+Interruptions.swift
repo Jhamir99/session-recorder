@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// Device disconnect/reconnect, iOS audio interruptions and capture failures while a recording exists (RF-8).
@@ -73,6 +74,7 @@ extension RecordingViewModel {
         guard !Self.hasRecoveredInterruptedRecordings else { return }
         Self.hasRecoveredInterruptedRecordings = true
         let names = fileStore.recoverInterruptedRecordings()
+        names.forEach { sessionSaved.send($0) }
         if let name = names.last {
             show(RecordingNotice(kind: .recovered(sessionName: name)))
         }

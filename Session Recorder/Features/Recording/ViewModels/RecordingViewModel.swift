@@ -20,6 +20,8 @@ final class RecordingViewModel: ObservableObject {
     @Published private(set) var notice: RecordingNotice?
     /// Live levels for the meters (observed only by the meter view).
     let meters = LevelMeterModel()
+    /// Sends the name of each session saved or recovered, so the session library can refresh.
+    let sessionSaved = PassthroughSubject<String, Never>()
     /// Number of metered channels (0 when meters are hidden); changes only when the source changes.
     @Published private(set) var meteredChannelCount = 0
     /// Quality for the next (or current) recording on the selected device (RF-1).
@@ -246,6 +248,7 @@ final class RecordingViewModel: ObservableObject {
             logger.error("Cannot save session: \(error.localizedDescription, privacy: .public)")
         }
         notice = makeNotice(savedName)
+        if let savedName { sessionSaved.send(savedName) }
 
         self.writer = nil
         recordingStartDate = nil

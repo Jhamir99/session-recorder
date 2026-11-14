@@ -12,10 +12,16 @@ struct ContentView: View {
     @State private var windowID = UUID()
     @StateObject private var audioSourceViewModel: AudioSourceSelectionViewModel
     @StateObject private var recordingViewModel: RecordingViewModel
+    @StateObject private var libraryViewModel: SessionLibraryViewModel
 
-    init(audioSourceViewModel: AudioSourceSelectionViewModel? = nil, recordingViewModel: RecordingViewModel? = nil) {
+    init(
+        audioSourceViewModel: AudioSourceSelectionViewModel? = nil,
+        recordingViewModel: RecordingViewModel? = nil,
+        libraryViewModel: SessionLibraryViewModel? = nil
+    ) {
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
         _recordingViewModel = StateObject(wrappedValue: recordingViewModel ?? RecordingViewModel())
+        _libraryViewModel = StateObject(wrappedValue: libraryViewModel ?? SessionLibraryViewModel())
     }
 
     var body: some View {
@@ -32,6 +38,7 @@ struct ContentView: View {
         // Injected at the root so tabs and sheets presented from them share the same state.
         .environmentObject(audioSourceViewModel)
         .task {
+            libraryViewModel.attach(recording: recordingViewModel)
             recordingViewModel.attach(audioSource: audioSourceViewModel)
         }
         // Recording menu and shortcuts act on this window's recording (RF-9).
@@ -43,7 +50,16 @@ struct ContentView: View {
         // Idle meters stop in the background; a recording keeps going (RF-7).
         .onChange(of: scenePhase) { _, phase in
             recordingViewModel.setAppInForeground(phase != .background)
+            // Sessions may have been renamed or deleted in Files/Finder meanwhile (RF-1).
+            if phase == .active { libraryViewModel.refresh() }
         }
+        #if os(macOS)
+        // On Mac the scene stays active while another app (e.g. Finder) is in front, so refresh when the
+        // app itself becomes active again (RF-1).
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            libraryViewModel.refresh()
+        }
+        #endif
     }
 
     private var recordTab: some View {
@@ -160,25 +176,16 @@ struct ContentView: View {
         .environment(\.recordingViewModel, recordingViewModel)
     }
 
-    // Placeholder until the session library feature exists.
     private var sessionsTab: some View {
-        NavigationStack {
-            ContentUnavailableView(
-                "No sessions yet",
-                systemImage: "waveform",
-                description: Text("Your recorded sessions will appear here.")
-            )
-            .navigationTitle("Sessions")
-            // REC/PAUSED stays visible while a recording exists (RF-4).
-            .safeAreaInset(edge: .top) {
-                if recordingViewModel.state.hasActiveRecording {
-                    RecordingIndicator(
-                        state: recordingViewModel.state,
-                        elapsedSeconds: recordingViewModel.liveInfo.elapsedSeconds
-                    ) { selectedTab = .record }
-                    .padding(.horizontal)
-                    .padding(.top, 4)
-                }
+        SessionLibraryView(viewModel: libraryViewModel) {
+            // REC/PAUSED stays visible while a recording exists (recording RF-4).
+            if recordingViewModel.state.hasActiveRecording {
+                RecordingIndicator(
+                    state: recordingViewModel.state,
+                    elapsedSeconds: recordingViewModel.liveInfo.elapsedSeconds
+                ) { selectedTab = .record }
+                .padding(.horizontal)
+                .padding(.top, 4)
             }
         }
     }
