@@ -37,6 +37,7 @@ final class SessionDetailViewModel: ObservableObject {
         self.waveformService = waveformService
         self.handoff = handoff ?? .none
         player.onFinish = { [weak self] in self?.playbackStopped() }
+        player.onInterruption = { [weak self] in self?.playbackStopped() }
     }
 
     deinit {
@@ -107,8 +108,10 @@ final class SessionDetailViewModel: ObservableObject {
             if !ownsPlayback {
                 ownsPlayback = true
                 await handoff.begin { [weak self] in self?.stopPlayback() }
+                activateRemoteControls()
             }
             guard ownsPlayback, canPlay else { return }
+            await player.prepareToResume()
             player.play()
             isPlaying = player.isPlaying
             startProgressUpdates()
@@ -155,12 +158,22 @@ final class SessionDetailViewModel: ObservableObject {
 
     private func preparePlayer() {
         do {
-            try player.load(url: session.url)
+            try player.load(url: session.url, title: session.name)
             isPlayable = true
         } catch {
             logger.error("Cannot open player: \(error.localizedDescription, privacy: .public)")
             isPlayable = false
         }
+    }
+
+    /// Lock screen, Control Center and media keys control this detail's playback (RF-2).
+    private func activateRemoteControls() {
+        player.activateRemoteControls(SessionPlayerService.RemoteActions(
+            play: { [weak self] in self?.play() },
+            pause: { [weak self] in self?.pause() },
+            skip: { [weak self] in self?.skip(by: $0) },
+            seek: { [weak self] in self?.seek(to: $0) }
+        ))
     }
 
     private func playbackStopped() {

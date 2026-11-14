@@ -58,7 +58,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T9
   - **Done when:** iOS plays through the speaker/route (not the receiver) in `.playback`; meters stop while playing and restart after; Record is unavailable while playing and selecting the Record tab stops playback; playback is disabled with an explanation while a recording exists.
 
-- [ ] **T11 — Background playback, Now Playing and interruptions** (`SessionPlayerService.swift`)
+- [x] **T11 — Background playback, Now Playing and interruptions** (`SessionPlayerService.swift`)
   - **RF:** RF-2
   - **Depends on:** T10
   - **Done when:** Playback continues with the device locked; lock screen / Control Center (and Mac Now Playing) show the session name and position with play/pause/skip; a call pauses playback without auto-resume.
