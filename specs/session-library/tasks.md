@@ -107,7 +107,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4–T17
   - **Done when:** Previews exist for list (empty / sessions / unreadable / recording), detail (loading / ready / playing / disabled), trim, export (choose / progress / ready / error), rename and delete dialogs; previews touch no files or audio.
 
-- [ ] **T20 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T20 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2
   - **Depends on:** T19
   - **Done when:** Docs list `Features/SessionLibrary/` and the updated status.

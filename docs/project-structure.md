@@ -6,7 +6,7 @@ This document describes the repository layout and feature code organization. Kee
 - `AGENTS.md` — canonical agent instructions for this repo.
 - `README.md` — project overview and product vision (scope, planned features, open questions).
 - `Session Recorder.xcodeproj/` — Xcode project (scheme/target: `Session Recorder`).
-- `Session-Recorder-Info.plist` — Info.plist keys that cannot be generated from build settings (iOS `UIBackgroundModes = audio`); merged with the generated Info.plist.
+- `Session-Recorder-Info.plist` — Info.plist keys that cannot be generated from build settings (iOS `UIBackgroundModes = audio`, Files visibility `UIFileSharingEnabled` + `LSSupportsOpeningDocumentsInPlace`); merged with the generated Info.plist.
 - `Session Recorder/` — app source root used by the Xcode target (synchronized root group).
 - `docs/` — project-level documentation (e.g., `constitution.md`, `project-structure.md`).
 - `specs/<feature>/` — feature specs, plans, and tasks (what/why/acceptance; plans map files and RFs).
@@ -34,7 +34,7 @@ Session Recorder/Features/<FeatureName>/
     <SubView>.swift                   (focused subviews)
 ```
 
-Not every feature needs every file. Keep it simple (Constitution C1). Current examples: `Features/AudioDevicesList/` (device and channel selection) and `Features/Recording/` (capture service, session file store, recording logic/settings, `RecordingViewModel` + `+Interruptions`, views and `RecordingCommands`).
+Not every feature needs every file. Keep it simple (Constitution C1). Current examples: `Features/AudioDevicesList/` (device and channel selection) and `Features/Recording/` (capture service, session file store, recording logic/settings, `RecordingViewModel` + `+Interruptions`, views and `RecordingCommands`) and `Features/SessionLibrary/` (library store, waveform/player/export services, library/detail/export view models, views and `SessionLibraryCommands`).
 
 ## Boundaries (Constitution C4)
 - **Views** render state and emit user intent; they do not perform device discovery, permission I/O, persistence, or core selection rules.
