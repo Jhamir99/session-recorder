@@ -55,7 +55,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T9
   - **Done when:** Docs list `Features/SessionsFolder/` and the updated status.
 
-- [ ] **T11 — Verification pass**
+- [x] **T11 — Verification pass**
   - **RF:** RF-1–RF-6, NFR-1–NFR-5
   - **Depends on:** T1–T10
   - **Done when:** `xcodebuild` succeeds for macOS and an iOS Simulator; every Completion Criterion verified on a real iPhone and Mac, including delete + reinstall on iPhone with sessions in a chosen folder.
