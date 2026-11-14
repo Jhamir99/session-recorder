@@ -45,6 +45,10 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        // Theme for all windows (settings RF-13); also re-applied when a new window/scene appears.
+        .onChange(of: settingsStore.settings.theme, initial: true) { _, theme in
+            ThemeApplier.apply(theme)
+        }
         // Settings at the bottom left of the sidebar (Mac, iPad sidebar).
         .tabViewSidebarBottomBar {
             HStack {
@@ -61,6 +65,7 @@ struct ContentView: View {
             #endif
         }
         .environmentObject(settingsStore)
+        .environment(\.waveformStyle, settingsStore.settings.waveformStyle)
         // iPhone/iPad settings sheet (Mac uses the Settings window, ⌘,).
         .sheet(isPresented: $isShowingSettings) {
             SettingsView(showsDoneButton: true)

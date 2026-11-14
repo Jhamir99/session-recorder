@@ -70,12 +70,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** `N sessions · size · free available` at the bottom of the list on iPhone, iPad and Mac, updated with the list.
 
 ### Appearance
-- [ ] **T13 — Theme** (`MyApp.swift`, `SettingsView.swift`)
+- [x] **T13 — Theme** (`MyApp.swift`, `SettingsView.swift`)
   - **RF:** RF-13
   - **Depends on:** T3
   - **Done when:** System / Light / Dark apply immediately to all windows, sheets and the Mac Settings window.
 
-- [ ] **T14 — Line waveform** (`WaveformView.swift`)
+- [x] **T14 — Line waveform** (`WaveformView.swift`)
   - **RF:** RF-14
   - **Depends on:** T3
   - **Done when:** Bars / Line switch live in the detail and trim views.

@@ -17,6 +17,7 @@ New feature folder: `Session Recorder/Features/Settings/`.
 | `Features/Settings/AppSettingsStore.swift` | Create | Shared `ObservableObject` with the current settings; saves on every change; one instance per app (shared by all windows and the Mac Settings window). | RF-1 |
 | `Features/Settings/Views/SettingsView.swift` | Create | Form with Recording / Library / Appearance sections (pickers, toggle, prefix field with validation); Mac Settings window and iOS sheet (Done). | RF-1–RF-10, RF-13, RF-14 |
 | `Features/Settings/Views/SettingsViews+Previews.swift` | Create | Previews: settings form (iPhone/Mac sizes), segmented meter, peak hold, line waveform, storage line. | C5 |
+| `Features/Settings/ThemeApplier.swift` | Create (added during T13) | Applies the theme at window/app level (iOS `overrideUserInterfaceStyle`, Mac `NSApp.appearance`), because `preferredColorScheme(nil)` did not reliably return to System. | RF-13 |
 | `MyApp.swift` | Modify | Own `AppSettingsStore`; `Settings { SettingsView() }` scene on Mac; inject the store; apply the theme (`preferredColorScheme`). | RF-1, RF-13 |
 | `ContentView.swift` | Modify | Gear button in the Record and Sessions toolbars (iPhone/iPad) → settings sheet; pass settings to the recording and library view models. | RF-1 |
 | `Features/Recording/Views/LevelMetersView.swift` | Modify | Segmented style; peak-hold marker; tap/click to reset (Until reset). | RF-2, RF-3 |

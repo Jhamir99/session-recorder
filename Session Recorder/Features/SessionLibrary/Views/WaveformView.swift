@@ -1,5 +1,10 @@
 import SwiftUI
 
+extension EnvironmentValues {
+    /// Bars or a filled line (settings RF-14); set by ContentView from Settings.
+    @Entry var waveformStyle: WaveformStyle = .bars
+}
+
 /// Whole-session waveform (RF-2): bars mirrored around the center, drawn for the full duration so a
 /// partial waveform fills left to right. With `progress`, shows the playhead; with `onSeek`, tapping or
 /// dragging moves it. Trim handles are added later.
@@ -16,6 +21,7 @@ struct WaveformView: View {
     var onTrimEnd: ((TimeInterval) -> Void)?
 
     @State private var width: CGFloat = 0
+    @Environment(\.waveformStyle) private var style
 
     private let barWidth: CGFloat = 2
     private let barSpacing: CGFloat = 1
@@ -27,12 +33,30 @@ struct WaveformView: View {
             let bars = SessionLibraryLogic.waveformBars(waveform, visible: 0...duration, barCount: barCount)
             let loadedBars = Int((min(waveform.duration / duration, 1) * Double(barCount)).rounded(.down))
             let midY = size.height / 2
-            for (index, value) in bars.prefix(loadedBars).enumerated() {
-                // Linear peak scale (like most audio editors), so loud and quiet parts differ clearly.
-                let height = max(CGFloat(value) * size.height, 1)
-                let x = CGFloat(index) * (barWidth + barSpacing)
-                let rect = CGRect(x: x, y: midY - height / 2, width: barWidth, height: height)
-                context.fill(Path(roundedRect: rect, cornerRadius: 1), with: .color(.accentColor))
+            let step = barWidth + barSpacing
+            let loaded = Array(bars.prefix(loadedBars))
+            switch style {
+            case .bars:
+                for (index, value) in loaded.enumerated() {
+                    // Linear peak scale (like most audio editors), so loud and quiet parts differ clearly.
+                    let height = max(CGFloat(value) * size.height, 1)
+                    let x = CGFloat(index) * step
+                    let rect = CGRect(x: x, y: midY - height / 2, width: barWidth, height: height)
+                    context.fill(Path(roundedRect: rect, cornerRadius: 1), with: .color(.accentColor))
+                }
+            case .line:
+                // Filled outline: the top edge left to right, then the mirrored bottom edge back.
+                guard loaded.count > 1 else { return }
+                var path = Path()
+                for (index, value) in loaded.enumerated() {
+                    let point = CGPoint(x: CGFloat(index) * step + barWidth / 2, y: midY - max(CGFloat(value) * size.height, 1) / 2)
+                    index == 0 ? path.move(to: point) : path.addLine(to: point)
+                }
+                for (index, value) in loaded.enumerated().reversed() {
+                    path.addLine(to: CGPoint(x: CGFloat(index) * step + barWidth / 2, y: midY + max(CGFloat(value) * size.height, 1) / 2))
+                }
+                path.closeSubpath()
+                context.fill(path, with: .color(.accentColor.opacity(0.85)))
             }
         }
         .overlay {
@@ -154,4 +178,12 @@ private struct Playhead: View {
     }
     .frame(height: 360)
     .padding()
+}
+
+#Preview("Line style") {
+    let peaks = (0..<600).map { index in Float(abs(sin(Double(index) / 25))) * 0.8 }
+    WaveformView(waveform: WaveformData(peaksPerSecond: 10, peaks: peaks), duration: 60)
+        .frame(height: 80)
+        .padding()
+        .environment(\.waveformStyle, .line)
 }
