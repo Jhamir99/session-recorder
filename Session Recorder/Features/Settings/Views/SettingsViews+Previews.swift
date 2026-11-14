@@ -17,13 +17,23 @@ private func previewStore(_ change: (inout AppSettings) -> Void = { _ in }) -> A
     return store
 }
 
+@MainActor
+private func previewFolders() -> SessionsFolderStore {
+    SessionsFolderStore(repository: SessionsFolderRepository(
+        defaults: UserDefaults(suiteName: "preview.folders") ?? .standard,
+        bookmarkKey: "preview_bookmark"
+    ))
+}
+
 #Preview("Settings, defaults") {
     SettingsView(showsDoneButton: true)
         .environmentObject(previewStore())
+        .environmentObject(previewFolders())
 }
 
 #Preview("Settings, changed") {
     SettingsView(showsDoneButton: true)
+        .environmentObject(previewFolders())
         .environmentObject(previewStore {
             $0.meterStyle = .segmented
             $0.peakHold = .untilReset
@@ -63,5 +73,6 @@ private func previewStore(_ change: (inout AppSettings) -> Void = { _ in }) -> A
 #Preview("Settings (Spanish)") {
     SettingsView(showsDoneButton: true)
         .environmentObject(previewStore())
+        .environmentObject(previewFolders())
         .environment(\.locale, Locale(identifier: "es"))
 }

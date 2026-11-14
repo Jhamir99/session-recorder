@@ -10,12 +10,12 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** none
   - **Done when:** Pure rules (folder in use, warning, inside-app check, unique names, move summary) checked with a scratch script; the bookmark can be saved and loaded.
 
-- [ ] **T2 — Folder service and shared store** (`SessionsFolderService.swift`, `SessionsFolderStore.swift`, `MyApp.swift`, entitlements)
+- [x] **T2 — Folder service and shared store** (`SessionsFolderService.swift`, `SessionsFolderStore.swift`, `MyApp.swift`, entitlements)
   - **RF:** RF-1, RF-5
   - **Depends on:** T1
   - **Done when:** A chosen folder is resolved at launch with access (Mac and iOS), availability is tracked (app active), App Folder fallback works.
 
-- [ ] **T3 — Settings: choose folder and warning** (`Views/SessionsFolderSection.swift`, `SettingsView.swift`)
+- [x] **T3 — Settings: choose folder and warning** (`Views/SessionsFolderSection.swift`, `SettingsView.swift`)
   - **RF:** RF-1, RF-2
   - **Depends on:** T2
   - **Done when:** Current folder shown; Choose Folder… / Use App Folder work and are remembered after restart; warning on iPhone/iPad only with the App Folder.

@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var libraryViewModel: SessionLibraryViewModel
     @StateObject private var firstUseViewModel = FirstUseViewModel()
     @StateObject private var settingsStore: AppSettingsStore
+    @StateObject private var foldersStore: SessionsFolderStore
     @State private var isShowingSettings = false
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -26,8 +27,10 @@ struct ContentView: View {
         audioSourceViewModel: AudioSourceSelectionViewModel? = nil,
         recordingViewModel: RecordingViewModel? = nil,
         libraryViewModel: SessionLibraryViewModel? = nil,
-        settingsStore: AppSettingsStore? = nil
+        settingsStore: AppSettingsStore? = nil,
+        foldersStore: SessionsFolderStore? = nil
     ) {
+        _foldersStore = StateObject(wrappedValue: foldersStore ?? SessionsFolderStore())
         _settingsStore = StateObject(wrappedValue: settingsStore ?? AppSettingsStore())
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
         _recordingViewModel = StateObject(wrappedValue: recordingViewModel ?? RecordingViewModel())
@@ -65,11 +68,13 @@ struct ContentView: View {
             #endif
         }
         .environmentObject(settingsStore)
+        .environmentObject(foldersStore)
         .environment(\.waveformStyle, settingsStore.settings.waveformStyle)
         // iPhone/iPad settings sheet (Mac uses the Settings window, ⌘,).
         .sheet(isPresented: $isShowingSettings) {
             SettingsView(showsDoneButton: true)
                 .environmentObject(settingsStore)
+                .environmentObject(foldersStore)
         }
         .sheet(isPresented: showsExplanationSheet) { explanation }
         #if os(iOS)
@@ -104,12 +109,17 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, phase in
             recordingViewModel.setAppInForeground(phase != .background)
             // Sessions may have been renamed or deleted in Files/Finder meanwhile (RF-1).
-            if phase == .active { libraryViewModel.refresh() }
+            if phase == .active {
+                // A drive may have been plugged in or removed meanwhile (sessions-folder RF-5).
+                foldersStore.refreshAvailability()
+                libraryViewModel.refresh()
+            }
         }
         #if os(macOS)
         // On Mac the scene stays active while another app (e.g. Finder) is in front, so refresh when the
         // app itself becomes active again (RF-1).
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            foldersStore.refreshAvailability()
             libraryViewModel.refresh()
         }
         #endif

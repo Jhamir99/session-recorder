@@ -13,6 +13,7 @@ struct SettingsView: View {
             Form {
                 recordingSection
                 librarySection
+                exportSection
                 appearanceSection
             }
             .formStyle(.grouped)
@@ -87,7 +88,15 @@ struct SettingsView: View {
 
     // MARK: Library
 
+    /// Where sessions are kept (sessions-folder RF-1, RF-2).
     private var librarySection: some View {
+        Section("Library") {
+            SessionsFolderRows()
+        }
+    }
+
+    /// Default share/export format (settings RF-10).
+    private var exportSection: some View {
         Section {
             Picker("Export format", selection: exportFormatBinding) {
                 Text("Last Used").tag(ExportFormat?.none)
@@ -99,7 +108,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text("Library")
+            Text("Export")
         } footer: {
             Text("The format used by default when you share a session. You can still change it before sharing.")
         }
