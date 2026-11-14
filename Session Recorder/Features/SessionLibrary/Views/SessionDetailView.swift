@@ -91,7 +91,7 @@ struct SessionDetailView: View {
                 if let onShare {
                     ToolbarItem(placement: .primaryAction) {
                         Button("Share…", systemImage: "square.and.arrow.up", action: onShare)
-                            .disabled(viewModel.session.isUnreadable)
+                            .disabled(viewModel.session.isUnreadable || viewModel.session.isDownloading)
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
@@ -128,7 +128,7 @@ struct SessionDetailView: View {
             .disabled(viewModel.audioInfo == nil || viewModel.isTrimming)
             if let onShare {
                 Button("Share…", systemImage: "square.and.arrow.up", action: onShare)
-                    .disabled(viewModel.session.isUnreadable)
+                    .disabled(viewModel.session.isUnreadable || viewModel.session.isDownloading)
             }
             if let onRename {
                 Button("Rename…", systemImage: "pencil", action: onRename)
@@ -166,7 +166,7 @@ struct SessionDetailView: View {
             return size
         case .readable(let info):
             return [SessionLibraryLogic.formatPlaybackTime(info.duration), info.format.label, size].joined(separator: " · ")
-        case .unreadable:
+        case .unreadable, .downloading:
             return size
         }
     }
@@ -180,7 +180,15 @@ struct SessionDetailView: View {
 
     @ViewBuilder
     private var waveformSection: some View {
-        if viewModel.session.isUnreadable {
+        if viewModel.session.isDownloading {
+            ContentUnavailableView {
+                Label("Downloading…", systemImage: "icloud.and.arrow.down")
+            } description: {
+                Text("This session is in iCloud Drive and is being downloaded to this device.")
+            } actions: {
+                ProgressView()
+            }
+        } else if viewModel.session.isUnreadable {
             ContentUnavailableView(
                 "Can't be played",
                 systemImage: "exclamationmark.triangle",

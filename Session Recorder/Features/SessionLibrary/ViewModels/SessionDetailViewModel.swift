@@ -61,7 +61,8 @@ final class SessionDetailViewModel: ObservableObject {
 
     /// Reads the header if the list had not yet, then loads the waveform (cache or computed).
     func load() {
-        guard loadTask == nil, !isPreview else { return }
+        // iCloud file not on the device yet: loaded when the library sees it downloaded (sessionDidChange).
+        guard loadTask == nil, !isPreview, !session.isDownloading else { return }
         let url = session.url
         let service = waveformService
         loadTask = Task { [weak self] in
@@ -97,7 +98,12 @@ final class SessionDetailViewModel: ObservableObject {
 
     /// The session was renamed (same file): keep playback and the waveform, update name and URL.
     func sessionDidChange(_ updated: SessionItem) {
-        guard updated.id == session.id, updated.url != session.url || updated.name != session.name else { return }
+        guard updated.id == session.id else { return }
+        if session.isDownloading, !updated.isDownloading {
+            session.audio = updated.audio
+            load()
+        }
+        guard updated.url != session.url || updated.name != session.name else { return }
         session.url = updated.url
         session.name = updated.name
         player.updateTitle(updated.name)

@@ -291,8 +291,8 @@ final class SessionLibraryViewModel: ObservableObject {
                 freeBytes: freeBytes
             )
             sessions = SettingsLogic.sorted(listed, by: sortOrder).map { item in
-                guard let previous = known[item.id], previous.fileSizeBytes == item.fileSizeBytes,
-                      previous.audio != .loading else { return item }
+                guard item.audio == .loading, let previous = known[item.id], previous.fileSizeBytes == item.fileSizeBytes,
+                      previous.audio != .loading, !previous.isDownloading else { return item }
                 var kept = item
                 kept.audio = previous.audio
                 return kept
@@ -304,6 +304,11 @@ final class SessionLibraryViewModel: ObservableObject {
                 self.selectedSessionID = nil
             }
             await loadAudioInfo(generation: generation)
+            // iCloud downloads in progress: list again shortly until they are on the device.
+            if sessions.contains(where: \.isDownloading) {
+                try? await Task.sleep(for: .seconds(3))
+                if !Task.isCancelled, generation == refreshGeneration { refresh() }
+            }
         }
     }
 

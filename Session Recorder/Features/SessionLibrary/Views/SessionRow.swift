@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Name, recording date and duration of a session; "Can't be played" for unreadable files (RF-1).
+/// Name, recording date and duration of a session; "Can't be played" for unreadable files (RF-1);
+/// "Downloading…" for iCloud files not on the device yet (sessions-folder RF-4).
 struct SessionRow: View {
     let session: SessionItem
 
@@ -23,6 +24,10 @@ struct SessionRow: View {
                     Label("Can't be played", systemImage: "exclamationmark.triangle.fill")
                         .labelStyle(.titleAndIcon)
                         .foregroundStyle(.orange)
+                case .downloading:
+                    Text(verbatim: "·")
+                    Label("Downloading…", systemImage: "icloud.and.arrow.down")
+                        .labelStyle(.titleAndIcon)
                 }
             }
             .font(.subheadline)
@@ -47,6 +52,10 @@ struct SessionRow: View {
         SessionRow(session: SessionItem(
             url: URL(fileURLWithPath: "/Sessions/Broken.caf"), name: "Broken",
             recordedDate: .now, fileSizeBytes: 12, audio: .unreadable
+        ))
+        SessionRow(session: SessionItem(
+            url: URL(fileURLWithPath: "/Sessions/In iCloud.caf"), name: "In iCloud",
+            recordedDate: .now, fileSizeBytes: 520_000_000, audio: .downloading
         ))
     }
 }

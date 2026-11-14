@@ -39,7 +39,8 @@ struct SessionLibraryCommands: Commands {
             Button("Share…") {
                 if let session = library?.selectedSession { library?.startShare(session) }
             }
-            .disabled(!canActOnSelection || library?.selectedSession?.isUnreadable == true)
+            .disabled(!canActOnSelection || library?.selectedSession?.isUnreadable == true
+                      || library?.selectedSession?.isDownloading == true)
 
             #if os(macOS)
             Button("Show in Finder") {

@@ -45,6 +45,9 @@ nonisolated struct SessionItem: Identifiable, Equatable, Hashable {
         case readable(SessionAudioInfo)
         /// The file is damaged or not audio: listed as "Can't be played" (RF-1).
         case unreadable
+        /// In iCloud Drive (or another provider) and not on this device yet; being downloaded
+        /// (sessions-folder RF-4).
+        case downloading
     }
 
     /// Stable across renames when the file system provides an identifier; otherwise the path.
@@ -57,6 +60,11 @@ nonisolated struct SessionItem: Identifiable, Equatable, Hashable {
 
     var isUnreadable: Bool {
         audio == .unreadable
+    }
+
+    /// Not downloaded yet: cannot be played, trimmed or shared until it is.
+    var isDownloading: Bool {
+        audio == .downloading
     }
 }
 

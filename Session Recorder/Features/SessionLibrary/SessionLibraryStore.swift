@@ -18,17 +18,35 @@ nonisolated struct SessionLibraryStore: Sendable {
 
     /// Every `.caf` file, newest first, with audio info still `.loading` (fast: no audio is read).
     /// Other files and folders are ignored. A missing folder means no sessions.
+    /// iCloud Drive files that are not on the device (`.Name.caf.icloud` placeholders, or files not downloaded)
+    /// are listed as `.downloading` and their download is requested (sessions-folder RF-4).
     func listSessions(calendar: Calendar = .current) -> [SessionItem] {
-        let keys: [URLResourceKey] = [.isRegularFileKey, .creationDateKey, .contentModificationDateKey, .fileSizeKey, .fileIdentifierKey]
+        let keys: [URLResourceKey] = [
+            .isRegularFileKey, .creationDateKey, .contentModificationDateKey, .fileSizeKey, .fileIdentifierKey,
+            .isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey
+        ]
         let urls = (try? FileManager.default.contentsOfDirectory(
             at: sessionsDirectory,
             includingPropertiesForKeys: keys,
-            options: [.skipsHiddenFiles]
+            options: []
         )) ?? []
         let items = urls
-            .filter { $0.pathExtension.lowercased() == SessionFileStore.fileExtension }
-            .compactMap { url -> SessionItem? in
-                guard let values = try? url.resourceValues(forKeys: Set(keys)), values.isRegularFile == true else { return nil }
+            .compactMap { listedURL -> SessionItem? in
+                let fileName = listedURL.lastPathComponent
+                // Legacy iCloud placeholder for "Name.caf": ".Name.caf.icloud".
+                let placeholderPrefix = ".", placeholderSuffix = ".icloud"
+                let isPlaceholder = fileName.hasPrefix(placeholderPrefix) && fileName.hasSuffix(placeholderSuffix)
+                let url = isPlaceholder
+                    ? listedURL.deletingLastPathComponent().appending(path: String(fileName.dropFirst().dropLast(placeholderSuffix.count)))
+                    : listedURL
+                guard url.pathExtension.lowercased() == SessionFileStore.fileExtension,
+                      isPlaceholder || !fileName.hasPrefix(".") else { return nil }
+                guard let values = try? listedURL.resourceValues(forKeys: Set(keys)), values.isRegularFile == true else { return nil }
+                let isNotDownloaded = isPlaceholder
+                    || (values.isUbiquitousItem == true && values.ubiquitousItemDownloadingStatus != .current)
+                if isNotDownloaded {
+                    try? FileManager.default.startDownloadingUbiquitousItem(at: url)
+                }
                 let name = url.deletingPathExtension().lastPathComponent
                 return SessionItem(
                     url: url,
@@ -40,7 +58,7 @@ nonisolated struct SessionLibraryStore: Sendable {
                         calendar: calendar
                     ),
                     fileSizeBytes: Int64(values.fileSize ?? 0),
-                    audio: .loading,
+                    audio: isNotDownloaded ? .downloading : .loading,
                     fileID: values.fileIdentifier
                 )
             }

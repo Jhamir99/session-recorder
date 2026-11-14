@@ -35,7 +35,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T4
   - **Done when:** Library notice with actions; a recording stopped meanwhile is saved in the App Folder with a notice; sessions reappear when the folder is back.
 
-- [ ] **T7 — iCloud Drive placeholders** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, `SessionRow.swift`)
+- [x] **T7 — iCloud Drive placeholders** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, `SessionRow.swift`)
   - **RF:** RF-4
   - **Depends on:** T4
   - **Done when:** Not-downloaded sessions are listed as downloading, are downloaded on demand and become playable.

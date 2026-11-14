@@ -224,7 +224,7 @@ struct SessionLibraryView<Indicator: View>: View {
                 Button("Share…", systemImage: "square.and.arrow.up") {
                     viewModel.startShare(session)
                 }
-                .disabled(session.isUnreadable)
+                .disabled(session.isUnreadable || session.isDownloading)
                 #if os(macOS)
                 Button("Show in Finder", systemImage: "folder") {
                     SessionLibraryStore.revealInFinder(session.url)
