@@ -10,6 +10,10 @@ import SwiftUI
         WindowGroup {
             ContentView(settingsStore: settingsStore, foldersStore: foldersStore)
         }
+        #if os(macOS)
+        // Comfortable first size on Mac; the window can still be resized (macOS remembers the last size).
+        .defaultSize(width: 900, height: 620)
+        #endif
         .commands {
             RecordingCommands()
             SessionLibraryCommands()

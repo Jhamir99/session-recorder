@@ -67,6 +67,8 @@ enum RecordingStartError: Equatable {
 struct RecordingNotice: Identifiable, Equatable {
     enum Kind: Equatable {
         case saved(sessionName: String)
+        /// Sessions-folder RF-5: the chosen folder was unavailable, so the session went to the App Folder.
+        case savedInAppFolder(sessionName: String)
         case recovered(sessionName: String)
         case startFailed(RecordingStartError)
         case deviceDisconnected(deviceName: String)
@@ -85,6 +87,7 @@ struct RecordingNotice: Identifiable, Equatable {
     var isError: Bool {
         switch kind {
         case .saved, .recovered: false
+        case .savedInAppFolder: true
         case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning, .storageFull, .recordingFailed: true
         case .timeLimitReached: false
         }
@@ -94,6 +97,8 @@ struct RecordingNotice: Identifiable, Equatable {
         switch kind {
         case .saved(let name):
             String(localized: "Saved: \(name)", comment: "Recording notice")
+        case .savedInAppFolder(let name):
+            String(localized: "The sessions folder isn't available, so the session was saved in the App Folder: \(name)", comment: "Recording notice")
         case .recovered(let name):
             String(localized: "Recovered an interrupted recording: \(name)", comment: "Recording notice")
         case .startFailed(.permissionRequired):

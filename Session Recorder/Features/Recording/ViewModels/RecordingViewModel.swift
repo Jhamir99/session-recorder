@@ -332,7 +332,14 @@ final class RecordingViewModel: ObservableObject {
 
     /// Finishes the file and saves the session with a date-based name (RF-6).
     func stopRecording() {
-        finishRecording { name in name.map { RecordingNotice(kind: .saved(sessionName: $0)) } }
+        finishRecording { [weak self] name in
+            guard let name else { return nil }
+            // The chosen folder could not be reached: say where the session went (sessions-folder RF-5).
+            if self?.foldersStore?.isChosenFolderUnavailable == true {
+                return RecordingNotice(kind: .savedInAppFolder(sessionName: name))
+            }
+            return RecordingNotice(kind: .saved(sessionName: name))
+        }
     }
 
     /// Stops and saves; `makeNotice` gets the saved session name (nil when nothing was saved).

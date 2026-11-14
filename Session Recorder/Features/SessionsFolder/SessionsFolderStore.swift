@@ -1,6 +1,9 @@
 import Combine
 import Foundation
 import os
+#if os(macOS)
+import AppKit
+#endif
 
 /// The sessions folder in use, shared by every window (created once in `MyApp`; spec RF-1, RF-5).
 /// Keeps security-scoped access to the chosen folder for the app's lifetime.
@@ -31,7 +34,24 @@ final class SessionsFolderStore: ObservableObject {
         self.repository = repository
         folder = .app(SessionsFolderService.appFolder)
         loadChosenFolder()
+        #if os(macOS)
+        // A drive can be plugged in or removed while the app is in front (RF-5).
+        let center = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didMountNotification, NSWorkspace.didUnmountNotification] {
+            volumeObservers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor [weak self] in self?.refreshAvailability() }
+            })
+        }
+        #endif
     }
+
+    #if os(macOS)
+    nonisolated(unsafe) private var volumeObservers: [NSObjectProtocol] = []
+
+    deinit {
+        volumeObservers.forEach { NSWorkspace.shared.notificationCenter.removeObserver($0) }
+    }
+    #endif
 
     /// Where sessions are written and listed now (the App Folder while a chosen folder is unavailable).
     var currentURL: URL { folder.url }

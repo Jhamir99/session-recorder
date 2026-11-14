@@ -30,7 +30,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T3, T4
   - **Done when:** Move/Keep dialog; move with progress and unique names; partial failure reported; scratch script confirms nothing is lost or duplicated.
 
-- [ ] **T6 — Folder not available** (`SessionsFolderStore.swift`, `SessionLibraryView.swift`, recording notice)
+- [x] **T6 — Folder not available** (`SessionsFolderStore.swift`, `SessionLibraryView.swift`, recording notice)
   - **RF:** RF-5, NFR-2
   - **Depends on:** T4
   - **Done when:** Library notice with actions; a recording stopped meanwhile is saved in the App Folder with a notice; sessions reappear when the folder is back.

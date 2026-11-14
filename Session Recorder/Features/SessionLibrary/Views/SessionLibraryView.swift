@@ -62,7 +62,14 @@ struct SessionLibraryView<Indicator: View>: View {
         #if os(macOS)
         HStack(spacing: 0) {
             sessionList
-                .safeAreaInset(edge: .top) { indicator }
+                .safeAreaInset(edge: .top) {
+                    VStack(spacing: 0) {
+                        indicator
+                        if let folders = viewModel.foldersStore {
+                            SessionsFolderUnavailableBanner(folders: folders)
+                        }
+                    }
+                }
                 .frame(width: 280)
                 .toolbar {
                     ToolbarItem(placement: .navigation) { sortMenu }
@@ -87,7 +94,14 @@ struct SessionLibraryView<Indicator: View>: View {
                         }
                     }
                 }
-                .safeAreaInset(edge: .top) { indicator }
+                .safeAreaInset(edge: .top) {
+                    VStack(spacing: 0) {
+                        indicator
+                        if let folders = viewModel.foldersStore {
+                            SessionsFolderUnavailableBanner(folders: folders)
+                        }
+                    }
+                }
         } detail: {
             detail
                 // iPad (list + detail): gear in the detail bar, top right of the window like the Record tab.
