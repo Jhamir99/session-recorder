@@ -4,20 +4,27 @@ import SwiftUI
 /// Meters fed by the live levels; the only view that updates at the meter rate.
 struct LiveLevelMetersView: View {
     @ObservedObject var meters: LevelMeterModel
+    var style: MeterStyle = .continuous
+    /// Tap/click on the meters (resets held peaks with peak hold "Until Reset").
+    var onTap: () -> Void = {}
 
     var body: some View {
-        LevelMetersView(levels: meters.levels)
+        LevelMetersView(levels: meters.levels, style: style)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onTap)
     }
 }
 
 struct LevelMetersView: View {
     /// Mono: one level; stereo: left then right.
     let levels: [ChannelLevel]
+    /// Continuous bar or LED-like segments (settings RF-2).
+    var style: MeterStyle = .continuous
 
     var body: some View {
         VStack(spacing: 6) {
             ForEach(Array(levels.enumerated()), id: \.offset) { index, level in
-                MeterRow(label: label(for: index), level: level)
+                MeterRow(label: label(for: index), level: level, style: style)
             }
         }
     }
@@ -31,6 +38,7 @@ struct LevelMetersView: View {
 private struct MeterRow: View {
     let label: String
     let level: ChannelLevel
+    let style: MeterStyle
 
     var body: some View {
         HStack(spacing: 8) {
@@ -39,15 +47,9 @@ private struct MeterRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 14)
 
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(.fill.tertiary)
-                    Capsule()
-                        .fill(meterGradient)
-                        .frame(width: geometry.size.width * CGFloat(RecordingLogic.meterValue(peak: level.peak)))
-                }
-            }
-            .frame(height: 10)
+            bar
+                .frame(height: 10)
+                .overlay { heldPeakMarker }
 
             Text("CLIP")
                 .font(.caption2.weight(.bold))
@@ -61,7 +63,42 @@ private struct MeterRow: View {
         .accessibilityValue(accessibilityLevel)
     }
 
-    // Green up to about -12 dBFS, yellow up to about -3 dBFS, red near full scale.
+    @ViewBuilder
+    private var bar: some View {
+        switch style {
+        case .continuous:
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.fill.tertiary)
+                    Capsule()
+                        .fill(meterGradient)
+                        .frame(width: geometry.size.width * CGFloat(RecordingLogic.meterValue(peak: level.peak)))
+                }
+            }
+        case .segmented:
+            SegmentedMeterBar(
+                meterValue: RecordingLogic.meterValue(peak: level.peak),
+                segmentCount: style.segmentCount ?? SettingsLogic.meterSegmentCount
+            )
+        }
+    }
+
+    /// Thin line at the held peak (settings RF-3), on the same scale as the bar.
+    @ViewBuilder
+    private var heldPeakMarker: some View {
+        if let held = level.heldPeak, held > 0 {
+            GeometryReader { geometry in
+                Rectangle()
+                    .fill(.primary)
+                    .frame(width: 2, height: geometry.size.height + 4)
+                    .offset(x: geometry.size.width * CGFloat(RecordingLogic.meterValue(peak: held)) - 1, y: -2)
+            }
+            .allowsHitTesting(false)
+        }
+    }
+
+    // Green up to about -12 dBFS, yellow up to about -3 dBFS, red near full scale (same zones as the
+    // segmented style, see SettingsLogic).
     private var meterGradient: LinearGradient {
         LinearGradient(
             stops: [
@@ -90,6 +127,33 @@ private struct MeterRow: View {
     }
 }
 
+/// LED-like meter (settings RF-2): same dB scale and green/yellow/red zones as the continuous bar.
+private struct SegmentedMeterBar: View {
+    let meterValue: Float
+    let segmentCount: Int
+
+    var body: some View {
+        let lit = SettingsLogic.litSegments(meterValue: meterValue, segmentCount: segmentCount)
+        HStack(spacing: 2) {
+            ForEach(0..<segmentCount, id: \.self) { index in
+                let fill = index < lit
+                    ? color(for: SettingsLogic.zone(forSegment: index, segmentCount: segmentCount))
+                    : Color.secondary.opacity(0.18)
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(fill)
+            }
+        }
+    }
+
+    private func color(for zone: SettingsLogic.MeterZone) -> Color {
+        switch zone {
+        case .green: .green
+        case .yellow: .yellow
+        case .red: .red
+        }
+    }
+}
+
 #Preview("Stereo, clipping right") {
     LevelMetersView(levels: [
         ChannelLevel(peak: 0.3, isClipping: false),
@@ -101,4 +165,12 @@ private struct MeterRow: View {
 #Preview("Mono") {
     LevelMetersView(levels: [ChannelLevel(peak: 0.1, isClipping: false)])
         .padding()
+}
+
+#Preview("Segmented") {
+    LevelMetersView(levels: [
+        ChannelLevel(peak: 0.3, isClipping: false, heldPeak: 0.5),
+        ChannelLevel(peak: 0.9, isClipping: false, heldPeak: 0.95)
+    ], style: .segmented)
+    .padding()
 }

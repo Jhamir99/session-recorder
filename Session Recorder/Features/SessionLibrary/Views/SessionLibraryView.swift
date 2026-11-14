@@ -10,6 +10,9 @@ struct SessionLibraryView<Indicator: View>: View {
     let isRecordingActive: Bool
     /// iPhone/iPad gear button (settings RF-1); the Mac uses the Settings window.
     var onOpenSettings: (() -> Void)?
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
     /// Shown above the list (the `REC`/`PAUSED` indicator while a recording exists).
     @ViewBuilder var indicator: Indicator
 
@@ -74,8 +77,9 @@ struct SessionLibraryView<Indicator: View>: View {
         NavigationSplitView {
             sessionList
                 .navigationTitle("Sessions")
+                // iPhone (one column): gear in the list's bar, top right.
                 .toolbar {
-                    if let onOpenSettings {
+                    if let onOpenSettings, isCompact {
                         ToolbarItem(placement: .primaryAction) {
                             Button("Settings", systemImage: "gearshape", action: onOpenSettings)
                         }
@@ -84,6 +88,14 @@ struct SessionLibraryView<Indicator: View>: View {
                 .safeAreaInset(edge: .top) { indicator }
         } detail: {
             detail
+                // iPad (list + detail): gear in the detail bar, top right of the window like the Record tab.
+                .toolbar {
+                    if let onOpenSettings, !isCompact {
+                        ToolbarItem(placement: .primaryAction) {
+                            Button("Settings", systemImage: "gearshape", action: onOpenSettings)
+                        }
+                    }
+                }
         }
         #endif
     }
@@ -94,6 +106,14 @@ struct SessionLibraryView<Indicator: View>: View {
         }
         action(detail)
         return .handled
+    }
+
+    private var isCompact: Bool {
+        #if os(iOS)
+        horizontalSizeClass == .compact
+        #else
+        false
+        #endif
     }
 
     @ViewBuilder

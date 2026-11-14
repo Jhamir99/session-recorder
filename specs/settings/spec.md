@@ -20,12 +20,13 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 ### RF-1: Settings screen
 - On Mac, the system shall provide **Settings…** (⌘,) in the app menu, opening the standard settings window.
 - On iPhone/iPad, the Record and Sessions tabs shall show a **Settings** (gear) button in their navigation bars that opens Settings as a sheet with a **Done** button (no separate Settings tab).
+- When the tab sidebar is shown (Mac, iPad), a **Settings** button (gear and text) sits at the bottom left of the sidebar.
 - Settings shall be grouped into **Recording**, **Library** and **Appearance**; options that are not obvious (peak hold, fade at pause, recording time limit, low-storage warning, session name) show a short hint under their name.
 - Changes shall apply immediately and be saved on the device (no Save button); they shall survive restarts.
 - While a recording exists, options that would change it (name prefix, time limit) shall apply from the next recording; display options (meters, theme) apply immediately.
 
 ### RF-2: Meter style (Recording)
-- Options: **Continuous** (the current bar) and **Segmented** (separate blocks like LED meters, with the same green/yellow/red zones).
+- Options: **Continuous** (the current bar) and **Segmented** (24 thin blocks like LED meters), with the same dB scale and green/yellow/red zones. (LED and Round LED styles were tried and removed, 2026-11-14.)
 - Default: Continuous.
 
 ### RF-3: Peak hold (Recording)

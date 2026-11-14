@@ -42,6 +42,10 @@ final class RecordingViewModel: ObservableObject {
     private let logger = Logger(subsystem: "SessionRecorder", category: "Recording")
     private(set) weak var audioSource: AudioSourceSelectionViewModel?
     private var lastClipDates: [Date?] = []
+    /// Held peak per channel (settings RF-3).
+    private var heldPeaks: [SettingsLogic.HeldPeak?] = []
+    /// App settings (peak hold now; more options in later tasks). Set by ContentView.
+    private(set) weak var settingsStore: AppSettingsStore?
     /// Last hardware rate requested, to avoid asking again on every source change.
     private var appliedSampleRate: (deviceID: String, rate: Double)?
     private var cancellables: Set<AnyCancellable> = []
@@ -83,6 +87,15 @@ final class RecordingViewModel: ObservableObject {
         self.fileStore = fileStore ?? SessionFileStore()
         self.settings = settings ?? RecordingSettingsRepository()
         bindCapture()
+    }
+
+    func attach(settings: AppSettingsStore) {
+        settingsStore = settings
+    }
+
+    /// Peak hold "Until Reset": tapping the meters clears the held peaks (settings RF-3).
+    func resetHeldPeaks() {
+        heldPeaks = Array(repeating: nil, count: heldPeaks.count)
     }
 
     /// Connects to the shared source selection; meters and quality follow it. Safe to call more than once.
@@ -438,7 +451,9 @@ final class RecordingViewModel: ObservableObject {
     private func updateLevels(peaks: [Float], now: Date = Date()) {
         if lastClipDates.count != peaks.count {
             lastClipDates = Array(repeating: nil, count: peaks.count)
+            heldPeaks = Array(repeating: nil, count: peaks.count)
         }
+        let hold = settingsStore?.settings.peakHold ?? .off
         if meteredChannelCount != peaks.count {
             meteredChannelCount = peaks.count
         }
@@ -446,9 +461,11 @@ final class RecordingViewModel: ObservableObject {
             if RecordingLogic.isClipping(peak: peak) {
                 lastClipDates[index] = now
             }
+            heldPeaks[index] = SettingsLogic.heldPeak(previous: heldPeaks[index], peak: peak, now: now, hold: hold)
             return ChannelLevel(
                 peak: peak,
-                isClipping: RecordingLogic.isClipIndicatorVisible(lastClipDate: lastClipDates[index], now: now)
+                isClipping: RecordingLogic.isClipIndicatorVisible(lastClipDate: lastClipDates[index], now: now),
+                heldPeak: heldPeaks[index]?.value
             )
         }
     }

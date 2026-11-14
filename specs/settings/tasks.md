@@ -22,12 +22,12 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Mac: Settings… (⌘,) opens the window; iPhone/iPad: gear in Record and Sessions opens a sheet with Done; all options are shown in Recording / Library / Appearance and are remembered after a restart.
 
 ### Meters
-- [ ] **T4 — Segmented meter style** (`Features/Recording/Views/LevelMetersView.swift`)
+- [x] **T4 — Segmented meter style** (`Features/Recording/Views/LevelMetersView.swift`)
   - **RF:** RF-2, NFR-3
   - **Depends on:** T3
   - **Done when:** Continuous/Segmented switch live; segments use the same scale and zones.
 
-- [ ] **T5 — Peak hold** (`RecordingModels.swift`, `RecordingViewModel.swift`, `LevelMetersView.swift`)
+- [x] **T5 — Peak hold** (`RecordingModels.swift`, `RecordingViewModel.swift`, `LevelMetersView.swift`)
   - **RF:** RF-3
   - **Depends on:** T4
   - **Done when:** Off / 1 s / 3 s / Until reset behave as specified; tapping the meters resets Until reset.

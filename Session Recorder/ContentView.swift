@@ -45,6 +45,21 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        // Settings at the bottom left of the sidebar (Mac, iPad sidebar).
+        .tabViewSidebarBottomBar {
+            HStack {
+                sidebarSettingsButton
+                Spacer()
+            }
+            // Same inset as the tab items, clear of the rounded screen corner on iPad.
+            #if os(iOS)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 16)
+            #else
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            #endif
+        }
         .environmentObject(settingsStore)
         // iPhone/iPad settings sheet (Mac uses the Settings window, ⌘,).
         .sheet(isPresented: $isShowingSettings) {
@@ -62,6 +77,7 @@ struct ContentView: View {
         // Injected at the root so tabs and sheets presented from them share the same state.
         .environmentObject(audioSourceViewModel)
         .task {
+            recordingViewModel.attach(settings: settingsStore)
             libraryViewModel.attach(recording: recordingViewModel)
             firstUseViewModel.attach(audioSource: audioSourceViewModel)
             recordingViewModel.attach(audioSource: audioSourceViewModel)
@@ -108,6 +124,26 @@ struct ContentView: View {
         return true
     }
     #endif
+
+    /// Gear + "Settings" at the bottom of the sidebar, aligned with the tab items (Mac, iPad).
+    @ViewBuilder
+    private var sidebarSettingsButton: some View {
+        #if os(macOS)
+        SettingsLink {
+            Label("Settings", systemImage: "gearshape")
+                .labelStyle(.titleAndIcon)
+        }
+        .buttonStyle(.borderless)
+        #else
+        Button {
+            isShowingSettings = true
+        } label: {
+            Label("Settings", systemImage: "gearshape")
+                .labelStyle(.titleAndIcon)
+        }
+        .buttonStyle(.borderless)
+        #endif
+    }
 
     private var settingsButton: some View {
         Button("Settings", systemImage: "gearshape") { isShowingSettings = true }
@@ -184,7 +220,11 @@ struct ContentView: View {
                     )
                     .padding(.top, 8)
                 } else if recordingViewModel.meteredChannelCount > 0 {
-                    LiveLevelMetersView(meters: recordingViewModel.meters)
+                    LiveLevelMetersView(
+                        meters: recordingViewModel.meters,
+                        style: settingsStore.settings.meterStyle,
+                        onTap: recordingViewModel.resetHeldPeaks
+                    )
                         .padding(.top, 8)
                 }
 

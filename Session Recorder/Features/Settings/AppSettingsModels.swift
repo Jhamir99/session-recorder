@@ -5,6 +5,7 @@ import Foundation
 
 nonisolated enum MeterStyle: String, CaseIterable, Identifiable, Codable {
     case continuous
+    /// 24 thin segments.
     case segmented
 
     var id: String { rawValue }
@@ -12,6 +13,14 @@ nonisolated enum MeterStyle: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .continuous: "Continuous"
         case .segmented: "Segmented"
+        }
+    }
+
+    /// Number of segments/LEDs (nil for the continuous bar).
+    var segmentCount: Int? {
+        switch self {
+        case .continuous: nil
+        case .segmented: 24
         }
     }
 }

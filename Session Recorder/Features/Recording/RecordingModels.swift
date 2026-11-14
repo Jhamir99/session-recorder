@@ -51,6 +51,8 @@ struct ChannelLevel: Equatable {
     /// Peak level, linear 0...1 (1 = full scale).
     var peak: Float
     var isClipping: Bool
+    /// Highest recent peak shown as a marker (settings RF-3); nil when peak hold is off.
+    var heldPeak: Float? = nil
 
     static let silent = ChannelLevel(peak: 0, isClipping: false)
 }
