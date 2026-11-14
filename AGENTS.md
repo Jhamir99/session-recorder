@@ -12,8 +12,8 @@ SwiftUI app (early stage) for DJs/musicians to record sessions from a USB-C audi
 
 ## Facts (from project)
 - Xcode project: `Session Recorder.xcodeproj`, scheme/target: `Session Recorder`.
-- Swift 5 (`SWIFT_VERSION=5.0`), generated Info.plist merged with `Session-Recorder-Info.plist` (iOS `UIBackgroundModes = audio`, `UIFileSharingEnabled`, `LSSupportsOpeningDocumentsInPlace`), bundle `com.jhamirfranciscopiminchumopersonalteam.SessionRecorder`.
-- Platforms in project settings: `iphoneos iphonesimulator macosx xros xrsimulator` (`TARGETED_DEVICE_FAMILY=1,2,7`); deployment targets are set to `27.0` in `project.pbxproj` (verify in Xcode before changing).
+- Swift 5 (`SWIFT_VERSION=5.0`), generated Info.plist merged with `Session-Recorder-Info.plist` (iOS `UIBackgroundModes = audio`, `UIFileSharingEnabled`, `LSSupportsOpeningDocumentsInPlace`), bundle `com.jfran.SessionRecorder`, `ITSAppUsesNonExemptEncryption = NO`, privacy manifest `Session Recorder/PrivacyInfo.xcprivacy` (update its API reasons when using new required-reason APIs).
+- Platforms in project settings: `iphoneos iphonesimulator macosx` (`TARGETED_DEVICE_FAMILY=1,2`); deployment targets are set to `27.0` in `project.pbxproj` (verify in Xcode before changing).
 - Entitlements (`Session Recorder/Session Recorder.entitlements`): App Sandbox, `com.apple.security.device.midi`, `com.apple.security.device.audio-input`, `com.apple.security.files.bookmarks.app-scope` (Mac: keep access to the chosen sessions folder); user-selected files read-write via `ENABLE_USER_SELECTED_FILES = readwrite` (Mac Save… when exporting). Microphone usage description is set via `INFOPLIST_KEY_NSMicrophoneUsageDescription` in `project.pbxproj`.
 - No test targets, CI workflows, package manifests, or lint/format config found.
 
