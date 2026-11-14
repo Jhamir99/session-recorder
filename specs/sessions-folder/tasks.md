@@ -40,7 +40,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T4
   - **Done when:** Not-downloaded sessions are listed as downloading, are downloaded on demand and become playable.
 
-- [ ] **T8 — Show in Files (iOS)** (`Views/FolderBrowserView.swift`, `SessionDetailView.swift`)
+- [x] **T8 — Show in Files (iOS)** (`Views/FolderBrowserView.swift`, `SessionDetailView.swift`)
   - **RF:** RF-6
   - **Depends on:** T4
   - **Done when:** The detail menu opens the system file browser at the session's folder on iPhone/iPad; Mac keeps Show in Finder.

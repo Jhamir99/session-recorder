@@ -10,6 +10,10 @@ struct SessionDetailView: View {
     var onRename: (() -> Void)?
     var onShare: (() -> Void)?
     var onDelete: (() -> Void)?
+    #if os(iOS)
+    /// Show in Files: the system file browser at the session's folder (sessions-folder RF-6).
+    @State private var isShowingInFiles = false
+    #endif
 
     /// Told when this detail appears/disappears, so the Session menu controls the right playback.
     private weak var library: SessionLibraryViewModel?
@@ -99,6 +103,12 @@ struct SessionDetailView: View {
                 }
             }
         }
+        #if os(iOS)
+        .sheet(isPresented: $isShowingInFiles) {
+            FolderBrowserView(directoryURL: viewModel.session.url.deletingLastPathComponent())
+                .ignoresSafeArea()
+        }
+        #endif
         .alert(
             viewModel.trimErrorMessage ?? "",
             isPresented: Binding(
@@ -136,6 +146,10 @@ struct SessionDetailView: View {
             #if os(macOS)
             Button("Show in Finder", systemImage: "folder") {
                 SessionLibraryStore.revealInFinder(viewModel.session.url)
+            }
+            #else
+            Button("Show in Files", systemImage: "folder") {
+                isShowingInFiles = true
             }
             #endif
             if let onDelete {

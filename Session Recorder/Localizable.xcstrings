@@ -1745,6 +1745,9 @@
         }
       }
     },
+    "Show in Files" : {
+
+    },
     "Show in Finder" : {
       "localizations" : {
         "es" : {
