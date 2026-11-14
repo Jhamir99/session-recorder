@@ -1,6 +1,9 @@
 import AVFoundation
 import Foundation
 import os
+#if os(macOS)
+import AppKit
+#endif
 
 /// File operations on the Sessions folder (plan §3). Nonisolated and stateless, so it can run on
 /// background tasks; reading audio headers never happens on the main thread (NFR-2).
@@ -58,6 +61,14 @@ nonisolated struct SessionLibraryStore: Sendable {
             )
         ))
     }
+
+    #if os(macOS)
+    /// Opens a Finder window with the session file selected (RF-7).
+    @MainActor
+    static func revealInFinder(_ url: URL) {
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+    #endif
 
     /// Names of all sessions (for rename and trim uniqueness).
     func existingNames() -> Set<String> {

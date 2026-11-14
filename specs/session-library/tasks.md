@@ -32,18 +32,18 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4
   - **Done when:** Saved and recovered recordings appear without leaving the tab; changes made in Files/Finder show when the app becomes active; an open detail of a removed session returns to the list.
 
-- [ ] **T6 — Files visibility (iOS) and Show in Finder (Mac)** (Info.plist keys — approved in plan §7; `SessionLibraryStore.swift`, row context menu)
+- [x] **T6 — Files visibility (iOS) and Show in Finder (Mac)** (Info.plist keys — approved in plan §7; `SessionLibraryStore.swift`, row context menu)
   - **RF:** RF-7
   - **Depends on:** T4
   - **Done when:** On iPhone/iPad the Sessions folder is visible in Files ("On My iPhone › Session Recorder"); on Mac, Show in Finder reveals the file; the generated Info.plist contains the keys.
 
 ### Playback (RF-2)
-- [ ] **T7 — Waveform service + cache** (`Features/SessionLibrary/WaveformService.swift`)
+- [x] **T7 — Waveform service + cache** (`Features/SessionLibrary/WaveformService.swift`)
   - **RF:** RF-2, NFR-2, NFR-3
   - **Depends on:** T2
   - **Done when:** Peaks (10/s) are computed in chunks off the main thread with partial results and cancel; saved to and read from `Caches/Waveforms/`; recomputed when missing or outdated; a 1 h file is checked with a scratch script (time, cache size).
 
-- [ ] **T8 — Detail view: info + waveform** (`ViewModels/SessionDetailViewModel.swift`, `Views/SessionDetailView.swift`, `Views/WaveformView.swift`)
+- [x] **T8 — Detail view: info + waveform** (`ViewModels/SessionDetailViewModel.swift`, `Views/SessionDetailView.swift`, `Views/WaveformView.swift`)
   - **RF:** RF-2
   - **Depends on:** T4, T7
   - **Done when:** Selecting a session shows name, date, duration, format, size and the waveform filling progressively (loading state for long sessions).

@@ -22,7 +22,7 @@ New feature folder: `Session Recorder/Features/SessionLibrary/` (views in `Views
 | `Features/SessionLibrary/ViewModels/SessionDetailViewModel+Trim.swift` | Create | Trim mode: handles, range preview, validation, save as new session. | RF-5 |
 | `Features/SessionLibrary/ViewModels/SessionExportViewModel.swift` | Create | Share flow: format/bitrate, size estimate, export progress/cancel, exported file URL, cleanup. | RF-6 |
 | `Features/SessionLibrary/ViewModels/SessionLibraryViewModel+Preview.swift` | Create | Preview instances for all states (no files or audio). | C5 |
-| `Features/SessionLibrary/Views/SessionLibraryView.swift` | Create | Sessions tab content: `NavigationSplitView` (list + detail; collapses to a stack on iPhone), `REC` indicator, empty state, swipe/context actions, rename alert, delete confirmation. | RF-1, RF-3, RF-4, NFR-1 |
+| `Features/SessionLibrary/Views/SessionLibraryView.swift` | Create | Sessions tab content: `NavigationSplitView` on iPhone/iPad (collapses to a stack on iPhone); on Mac list + detail side by side in an `HStack` (a split view inside the tab sidebar laid the detail under the list), `REC` indicator, empty state, swipe/context actions, rename alert, delete confirmation. | RF-1, RF-3, RF-4, NFR-1 |
 | `Features/SessionLibrary/Views/SessionRow.swift` | Create | Name, date, duration (or "Can't be played"). | RF-1 |
 | `Features/SessionLibrary/Views/SessionDetailView.swift` | Create | Info, waveform, player controls, actions (Trim, Share, Rename, Delete, Show in Finder on Mac). | RF-2–RF-7 |
 | `Features/SessionLibrary/Views/WaveformView.swift` | Create | Draws peaks (Canvas), playback position, tap/drag to seek, optional trim handles and dimmed outside range; loading state. | RF-2, RF-5 |
