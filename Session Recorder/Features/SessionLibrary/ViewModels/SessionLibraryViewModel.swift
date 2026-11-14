@@ -10,6 +10,8 @@ final class SessionLibraryViewModel: ObservableObject {
     @Published var selectedSessionID: SessionItem.ID?
     /// Session whose rename sheet is open (RF-3).
     @Published var renamingSession: SessionItem?
+    /// Session waiting for delete confirmation (RF-4).
+    @Published var deletingSession: SessionItem?
     /// Shown as an alert when a file operation fails.
     @Published var notice: LibraryNotice?
 
@@ -98,6 +100,31 @@ final class SessionLibraryViewModel: ObservableObject {
             refresh()
             return false
         }
+    }
+
+    // MARK: Delete (RF-4)
+
+    /// Asks for confirmation first (the dialog names the session).
+    func requestDelete(_ session: SessionItem) {
+        deletingSession = session
+    }
+
+    func delete(_ session: SessionItem) {
+        deletingSession = nil
+        // Stop playback before the file goes away (it may be the playing session).
+        if selectedSessionID == session.id {
+            stopPlayback()
+        }
+        do {
+            try store.delete(session.url)
+            sessions.removeAll { $0.id == session.id }
+            if selectedSessionID == session.id {
+                selectedSessionID = nil
+            }
+        } catch {
+            notice = LibraryNotice(kind: .operationFailed("Deleting"))
+        }
+        refresh()
     }
 
     var selectedSession: SessionItem? {

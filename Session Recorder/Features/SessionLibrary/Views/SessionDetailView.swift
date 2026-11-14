@@ -8,12 +8,20 @@ struct SessionDetailView: View {
     /// A recording exists: playback is disabled (RF-2).
     let isRecordingActive: Bool
     var onRename: (() -> Void)?
+    var onDelete: (() -> Void)?
 
-    init(session: SessionItem, handoff: PlaybackHandoff, isRecordingActive: Bool, onRename: (() -> Void)? = nil) {
+    init(
+        session: SessionItem,
+        handoff: PlaybackHandoff,
+        isRecordingActive: Bool,
+        onRename: (() -> Void)? = nil,
+        onDelete: (() -> Void)? = nil
+    ) {
         _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff))
         self.session = session
         self.isRecordingActive = isRecordingActive
         self.onRename = onRename
+        self.onDelete = onDelete
     }
 
     init(viewModel: SessionDetailViewModel, isRecordingActive: Bool = false) {
@@ -64,6 +72,10 @@ struct SessionDetailView: View {
                 SessionLibraryStore.revealInFinder(viewModel.session.url)
             }
             #endif
+            if let onDelete {
+                Divider()
+                Button("Delete…", systemImage: "trash", role: .destructive, action: onDelete)
+            }
         }
     }
 

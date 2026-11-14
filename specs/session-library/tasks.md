@@ -69,7 +69,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T4, T8
   - **Done when:** Rename from list (swipe/context) and detail with inline validation (empty, `/` `:`, duplicate); the file is renamed, the date kept, the waveform cache still used.
 
-- [ ] **T13 — Delete** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, list + detail UI)
+- [x] **T13 — Delete** (`SessionLibraryStore.swift`, `SessionLibraryViewModel.swift`, list + detail UI)
   - **RF:** RF-4
   - **Depends on:** T4, T9
   - **Done when:** Delete from list and detail with a confirmation naming the session; Mac moves to the Trash, iOS deletes permanently (text says so); playback stops first; the detail returns to the list; the cache entry is removed.

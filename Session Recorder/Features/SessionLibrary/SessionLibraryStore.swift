@@ -89,6 +89,29 @@ nonisolated struct SessionLibraryStore: Sendable {
         return destination
     }
 
+    // MARK: Delete (RF-4)
+
+    /// Mac: moves the file to the Trash (restorable from Finder). iPhone/iPad: deletes it permanently
+    /// (apps have no system Trash for their files). The waveform cache entry is removed too.
+    func delete(_ url: URL, waveformService: WaveformService = WaveformService()) throws {
+        // The cache key is read from the file, so remove the cache entry while the file still exists.
+        waveformService.removeCache(for: url)
+        #if os(macOS)
+        try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+        #else
+        try FileManager.default.removeItem(at: url)
+        #endif
+    }
+
+    /// Wording for the delete confirmation, depending on where the file goes.
+    static var deleteMovesToTrash: Bool {
+        #if os(macOS)
+        true
+        #else
+        false
+        #endif
+    }
+
     #if os(macOS)
     /// Opens a Finder window with the session file selected (RF-7).
     @MainActor

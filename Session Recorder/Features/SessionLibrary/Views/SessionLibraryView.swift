@@ -19,6 +19,24 @@ struct SessionLibraryView<Indicator: View>: View {
             .sheet(item: $viewModel.renamingSession) { session in
                 RenameSessionSheet(session: session, viewModel: viewModel)
             }
+            .confirmationDialog(
+                "Delete “\(viewModel.deletingSession?.name ?? "")”?",
+                isPresented: Binding(
+                    get: { viewModel.deletingSession != nil },
+                    set: { if !$0 { viewModel.deletingSession = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: viewModel.deletingSession
+            ) { session in
+                Button(SessionLibraryStore.deleteMovesToTrash ? "Move to Trash" : "Delete", role: .destructive) {
+                    viewModel.delete(session)
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { _ in
+                Text(SessionLibraryStore.deleteMovesToTrash
+                     ? "The session will be moved to the Trash."
+                     : "This session will be deleted from this device. This can't be undone.")
+            }
             .alert(
                 viewModel.notice?.text ?? "",
                 isPresented: Binding(get: { viewModel.notice != nil }, set: { if !$0 { viewModel.notice = nil } })
@@ -60,7 +78,8 @@ struct SessionLibraryView<Indicator: View>: View {
                 session: session,
                 handoff: viewModel.playbackHandoff,
                 isRecordingActive: isRecordingActive,
-                onRename: { viewModel.startRename(session) }
+                onRename: { viewModel.startRename(session) },
+                onDelete: { viewModel.requestDelete(session) }
             )
             .id(session.id)
         } else {
@@ -94,9 +113,17 @@ struct SessionLibraryView<Indicator: View>: View {
                     SessionLibraryStore.revealInFinder(session.url)
                 }
                 #endif
+                Divider()
+                Button("Delete…", systemImage: "trash", role: .destructive) {
+                    viewModel.requestDelete(session)
+                }
             }
             #if os(iOS)
-            .swipeActions(edge: .trailing) {
+            // No full swipe: deleting always asks for confirmation (RF-4).
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button("Delete", systemImage: "trash", role: .destructive) {
+                    viewModel.requestDelete(session)
+                }
                 Button("Rename", systemImage: "pencil") {
                     viewModel.startRename(session)
                 }
