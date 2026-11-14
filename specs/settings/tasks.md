@@ -86,7 +86,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T3–T14
   - **Done when:** Previews for the settings form, segmented meter with peak hold, line waveform and storage line.
 
-- [ ] **T16 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
+- [x] **T16 — Docs** (`AGENTS.md`, `docs/project-structure.md`, `README.md`, `MEMORY.md`)
   - **RF:** C2
   - **Depends on:** T15
   - **Done when:** Docs list `Features/Settings/` and the updated status.

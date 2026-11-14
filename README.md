@@ -13,7 +13,9 @@ Session Recorder is an early-stage iPhone, iPad, and Mac app for DJs and musicia
 
 - First use: a short explanation before the audio-input prompt, notices with **Allow Audio Input** / **Open Settings** when access is missing, and a note suggesting a USB-C mixer when only the built-in microphone is available.
 
-Next: settings (level meter style) and Spanish localization.
+- Settings (⌘, on Mac, gear on iPhone/iPad): meter style and peak hold, fade at pause/resume, keep screen on, session name prefix, recording time limit, low-storage warning, default export format, theme and waveform style; library sort order and a storage status line.
+
+Next: Spanish localization (follows the system language).
 
 ## Product Vision
 
