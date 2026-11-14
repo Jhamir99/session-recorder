@@ -25,7 +25,7 @@ Constraints: C1–C6 (Apple APIs only, no deps, logic separated from UI, no audi
   - **Depends on:** T2
   - **Done when:** New/recovered sessions are saved in the chosen folder; list, play, rename, delete (text per location), trim and share work there.
 
-- [ ] **T5 — Moving sessions** (`SessionsFolderService.swift`, `SessionsFolderStore.swift`, `SessionsFolderSection.swift`)
+- [x] **T5 — Moving sessions** (`SessionsFolderService.swift`, `SessionsFolderStore.swift`, `SessionsFolderSection.swift`)
   - **RF:** RF-3, NFR-2, NFR-4
   - **Depends on:** T3, T4
   - **Done when:** Move/Keep dialog; move with progress and unique names; partial failure reported; scratch script confirms nothing is lost or duplicated.

@@ -220,6 +220,11 @@ final class SessionLibraryViewModel: ObservableObject {
                 self?.refresh()
             }
             .store(in: &cancellables)
+        folders.$contentsVersion
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refresh() }
+            .store(in: &cancellables)
     }
 
     /// The folder, or its parent while it does not exist yet (free space is read from its volume).

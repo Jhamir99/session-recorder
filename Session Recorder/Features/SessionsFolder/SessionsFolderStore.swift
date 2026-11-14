@@ -8,6 +8,19 @@ import os
 final class SessionsFolderStore: ObservableObject {
     @Published private(set) var folder: SessionsFolderInUse
 
+    /// A folder change waiting for Move Sessions / Keep Them (RF-3).
+    enum Target: Equatable {
+        case app
+        case chosen(URL)
+    }
+    @Published private(set) var pendingChange: Target?
+    /// Sessions moved so far / total while moving.
+    @Published private(set) var moveProgress: (done: Int, total: Int)?
+    /// Shown after moving, e.g. "Moved 12 sessions."
+    @Published var moveResult: String?
+    /// Increases when the files in the folder change outside the library (after moving sessions).
+    @Published private(set) var contentsVersion = 0
+
     private let repository: SessionsFolderRepository
     private let logger = Logger(subsystem: "SessionRecorder", category: "SessionsFolder")
     /// The chosen folder while its security-scoped access is open.
@@ -41,8 +54,83 @@ final class SessionsFolderStore: ObservableObject {
         return false
     }
 
+    /// Number of sessions in the folder in use.
+    private var sessionCountInCurrentFolder: Int {
+        SessionsFolderService.sessionFiles(in: currentURL).count
+    }
+
+    /// Asks Move/Keep when sessions exist in the current folder; otherwise switches at once (RF-3).
+    /// Throws when a picked folder cannot be used.
+    func requestChange(to target: Target) throws {
+        if case .chosen(let url) = target {
+            let didStart = url.startAccessingSecurityScopedResource()
+            defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+            guard SessionsFolderService.isAvailable(url) else { throw SessionsFolderService.FolderError.notAccessible }
+            if url.standardizedFileURL == currentURL.standardizedFileURL { return }
+        } else if folder == .app(SessionsFolderService.appFolder) {
+            return
+        }
+        if moveResult != nil { moveResult = nil }
+        if sessionCountInCurrentFolder > 0 {
+            pendingChange = target
+        } else {
+            try apply(target)
+        }
+    }
+
+    func cancelPendingChange() {
+        // Called when the dialog closes (also after Move/Keep); only publish when something changes.
+        guard pendingChange != nil else { return }
+        pendingChange = nil
+    }
+
+    /// Switches to the pending folder; with `moveSessions`, moves the sessions from the previous folder (RF-3).
+    func confirmPendingChange(moveSessions: Bool) {
+        guard let target = pendingChange else { return }
+        pendingChange = nil
+        let source = currentURL
+        // Keep access to the previous folder until its sessions have been moved.
+        let previousAccess = accessedURL
+        accessedURL = nil
+        do {
+            try apply(target, stopPreviousAccess: false)
+        } catch {
+            accessedURL = previousAccess
+            moveResult = String(localized: "This folder can't be used. Choose another one.", comment: "Sessions folder: picked folder not accessible")
+            return
+        }
+        guard moveSessions else {
+            previousAccess?.stopAccessingSecurityScopedResource()
+            return
+        }
+        let destination = currentURL
+        moveProgress = (0, max(SessionsFolderService.sessionFiles(in: source).count, 1))
+        Task { [weak self] in
+            let result = await Task.detached(priority: .userInitiated) {
+                SessionsFolderService.moveSessions(from: source, to: destination) { done, total in
+                    Task { @MainActor [weak self] in self?.moveProgress = (done, total) }
+                }
+            }.value
+            previousAccess?.stopAccessingSecurityScopedResource()
+            guard let self else { return }
+            moveProgress = nil
+            moveResult = SessionsFolderLogic.moveSummary(moved: result.moved, failed: result.failed)
+            // Tell the library to list the moved files.
+            contentsVersion += 1
+        }
+    }
+
+    private func apply(_ target: Target, stopPreviousAccess: Bool = true) throws {
+        switch target {
+        case .app:
+            useAppFolder(stopPreviousAccess: stopPreviousAccess)
+        case .chosen(let url):
+            try choose(url, stopPreviousAccess: stopPreviousAccess)
+        }
+    }
+
     /// Uses a folder picked by the user (URL from the system folder picker). Throws when it cannot be accessed.
-    func choose(_ url: URL) throws {
+    func choose(_ url: URL, stopPreviousAccess: Bool = true) throws {
         let didStart = url.startAccessingSecurityScopedResource()
         guard SessionsFolderService.isAvailable(url) else {
             if didStart { url.stopAccessingSecurityScopedResource() }
@@ -51,18 +139,18 @@ final class SessionsFolderStore: ObservableObject {
         // A folder inside the app's own storage is the App Folder.
         if SessionsFolderLogic.isInsideAppStorage(url, appContainer: SessionsFolderService.appContainer) {
             if didStart { url.stopAccessingSecurityScopedResource() }
-            useAppFolder()
+            useAppFolder(stopPreviousAccess: stopPreviousAccess)
             return
         }
         let bookmark = try SessionsFolderService.makeBookmark(for: url)
-        stopAccessingChosenFolder()
+        if stopPreviousAccess { stopAccessingChosenFolder() }
         accessedURL = didStart ? url : nil
         repository.saveBookmark(bookmark)
         folder = .chosen(url)
     }
 
-    func useAppFolder() {
-        stopAccessingChosenFolder()
+    func useAppFolder(stopPreviousAccess: Bool = true) {
+        if stopPreviousAccess { stopAccessingChosenFolder() }
         repository.clearBookmark()
         folder = .app(SessionsFolderService.appFolder)
     }
