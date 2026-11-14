@@ -11,11 +11,9 @@ struct RecordingQuality: Equatable, Hashable, Codable {
     }
 
     nonisolated static func formatSampleRate(_ sampleRate: Double) -> String {
+        // Decimal separator follows the user's region (44.1 kHz / 44,1 kHz; localization RF-4).
         let kilohertz = sampleRate / 1000
-        let text = kilohertz.rounded() == kilohertz
-            ? String(Int(kilohertz))
-            : String(format: "%.1f", kilohertz)
-        return "\(text) kHz"
+        return "\(kilohertz.formatted(.number.precision(.fractionLength(0...1)))) kHz"
     }
 }
 

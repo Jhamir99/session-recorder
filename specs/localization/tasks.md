@@ -15,7 +15,7 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** T1
   - **Done when:** Computed texts (enum titles, notices, messages, helpers, menu titles, accessibility) use `String(localized:)` with comments; non-translatable texts are verbatim; an `es` export lists every visible English text and none of the excluded ones.
 
-- [ ] **T3 — Plurals and sentences with values** (`Localizable.xcstrings`, logic helpers)
+- [x] **T3 — Plurals and sentences with values** (`Localizable.xcstrings`, logic helpers)
   - **RF:** RF-3, RF-4
   - **Depends on:** T2
   - **Done when:** Session counts, minutes/hours, remaining time and notices with values have plural variants and whole-sentence keys; dates/sizes follow the locale.
