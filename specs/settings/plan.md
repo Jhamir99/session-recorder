@@ -11,8 +11,8 @@ New feature folder: `Session Recorder/Features/Settings/`.
 
 | File | Action | Responsibility | RF |
 |---|---|---|---|
-| `Features/Settings/AppSettingsModels.swift` | Create | Value types: `MeterStyle`, `PeakHold`, `PauseFade` (off/short/long + duration), `DefaultQualityRule`, `RecordingTimeLimit`, `LowStorageWarning`, `ExportDefault` (last used / fixed `ExportChoice`), `AppTheme`, `WaveformStyle`, and `AppSettings` (all values with defaults, `Codable`). `SessionSortOrder` for the library. | RF-2–RF-11, RF-13, RF-14 |
-| `Features/Settings/SettingsLogic.swift` | Create | **Pure logic**: prefix validation (reuses rename rules + 30 characters), fade gain for a frame (linear ramp), time-limit reached, warning threshold seconds, peak-hold value over time, segment levels for the segmented meter, "highest available" quality. | RF-3, RF-4, RF-6–RF-9, RF-2 |
+| `Features/Settings/AppSettingsModels.swift` | Create | Value types: `MeterStyle`, `PeakHold`, `PauseFade` (off/short/long + duration), `RecordingTimeLimit`, `LowStorageWarning`, `ExportDefault` (last used / fixed `ExportChoice`), `AppTheme`, `WaveformStyle`, and `AppSettings` (all values with defaults, `Codable`). `SessionSortOrder` for the library. | RF-2–RF-11, RF-13, RF-14 |
+| `Features/Settings/SettingsLogic.swift` | Create | **Pure logic**: prefix validation (reuses rename rules + 30 characters), fade gain for a frame (linear ramp), time-limit reached, warning threshold seconds, peak-hold value over time, segment levels for the segmented meter. | RF-3, RF-4, RF-6–RF-9, RF-2 |
 | `Features/Settings/AppSettingsRepository.swift` | Create | `UserDefaults`: `app_settings_v1` (JSON of `AppSettings`) and `library_sort_order_v1`. Unknown/invalid data → defaults. | RF-1, RF-11, NFR-2 |
 | `Features/Settings/AppSettingsStore.swift` | Create | Shared `ObservableObject` with the current settings; saves on every change; one instance per app (shared by all windows and the Mac Settings window). | RF-1 |
 | `Features/Settings/Views/SettingsView.swift` | Create | Form with Recording / Library / Appearance sections (pickers, toggle, prefix field with validation); Mac Settings window and iOS sheet (Done). | RF-1–RF-10, RF-13, RF-14 |
@@ -21,8 +21,8 @@ New feature folder: `Session Recorder/Features/Settings/`.
 | `ContentView.swift` | Modify | Gear button in the Record and Sessions toolbars (iPhone/iPad) → settings sheet; pass settings to the recording and library view models. | RF-1 |
 | `Features/Recording/Views/LevelMetersView.swift` | Modify | Segmented style; peak-hold marker; tap/click to reset (Until reset). | RF-2, RF-3 |
 | `Features/Recording/RecordingModels.swift` | Modify | `ChannelLevel` gains the held peak. | RF-3 |
-| `Features/Recording/RecordingLogic.swift` | Modify | `sessionName` takes the prefix; `storageDecision` takes the warning threshold; default quality takes the rule. | RF-6, RF-7, RF-9 |
-| `Features/Recording/ViewModels/RecordingViewModel.swift` (+ `+Interruptions`) | Modify | Use settings: held peaks, prefix/quality captured at start, time limit (stop + notice), warning threshold, keep screen on (`isIdleTimerDisabled` on iOS while a recording exists), fade length passed to capture. | RF-3, RF-5–RF-9 |
+| `Features/Recording/RecordingLogic.swift` | Modify | `sessionName` takes the prefix; `storageDecision` takes the warning threshold. | RF-6, RF-7, RF-9 |
+| `Features/Recording/ViewModels/RecordingViewModel.swift` (+ `+Interruptions`) | Modify | Use settings: held peaks, prefix captured at start, time limit (stop + notice), warning threshold, keep screen on (`isIdleTimerDisabled` on iOS while a recording exists), fade length passed to capture. | RF-3, RF-5–RF-9 |
 | `Features/Recording/RecordingModels.swift` | Modify | Notice `timeLimitReached(limit:, sessionName:)`. | RF-8 |
 | `Features/Recording/SessionFileStore.swift` | Modify | Finish/recover with the prefix. | RF-7 |
 | `Features/Recording/AudioCaptureService.swift` | Modify | `CaptureSampleProcessor`: fade-out over N frames before writing stops (pause), fade-in over N frames after resume; no fade for disconnect/interruption pauses; gain applied only inside the ramps (bit-exact elsewhere). | RF-4, NFR-4 |
@@ -38,7 +38,6 @@ New feature folder: `Session Recorder/Features/Settings/`.
 |---|---|---|---|
 | Prefix validation | text | trimmed prefix or error (empty, `/` `:`, > 30 characters) | RF-7 |
 | Session name | prefix, start date, existing names | `<prefix> YYYY-MM-DD HH.mm.ss`, `… (2)` | RF-7 |
-| Default quality | rule, offered qualities | 24/48 rule (current) or 24-bit at the highest offered rate | RF-6 |
 | Fade gain | frame index in ramp, ramp length, direction | 0…1 linear (1 outside ramps) | RF-4 |
 | Fade length | `PauseFade`, sample rate | frames (Short 20 ms, Long 200 ms, Off 0) | RF-4 |
 | Time limit | elapsed seconds, limit | reached? | RF-8 |

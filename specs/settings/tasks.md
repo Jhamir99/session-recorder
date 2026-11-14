@@ -6,17 +6,17 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
 ## Tasks
 
 ### Foundation and Settings screen
-- [ ] **T1 — Settings models and pure logic** (`Features/Settings/AppSettingsModels.swift`, `Features/Settings/SettingsLogic.swift`)
+- [x] **T1 — Settings models and pure logic** (`Features/Settings/AppSettingsModels.swift`, `Features/Settings/SettingsLogic.swift`)
   - **RF:** RF-2–RF-14
   - **Depends on:** none
   - **Done when:** All options exist with the approved defaults; prefix validation, fade gain/length, time limit, warning threshold, held peak, segments, sort and storage summary are pure functions checked with a scratch script.
 
-- [ ] **T2 — Settings repository and shared store** (`Features/Settings/AppSettingsRepository.swift`, `Features/Settings/AppSettingsStore.swift`, `MyApp.swift`)
+- [x] **T2 — Settings repository and shared store** (`Features/Settings/AppSettingsRepository.swift`, `Features/Settings/AppSettingsStore.swift`, `MyApp.swift`)
   - **RF:** RF-1, NFR-2
   - **Depends on:** T1
   - **Done when:** Settings load/save under `app_settings_v1` (bad data → defaults); one store is shared by all windows.
 
-- [ ] **T3 — Settings screen** (`Features/Settings/Views/SettingsView.swift`, `MyApp.swift`, `ContentView.swift`)
+- [x] **T3 — Settings screen** (`Features/Settings/Views/SettingsView.swift`, `MyApp.swift`, `ContentView.swift`)
   - **RF:** RF-1
   - **Depends on:** T2
   - **Done when:** Mac: Settings… (⌘,) opens the window; iPhone/iPad: gear in Record and Sessions opens a sheet with Done; all options are shown in Recording / Library / Appearance and are remembered after a restart.
@@ -43,10 +43,10 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T2
   - **Done when:** With the option on, the screen does not lock while a recording exists; normal after stop; not shown on Mac.
 
-- [ ] **T8 — Name prefix and default quality** (`RecordingLogic.swift`, `SessionFileStore.swift`, `RecordingViewModel.swift`)
-  - **RF:** RF-6, RF-7
+- [ ] **T8 — Name prefix** (`RecordingLogic.swift`, `SessionFileStore.swift`, `RecordingViewModel.swift`)
+  - **RF:** RF-7
   - **Depends on:** T2
-  - **Done when:** New and recovered sessions use the prefix captured at start; invalid prefixes are refused with a message; "Highest available" applies only to devices without a saved quality.
+  - **Done when:** New and recovered sessions use the prefix captured at start; invalid prefixes are refused with a message. (RF-6 "Quality for new devices" removed 2026-11-14.)
 
 - [ ] **T9 — Time limit and low-storage threshold** (`RecordingViewModel+Interruptions.swift`, `RecordingLogic.swift`, `RecordingModels.swift`)
   - **RF:** RF-8, RF-9

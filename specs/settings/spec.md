@@ -20,9 +20,9 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 ### RF-1: Settings screen
 - On Mac, the system shall provide **Settings…** (⌘,) in the app menu, opening the standard settings window.
 - On iPhone/iPad, the Record and Sessions tabs shall show a **Settings** (gear) button in their navigation bars that opens Settings as a sheet with a **Done** button (no separate Settings tab).
-- Settings shall be grouped into **Recording**, **Library** and **Appearance**, each option with a short explanation where it is not obvious.
+- Settings shall be grouped into **Recording**, **Library** and **Appearance**; options that are not obvious (peak hold, fade at pause, recording time limit, low-storage warning, session name) show a short hint under their name.
 - Changes shall apply immediately and be saved on the device (no Save button); they shall survive restarts.
-- While a recording exists, options that would change it (quality default, name prefix, time limit) shall apply from the next recording; display options (meters, theme) apply immediately.
+- While a recording exists, options that would change it (name prefix, time limit) shall apply from the next recording; display options (meters, theme) apply immediately.
 
 ### RF-2: Meter style (Recording)
 - Options: **Continuous** (the current bar) and **Segmented** (separate blocks like LED meters, with the same green/yellow/red zones).
@@ -43,9 +43,8 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 - Recording continues if the user locks the device anyway (recording RF-7).
 - Not shown on Mac (the Mac already avoids idle sleep while recording, recording RF-7).
 
-### RF-6: Default quality for new devices (Recording)
-- Options: **24-bit / 48 kHz** (current default) and **Highest available** (24-bit at the highest rate the device supports, up to 96 kHz).
-- Applies only to devices without a saved quality (recording RF-1); saved per-device qualities are kept.
+### RF-6: (Removed 2026-11-14)
+- "Quality for new devices" was dropped: new devices keep the recording default (24-bit / 48 kHz, recording RF-1) and the quality is chosen per device in the source sheet.
 
 ### RF-7: Session name prefix (Recording)
 - A text field for the first word of new session names (default **Session**), for example `Set` → `Set 2026-11-14 22.30.15`.
@@ -94,7 +93,6 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 - Time limit reached while paused: cannot happen (paused time is not counted).
 - Fade on and the user stops right after resuming (less audio than the fade length): the fade is applied to what exists; no error (RF-4).
 - Fade on and a pause caused by a disconnect: the audio stops at the disconnect without a fade-out (there is no more input), fade-in still applies on resume (RF-4, recording RF-8).
-- "Highest available" with a device that supports only 44.1 kHz: 24-bit/44.1 kHz (RF-6).
 - Fixed export format AAC and a 96 kHz session: exported at 48 kHz as today (library RF-6).
 - Sort by Name with names that differ only by case/numbers: natural order (`Set 2` before `Set 10`) (RF-11).
 - Theme Dark while the system is Light: the whole app, including sheets, is dark (RF-13).
@@ -108,7 +106,7 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 - Settings open with ⌘, on Mac and the gear (Record and Sessions tabs) on iPhone/iPad; every option in RF-2–RF-10, RF-13, RF-14 works and is remembered (RF-1).
 - Segmented meters and peak hold behave as described; fade removes the click at pause/resume without changing the rest of the audio (checked by comparing files) (RF-2–RF-4).
 - Screen stays on while recording on iPhone when enabled (RF-5).
-- New recordings use the prefix and the default quality rule; the time limit stops and saves (RF-6–RF-8).
+- New recordings use the prefix; the time limit stops and saves (RF-7, RF-8).
 - Low-storage warning follows the chosen threshold (RF-9).
 - Default export format is applied in the share sheet (RF-10).
 - The library can be sorted from its toolbar and shows the storage line (RF-11, RF-12).
@@ -116,7 +114,7 @@ Session Recorder has no settings today: meter look, pause behavior, naming and l
 
 ## Decisions (approved 2026-11-14)
 - **Where:** Mac Settings window (⌘,); iPhone/iPad gear button in the Record and Sessions tabs opening a sheet; no Settings tab.
-- **Defaults:** meter Continuous, peak hold 1 second, fade Short, keep screen on On, quality 24-bit/48 kHz, prefix "Session", time limit Off, low-storage warning 10 minutes, export Last used, order Newest First, theme System, waveform Bars.
+- **Defaults:** meter Continuous, peak hold 1 second, fade Short, keep screen on On, prefix "Session", time limit Off, low-storage warning 10 minutes, export Last used, order Newest First, theme System, waveform Bars.
 - **Fade lengths:** Short (~20 ms) and Long (~200 ms).
 - **Session order** lives in the library toolbar, not in Settings; **storage status line** at the bottom of the library.
 - **One feature**, tasks grouped: Settings screen + meters first, then recording options, library, appearance.

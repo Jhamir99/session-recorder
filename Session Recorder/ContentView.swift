@@ -16,6 +16,8 @@ struct ContentView: View {
     /// updates do not rebuild the whole window.
     @State private var libraryViewModel: SessionLibraryViewModel
     @StateObject private var firstUseViewModel = FirstUseViewModel()
+    @StateObject private var settingsStore: AppSettingsStore
+    @State private var isShowingSettings = false
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     #endif
@@ -23,8 +25,10 @@ struct ContentView: View {
     init(
         audioSourceViewModel: AudioSourceSelectionViewModel? = nil,
         recordingViewModel: RecordingViewModel? = nil,
-        libraryViewModel: SessionLibraryViewModel? = nil
+        libraryViewModel: SessionLibraryViewModel? = nil,
+        settingsStore: AppSettingsStore? = nil
     ) {
+        _settingsStore = StateObject(wrappedValue: settingsStore ?? AppSettingsStore())
         _audioSourceViewModel = StateObject(wrappedValue: audioSourceViewModel ?? AudioSourceSelectionViewModel())
         _recordingViewModel = StateObject(wrappedValue: recordingViewModel ?? RecordingViewModel())
         _libraryViewModel = State(initialValue: libraryViewModel ?? SessionLibraryViewModel())
@@ -41,6 +45,12 @@ struct ContentView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .environmentObject(settingsStore)
+        // iPhone/iPad settings sheet (Mac uses the Settings window, ⌘,).
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView(showsDoneButton: true)
+                .environmentObject(settingsStore)
+        }
         .sheet(isPresented: showsExplanationSheet) { explanation }
         #if os(iOS)
         .fullScreenCover(isPresented: showsExplanationFullScreen) { explanation }
@@ -98,6 +108,10 @@ struct ContentView: View {
         return true
     }
     #endif
+
+    private var settingsButton: some View {
+        Button("Settings", systemImage: "gearshape") { isShowingSettings = true }
+    }
 
     private var audioAccess: AudioAccessState {
         AudioAccessLogic.accessState(for: audioSourceViewModel.permissionState)
@@ -211,6 +225,11 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("Record")
+            #if os(iOS)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) { settingsButton }
+            }
+            #endif
         }
         .sheet(isPresented: $isShowingSourceSheet) {
             sourceSheet
@@ -270,7 +289,11 @@ struct ContentView: View {
     }
 
     private var sessionsTab: some View {
-        SessionLibraryView(viewModel: libraryViewModel, isRecordingActive: recordingViewModel.state.hasActiveRecording) {
+        SessionLibraryView(
+            viewModel: libraryViewModel,
+            isRecordingActive: recordingViewModel.state.hasActiveRecording,
+            onOpenSettings: { isShowingSettings = true }
+        ) {
             // REC/PAUSED stays visible while a recording exists (recording RF-4).
             if recordingViewModel.state.hasActiveRecording {
                 RecordingIndicator(

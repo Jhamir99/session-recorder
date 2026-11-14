@@ -8,6 +8,8 @@ struct SessionLibraryView<Indicator: View>: View {
     @ObservedObject var viewModel: SessionLibraryViewModel
     /// A recording exists (recording or paused): playback is disabled.
     let isRecordingActive: Bool
+    /// iPhone/iPad gear button (settings RF-1); the Mac uses the Settings window.
+    var onOpenSettings: (() -> Void)?
     /// Shown above the list (the `REC`/`PAUSED` indicator while a recording exists).
     @ViewBuilder var indicator: Indicator
 
@@ -72,6 +74,13 @@ struct SessionLibraryView<Indicator: View>: View {
         NavigationSplitView {
             sessionList
                 .navigationTitle("Sessions")
+                .toolbar {
+                    if let onOpenSettings {
+                        ToolbarItem(placement: .primaryAction) {
+                            Button("Settings", systemImage: "gearshape", action: onOpenSettings)
+                        }
+                    }
+                }
                 .safeAreaInset(edge: .top) { indicator }
         } detail: {
             detail
