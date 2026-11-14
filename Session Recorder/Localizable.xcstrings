@@ -2,10 +2,26 @@
   "sourceLanguage": "en",
   "strings": {
     "%@ disconnected. Recording paused.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ se desconectó. Grabación en pausa."
+          }
+        }
+      }
     },
     "%@ long": {
-      "comment": "VoiceOver: waveform duration"
+      "comment": "VoiceOver: waveform duration",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duración: %@"
+          }
+        }
+      }
     },
     "%@ was disconnected. Switched to %@.": {
       "comment": "Audio source message",
@@ -14,6 +30,12 @@
           "stringUnit": {
             "state": "new",
             "value": "%1$@ was disconnected. Switched to %2$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ se desconectó. Se cambió a %@."
           }
         }
       }
@@ -26,82 +48,317 @@
             "state": "new",
             "value": "%1$@ · %2$@ · %3$@ available"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ · %@ disponibles"
+          }
         }
       }
     },
     "%@, clipping": {
-      "comment": "VoiceOver: meter level while clipping"
+      "comment": "VoiceOver: meter level while clipping",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, saturando"
+          }
+        }
+      }
     },
     "%lld ch": {
-      "comment": "Number of channels, short"
+      "comment": "Number of channels, short",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld can."
+          }
+        }
+      }
     },
     "%lld dB": {
-      "comment": "VoiceOver: meter level"
+      "comment": "VoiceOver: meter level",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld dB"
+          }
+        }
+      }
     },
     "%lld sessions": {
-      "comment": "Library storage line: number of sessions"
+      "comment": "Library storage line: number of sessions",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sesiones"
+          }
+        }
+      }
     },
     "1 Hour": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hora"
+          }
+        }
+      }
     },
     "1 Second": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 segundo"
+          }
+        }
+      }
     },
     "1 session": {
-      "comment": "Library storage line: one session"
+      "comment": "Library storage line: one session",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 sesión"
+          }
+        }
+      }
     },
     "10 Minutes Left": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan 10 minutos"
+          }
+        }
+      }
     },
     "2 Hours": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 horas"
+          }
+        }
+      }
     },
     "3 Seconds": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 segundos"
+          }
+        }
+      }
     },
     "30 Minutes Left": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan 30 minutos"
+          }
+        }
+      }
     },
     "4 Hours": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4 horas"
+          }
+        }
+      }
     },
     "60 Minutes Left": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan 60 minutos"
+          }
+        }
+      }
     },
     "8 Hours": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 horas"
+          }
+        }
+      }
     },
-    "AAC bitrate": {},
+    "AAC bitrate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasa de bits AAC"
+          }
+        }
+      }
+    },
     "About %@": {
-      "comment": "Estimated export size"
+      "comment": "Estimated export size",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprox. %@"
+          }
+        }
+      }
     },
     "About %@ per hour (mono). Saved for this device.": {
-      "comment": "Quality footer"
+      "comment": "Quality footer",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprox. %@ por hora (mono). Se guarda para este dispositivo."
+          }
+        }
+      }
     },
     "About %@ per hour (stereo). Saved for this device.": {
-      "comment": "Quality footer"
+      "comment": "Quality footer",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aprox. %@ por hora (estéreo). Se guarda para este dispositivo."
+          }
+        }
+      }
     },
     "About %lld h left": {
-      "comment": "Remaining recording time"
+      "comment": "Remaining recording time",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan aprox. %lld h"
+          }
+        }
+      }
     },
     "About %lld min left": {
-      "comment": "Remaining recording time"
+      "comment": "Remaining recording time",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan aprox. %lld min"
+          }
+        }
+      }
     },
-    "Actions": {},
-    "Allow Audio Input": {},
+    "Actions": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acciones"
+          }
+        }
+      }
+    },
+    "Allow Audio Input": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir entrada de audio"
+          }
+        }
+      }
+    },
     "Another session already has this name.": {
-      "comment": "Session library text"
+      "comment": "Session library text",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya hay otra sesión con este nombre."
+          }
+        }
+      }
     },
-    "Appearance": {},
-    "Audio Source": {},
+    "Appearance": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aspecto"
+          }
+        }
+      }
+    },
+    "Audio Source": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente de audio"
+          }
+        }
+      }
+    },
     "Audio input is needed to show levels and record.": {
-      "comment": "Access notice"
+      "comment": "Access notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se necesita la entrada de audio para mostrar los niveles y grabar."
+          }
+        }
+      }
     },
     "Audio input is restricted on this device, so recording isn't available.": {
-      "comment": "Access notice"
+      "comment": "Access notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La entrada de audio está restringida en este dispositivo, así que no se puede grabar."
+          }
+        }
+      }
     },
     "Audio input is turned off for Session Recorder. Turn it on in Settings to record.": {
-      "comment": "Access notice"
+      "comment": "Access notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La entrada de audio está desactivada para Session Recorder. Actívala en Ajustes para grabar."
+          }
+        }
+      }
     },
     "Audio source: %@, %@": {
       "comment": "VoiceOver: source row",
@@ -111,196 +368,1001 @@
             "state": "new",
             "value": "Audio source: %1$@, %2$@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente de audio: %@, %@"
+          }
         }
       }
     },
-    "Back 15 Seconds": {},
-    "Back to recording": {},
-    "Bars": {
-      "comment": "Settings option value"
+    "Back 15 Seconds": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retroceder 15 segundos"
+          }
+        }
+      }
     },
-    "Bit depth": {},
-    "Bitrate": {},
-    "Can't be played": {},
-    "Cancel": {},
-    "Channel": {},
-    "Channels": {},
-    "Choose Source…": {},
+    "Back to recording": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volver a la grabación"
+          }
+        }
+      }
+    },
+    "Bars": {
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Barras"
+          }
+        }
+      }
+    },
+    "Bit depth": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profundidad de bits"
+          }
+        }
+      }
+    },
+    "Bitrate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasa de bits"
+          }
+        }
+      }
+    },
+    "Can't be played": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede reproducir"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "Channel": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canal"
+          }
+        }
+      }
+    },
+    "Channels": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canales"
+          }
+        }
+      }
+    },
+    "Choose Source…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir fuente…"
+          }
+        }
+      }
+    },
     "Choose a device and channels before recording.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un dispositivo y los canales antes de grabar."
+          }
+        }
+      }
     },
     "Choose an audio source": {
-      "comment": "Source row status"
+      "comment": "Source row status",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige una fuente de audio"
+          }
+        }
+      }
     },
-    "Close": {},
+    "Close": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerrar"
+          }
+        }
+      }
+    },
     "Compressed: smaller file, some quality is lost.": {
-      "comment": "Export format footer"
+      "comment": "Export format footer",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprimido: archivo más pequeño, se pierde algo de calidad."
+          }
+        }
+      }
     },
-    "Continue": {},
+    "Continue": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        }
+      }
+    },
     "Continuous": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuo"
+          }
+        }
+      }
     },
     "Dark": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro"
+          }
+        }
+      }
     },
     "Delete": {
-      "comment": "Delete confirmation"
+      "comment": "Delete confirmation",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar"
+          }
+        }
+      }
     },
-    "Delete “%@”?": {},
+    "Delete “%@”?": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar “%@”?"
+          }
+        }
+      }
+    },
     "Delete…": {
-      "comment": "Session menu"
+      "comment": "Session menu",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar…"
+          }
+        }
+      }
     },
-    "Device": {},
-    "Dismiss": {},
-    "Done": {},
-    "Duration": {},
-    "End": {},
+    "Device": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispositivo"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Duration": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duración"
+          }
+        }
+      }
+    },
+    "End": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin"
+          }
+        }
+      }
+    },
     "Enter a name.": {
-      "comment": "Session library text\nSettings message"
+      "comment": "Session library text\nSettings message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribe un nombre."
+          }
+        }
+      }
     },
-    "Estimated size": {},
-    "Export format": {},
-    "Export progress": {},
-    "Exporting…": {},
-    "Fade at pause": {},
-    "For the best quality, connect your mixer or audio interface over USB-C.": {},
-    "Format": {},
-    "Forward 15 Seconds": {},
-    "Got It": {},
+    "Estimated size": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamaño estimado"
+          }
+        }
+      }
+    },
+    "Export format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato de exportación"
+          }
+        }
+      }
+    },
+    "Export progress": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progreso de la exportación"
+          }
+        }
+      }
+    },
+    "Exporting…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportando…"
+          }
+        }
+      }
+    },
+    "Fade at pause": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fundido al pausar"
+          }
+        }
+      }
+    },
+    "For the best quality, connect your mixer or audio interface over USB-C.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para la mejor calidad, conecta tu mesa de mezclas o interfaz de audio por USB-C."
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formato"
+          }
+        }
+      }
+    },
+    "Forward 15 Seconds": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avanzar 15 segundos"
+          }
+        }
+      }
+    },
+    "Got It": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entendido"
+          }
+        }
+      }
+    },
     "Input level": {
-      "comment": "VoiceOver: meter name"
+      "comment": "VoiceOver: meter name",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nivel de entrada"
+          }
+        }
+      }
     },
-    "Keep screen on while recording": {},
-    "Last Used": {},
-    "Left": {},
+    "Keep screen on while recording": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantener la pantalla encendida al grabar"
+          }
+        }
+      }
+    },
+    "Last Used": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Último usado"
+          }
+        }
+      }
+    },
+    "Left": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Izquierdo"
+          }
+        }
+      }
+    },
     "Left level": {
-      "comment": "VoiceOver: meter name"
+      "comment": "VoiceOver: meter name",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nivel izquierdo"
+          }
+        }
+      }
     },
     "Less than 1 min left": {
-      "comment": "Remaining recording time"
+      "comment": "Remaining recording time",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queda menos de 1 min"
+          }
+        }
+      }
     },
-    "Library": {},
+    "Library": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteca"
+          }
+        }
+      }
+    },
     "Light": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        }
+      }
     },
     "Line": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Línea"
+          }
+        }
+      }
     },
     "Loading": {
-      "comment": "VoiceOver: waveform"
+      "comment": "VoiceOver: waveform",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargando"
+          }
+        }
+      }
     },
     "Long": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largo"
+          }
+        }
+      }
     },
     "Lossless: same quality as the original.": {
-      "comment": "Export format footer"
+      "comment": "Export format footer",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin pérdida: la misma calidad que el original."
+          }
+        }
+      }
     },
-    "Low storage warning": {},
-    "Marks the loudest recent peak to help you avoid clipping.": {},
-    "Meter style": {},
-    "Mode": {},
+    "Low storage warning": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso de poco espacio"
+          }
+        }
+      }
+    },
+    "Marks the loudest recent peak to help you avoid clipping.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca el pico más alto reciente para ayudarte a evitar la saturación."
+          }
+        }
+      }
+    },
+    "Meter style": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estilo del vúmetro"
+          }
+        }
+      }
+    },
+    "Mode": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo"
+          }
+        }
+      }
+    },
     "Mono": {
-      "comment": "Channel mode"
+      "comment": "Channel mode",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono"
+          }
+        }
+      }
     },
     "Mono · %@": {
-      "comment": "Source row: mono channel"
+      "comment": "Source row: mono channel",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mono · %@"
+          }
+        }
+      }
     },
     "Move to Trash": {
-      "comment": "Delete confirmation\nSession menu"
+      "comment": "Delete confirmation\nSession menu",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover a la papelera"
+          }
+        }
+      }
     },
     "Name": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        }
+      }
     },
     "Names can't contain “/” or “:”.": {
-      "comment": "Session library text\nSettings message"
+      "comment": "Session library text\nSettings message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los nombres no pueden contener “/” ni “:”."
+          }
+        }
+      }
     },
-    "New session names: %@ 2026-11-14 22.30.15": {},
+    "New session names: %@ 2026-11-14 22.30.15": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre de las nuevas sesiones: %@ 2026-11-14 22.30.15"
+          }
+        }
+      }
+    },
     "Newest First": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más recientes primero"
+          }
+        }
+      }
     },
-    "No audio input devices are available.": {},
+    "No audio input devices are available.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay dispositivos de entrada de audio disponibles."
+          }
+        }
+      }
+    },
     "No channels are available for this device.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este dispositivo no tiene canales disponibles."
+          }
+        }
+      }
     },
     "No channels available": {
-      "comment": "Source row status"
+      "comment": "Source row status",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay canales disponibles"
+          }
+        }
+      }
     },
     "No input selected": {
-      "comment": "Source row status"
+      "comment": "Source row status",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna entrada seleccionada"
+          }
+        }
+      }
     },
-    "No sessions yet": {},
+    "No sessions yet": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay sesiones"
+          }
+        }
+      }
+    },
     "No valid channel is available for this device.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este dispositivo no tiene ningún canal válido disponible."
+          }
+        }
+      }
     },
     "No valid channel selected": {
-      "comment": "Source row status"
+      "comment": "Source row status",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ningún canal válido seleccionado"
+          }
+        }
+      }
     },
-    "None": {},
-    "Not Now": {},
+    "None": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguno"
+          }
+        }
+      }
+    },
+    "Not Now": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahora no"
+          }
+        }
+      }
+    },
     "Not enough free storage to export.": {
-      "comment": "Export error"
+      "comment": "Export error",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficiente espacio libre para exportar."
+          }
+        }
+      }
     },
     "Not enough free storage to record.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficiente espacio libre para grabar."
+          }
+        }
+      }
     },
     "Not enough free storage.": {
-      "comment": "Session library text"
+      "comment": "Session library text",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay suficiente espacio libre."
+          }
+        }
+      }
     },
-    "OK": {},
+    "OK": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
     "Off": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado"
+          }
+        }
+      }
     },
     "Oldest First": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más antiguas primero"
+          }
+        }
+      }
     },
-    "Open Settings": {},
+    "Open Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        }
+      }
+    },
     "Opens audio source settings": {
-      "comment": "VoiceOver hint: source row"
+      "comment": "VoiceOver hint: source row",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre los ajustes de la fuente de audio"
+          }
+        }
+      }
     },
     "Original (CAF)": {
-      "comment": "Export format: the session file as it is"
+      "comment": "Export format: the session file as it is",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original (CAF)"
+          }
+        }
+      }
     },
     "PAUSED": {
-      "comment": "Recording state badge"
+      "comment": "Recording state badge",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAUSA"
+          }
+        }
+      }
     },
     "Pause": {
-      "comment": "Player\nRecording menu\nTrim"
+      "comment": "Player\nRecording menu\nTrim",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausar"
+          }
+        }
+      }
     },
-    "Peak hold": {},
+    "Peak hold": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retención de picos"
+          }
+        }
+      }
+    },
     "Permission must be granted to access audio input channels.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hace falta permiso para acceder a los canales de entrada de audio."
+          }
+        }
+      }
     },
     "Permission required": {
-      "comment": "Source row status"
+      "comment": "Source row status",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se necesita permiso"
+          }
+        }
+      }
     },
     "Play": {
-      "comment": "Player"
+      "comment": "Player",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir"
+          }
+        }
+      }
     },
     "Play Selection": {
-      "comment": "Trim"
+      "comment": "Trim",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir selección"
+          }
+        }
+      }
     },
-    "Play/Pause": {},
+    "Play/Pause": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir/Pausar"
+          }
+        }
+      }
+    },
     "Play/Pause Session": {
-      "comment": "Recording menu: Space plays the open session"
+      "comment": "Recording menu: Space plays the open session",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir/Pausar sesión"
+          }
+        }
+      }
     },
-    "Playback is unavailable while recording.": {},
-    "Quality": {},
+    "Playback is unavailable while recording.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede reproducir mientras se graba."
+          }
+        }
+      }
+    },
+    "Quality": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calidad"
+          }
+        }
+      }
+    },
     "Record": {
-      "comment": "Recording menu"
+      "comment": "Recording menu",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabar"
+          }
+        }
+      }
     },
-    "Record your sessions": {},
-    "Recording": {},
+    "Record your sessions": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Graba tus sesiones"
+          }
+        }
+      }
+    },
+    "Recording": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabación"
+          }
+        }
+      }
+    },
     "Recording needs access to audio input.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para grabar se necesita acceso a la entrada de audio."
+          }
+        }
+      }
     },
     "Recording paused by a call or another app.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabación en pausa por una llamada u otra app."
+          }
+        }
+      }
     },
     "Recording paused, %@": {
-      "comment": "VoiceOver: Sessions tab indicator"
+      "comment": "VoiceOver: Sessions tab indicator",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabación en pausa, %@"
+          }
+        }
+      }
     },
     "Recording stopped after %@ (time limit).": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grabación se detuvo tras %@ (límite de tiempo)."
+          }
+        }
+      }
     },
     "Recording stopped after %@ (time limit). Saved: %@": {
       "comment": "Recording notice",
@@ -310,64 +1372,365 @@
             "state": "new",
             "value": "Recording stopped after %1$@ (time limit). Saved: %2$@"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grabación se detuvo tras %1$@ (límite de tiempo). Guardada: %2$@"
+          }
         }
       }
     },
     "Recording stopped because of an audio error.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grabación se detuvo por un error de audio."
+          }
+        }
+      }
     },
     "Recording stopped because of an audio error. Saved: %@": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grabación se detuvo por un error de audio. Guardada: %@"
+          }
+        }
+      }
     },
-    "Recording time limit": {},
+    "Recording time limit": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite de tiempo de grabación"
+          }
+        }
+      }
+    },
     "Recording, %@": {
-      "comment": "VoiceOver: Sessions tab indicator"
+      "comment": "VoiceOver: Sessions tab indicator",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabando, %@"
+          }
+        }
+      }
     },
     "Recovered an interrupted recording: %@": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se recuperó una grabación interrumpida: %@"
+          }
+        }
+      }
     },
-    "Removes the click when you pause and resume a recording.": {},
-    "Rename": {},
-    "Rename Session": {},
-    "Rename…": {},
+    "Removes the click when you pause and resume a recording.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina el clic al pausar y reanudar una grabación."
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renombrar"
+          }
+        }
+      }
+    },
+    "Rename Session": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renombrar sesión"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renombrar…"
+          }
+        }
+      }
+    },
     "Resume": {
-      "comment": "Recording menu"
+      "comment": "Recording menu",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar"
+          }
+        }
+      }
     },
-    "Returns to the Record tab.": {},
-    "Right": {},
+    "Returns to the Record tab.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a la pestaña Grabar."
+          }
+        }
+      }
+    },
+    "Right": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Derecho"
+          }
+        }
+      }
+    },
     "Right level": {
-      "comment": "VoiceOver: meter name"
+      "comment": "VoiceOver: meter name",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nivel derecho"
+          }
+        }
+      }
     },
-    "Sample rate": {},
-    "Save": {},
-    "Save creates a new session. The original is kept.": {},
+    "Sample rate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frecuencia de muestreo"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        }
+      }
+    },
+    "Save creates a new session. The original is kept.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al guardar se crea una nueva sesión. La original se conserva."
+          }
+        }
+      }
+    },
     "Saved: %@": {
-      "comment": "Notice after saving a trimmed session\nRecording notice"
+      "comment": "Notice after saving a trimmed session\nRecording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardada: %@"
+          }
+        }
+      }
     },
-    "Save…": {},
+    "Save…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar…"
+          }
+        }
+      }
+    },
     "Segmented": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segmentado"
+          }
+        }
+      }
     },
-    "Select a session": {},
-    "Session": {},
-    "Session Recorder uses audio input to show levels and record from your mixer, audio interface or microphone.": {},
-    "Session name": {},
-    "Sessions": {},
-    "Settings": {},
-    "Share “%@”": {},
-    "Share…": {},
+    "Select a session": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecciona una sesión"
+          }
+        }
+      }
+    },
+    "Session": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesión"
+          }
+        }
+      }
+    },
+    "Session Recorder uses audio input to show levels and record from your mixer, audio interface or microphone.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session Recorder usa la entrada de audio para mostrar los niveles y grabar desde tu mesa de mezclas, interfaz de audio o micrófono."
+          }
+        }
+      }
+    },
+    "Session name": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre de la sesión"
+          }
+        }
+      }
+    },
+    "Sessions": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesiones"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "Share “%@”": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir “%@”"
+          }
+        }
+      }
+    },
+    "Share…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir…"
+          }
+        }
+      }
+    },
     "Short": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Corto"
+          }
+        }
+      }
     },
-    "Show in Finder": {},
+    "Show in Finder": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar en Finder"
+          }
+        }
+      }
+    },
     "Silent": {
-      "comment": "VoiceOver: meter level"
+      "comment": "VoiceOver: meter level",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silencio"
+          }
+        }
+      }
     },
-    "Sort": {},
-    "Sort By": {},
-    "Start": {},
+    "Sort": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar"
+          }
+        }
+      }
+    },
+    "Sort By": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordenar por"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicio"
+          }
+        }
+      }
+    },
     "Stereo": {
-      "comment": "Channel mode"
+      "comment": "Channel mode",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estéreo"
+          }
+        }
+      }
     },
     "Stereo · %lld–%lld": {
       "comment": "Source row: stereo channel pair",
@@ -376,6 +1739,12 @@
           "stringUnit": {
             "state": "new",
             "value": "Stereo · %1$lld–%2$lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estéreo · %lld–%lld"
           }
         }
       }
@@ -388,13 +1757,36 @@
             "state": "new",
             "value": "Stereo · L %1$lld · R %2$lld"
           }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estéreo · L %lld · R %lld"
+          }
         }
       }
     },
     "Stop": {
-      "comment": "Recording menu"
+      "comment": "Recording menu",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detener"
+          }
+        }
+      }
     },
-    "Stops and saves the recording when it reaches this length.": {},
+    "Stops and saves the recording when it reaches this length.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detiene y guarda la grabación cuando llega a esta duración."
+          }
+        }
+      }
+    },
     "Storage is almost full: about %lld minutes of recording left.": {
       "comment": "Recording notice",
       "localizations": {
@@ -437,64 +1829,300 @@
       }
     },
     "Storage is full. Recording stopped and saved: %@": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenamiento lleno. La grabación se detuvo y se guardó: %@"
+          }
+        }
+      }
     },
     "Switched back to %@.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se volvió a %@."
+          }
+        }
+      }
     },
     "Switched to %@.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se cambió a %@."
+          }
+        }
+      }
     },
     "System": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        }
+      }
     },
     "The audio device is not available. Check the connection and try again.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dispositivo de audio no está disponible. Revisa la conexión e inténtalo de nuevo."
+          }
+        }
+      }
     },
     "The export failed. Please try again.": {
-      "comment": "Export error"
+      "comment": "Export error",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo exportar. Inténtalo de nuevo."
+          }
+        }
+      }
     },
-    "The format used by default when you share a session. You can still change it before sharing.": {},
+    "The format used by default when you share a session. You can still change it before sharing.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El formato que se usa por defecto al compartir una sesión. Puedes cambiarlo antes de compartir."
+          }
+        }
+      }
+    },
     "The recording file could not be created.": {
-      "comment": "Recording notice"
+      "comment": "Recording notice",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo crear el archivo de grabación."
+          }
+        }
+      }
     },
     "The selected audio device": {
-      "comment": "Used when the disconnected device name is unknown"
+      "comment": "Used when the disconnected device name is unknown",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dispositivo de audio seleccionado"
+          }
+        }
+      }
     },
     "The selected audio device was disconnected.": {
-      "comment": "Audio source message"
+      "comment": "Audio source message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dispositivo de audio seleccionado se desconectó."
+          }
+        }
+      }
     },
-    "The selection must be at least 1 second long.": {},
+    "The selection must be at least 1 second long.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La selección debe durar al menos 1 segundo."
+          }
+        }
+      }
+    },
     "The session could not be deleted. Please try again.": {
-      "comment": "Delete error"
+      "comment": "Delete error",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo eliminar la sesión. Inténtalo de nuevo."
+          }
+        }
+      }
     },
     "The session could not be renamed. Please try again.": {
-      "comment": "Rename error"
+      "comment": "Rename error",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo renombrar la sesión. Inténtalo de nuevo."
+          }
+        }
+      }
     },
-    "The session will be moved to the Trash.": {},
+    "The session will be moved to the Trash.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La sesión se moverá a la papelera."
+          }
+        }
+      }
+    },
     "The source cannot change while recording": {
-      "comment": "VoiceOver hint: locked source row"
+      "comment": "VoiceOver hint: locked source row",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fuente no se puede cambiar mientras se graba"
+          }
+        }
+      }
     },
     "The trimmed session could not be saved. Please try again.": {
-      "comment": "Trim error"
+      "comment": "Trim error",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar la sesión recortada. Inténtalo de nuevo."
+          }
+        }
+      }
     },
-    "Theme": {},
-    "This file is damaged or is not a supported audio file.": {},
-    "This session will be deleted from this device. This can't be undone.": {},
-    "Tip: turn on Do Not Disturb while recording. Calls pause the recording.": {},
-    "Trim…": {},
+    "Theme": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
+          }
+        }
+      }
+    },
+    "This file is damaged or is not a supported audio file.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este archivo está dañado o no es un archivo de audio compatible."
+          }
+        }
+      }
+    },
+    "This session will be deleted from this device. This can't be undone.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta sesión se eliminará de este dispositivo. No se puede deshacer."
+          }
+        }
+      }
+    },
+    "Tip: turn on Do Not Disturb while recording. Calls pause the recording.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consejo: activa No molestar mientras grabas. Las llamadas pausan la grabación."
+          }
+        }
+      }
+    },
+    "Trim…": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recortar…"
+          }
+        }
+      }
+    },
     "Until Reset": {
-      "comment": "Settings option value"
+      "comment": "Settings option value",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hasta restablecer"
+          }
+        }
+      }
     },
     "Use 30 characters or fewer.": {
-      "comment": "Settings message"
+      "comment": "Settings message",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa 30 caracteres o menos."
+          }
+        }
+      }
     },
-    "Warns when this much recording time is left.": {},
-    "Waveform": {},
-    "Your recorded sessions will appear here.": {},
-    "Your recordings stay on this device.": {},
+    "Warns when this much recording time is left.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisa cuando queda este tiempo de grabación."
+          }
+        }
+      }
+    },
+    "Waveform": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forma de onda"
+          }
+        }
+      }
+    },
+    "Your recorded sessions will appear here.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus sesiones grabadas aparecerán aquí."
+          }
+        }
+      }
+    },
+    "Your recordings stay on this device.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus grabaciones se quedan en este dispositivo."
+          }
+        }
+      }
+    },
     "another audio device": {
-      "comment": "Used when the new device name is unknown"
+      "comment": "Used when the new device name is unknown",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "otro dispositivo de audio"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

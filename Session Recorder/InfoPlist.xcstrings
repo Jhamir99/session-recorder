@@ -1,7 +1,36 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Session Recorder"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Microphone permission prompt",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Recorder needs access to audio input devices to let you choose a source for recording sessions."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Recorder necesita acceso a los dispositivos de entrada de audio para que puedas elegir una fuente y grabar tus sesiones."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

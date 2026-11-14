@@ -20,12 +20,12 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** T2
   - **Done when:** Session counts, minutes/hours, remaining time and notices with values have plural variants and whole-sentence keys; dates/sizes follow the locale.
 
-- [ ] **T4 — Spanish: recording, audio source and first use** (`Localizable.xcstrings`, `InfoPlist.xcstrings`)
+- [x] **T4 — Spanish: recording, audio source and first use** (`Localizable.xcstrings`, `InfoPlist.xcstrings`)
   - **RF:** RF-2
   - **Depends on:** T3
   - **Done when:** Record tab, source sheet, meters, notices, tips, first-use screens and the microphone prompt are translated with the glossary.
 
-- [ ] **T5 — Spanish: library, export, settings and menus** (`Localizable.xcstrings`)
+- [x] **T5 — Spanish: library, export, settings and menus** (`Localizable.xcstrings`)
   - **RF:** RF-2
   - **Depends on:** T3
   - **Done when:** Sessions tab, detail, trim, rename/delete, share/export, settings and Mac Recording/Session menus are translated; the `es` export has no untranslated strings.
