@@ -44,7 +44,3 @@ struct FirstUseExplanationView: View {
         .interactiveDismissDisabled()
     }
 }
-
-#Preview("Explanation") {
-    FirstUseExplanationView(onContinue: {}, onNotNow: {})
-}

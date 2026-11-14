@@ -35,7 +35,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Depends on:** T1
   - **Done when:** The note shows with the built-in microphone and no external device, hides when a mixer is connected or while recording.
 
-- [ ] **T7 — Previews** (`Features/FirstUse/Views/FirstUseViews+Previews.swift`)
+- [x] **T7 — Previews** (`Features/FirstUse/Views/FirstUseViews+Previews.swift`)
   - **RF:** C5
   - **Depends on:** T4–T6
   - **Done when:** Previews exist for the explanation, each notice state and the USB-C note.
