@@ -156,10 +156,10 @@ struct SettingsView: View {
 /// Option title with a short hint below it (settings RF-1). Placed in an HStack with the picker on the right
 /// (a multi-line Picker label, or LabeledContent, put the menu below or next to the text on iPhone).
 private struct OptionLabel: View {
-    let title: String
-    let hint: String
+    let title: LocalizedStringKey
+    let hint: LocalizedStringKey
 
-    init(_ title: String, hint: String) {
+    init(_ title: LocalizedStringKey, hint: LocalizedStringKey) {
         self.title = title
         self.hint = hint
     }
@@ -184,7 +184,7 @@ private struct NamePrefixField: View {
             HStack(spacing: 12) {
                 Text("Session name")
                 Spacer(minLength: 8)
-                TextField("Session name", text: $text, prompt: Text("Session"))
+                TextField("Session name", text: $text, prompt: Text(verbatim: "Session"))
                     .labelsHidden()
                     .multilineTextAlignment(.trailing)
                     .onSubmit(save)

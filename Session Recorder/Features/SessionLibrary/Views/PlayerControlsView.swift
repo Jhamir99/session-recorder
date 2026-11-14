@@ -25,7 +25,7 @@ struct PlayerControlsView: View {
                 }
                 .font(.title2)
 
-                Button(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.circle.fill" : "play.circle.fill") {
+                Button(isPlaying ? String(localized: "Pause", comment: "Player") : String(localized: "Play", comment: "Player"), systemImage: isPlaying ? "pause.circle.fill" : "play.circle.fill") {
                     onTogglePlayback()
                 }
                 .font(.system(size: 52))

@@ -8,9 +8,9 @@ nonisolated struct SessionFormat: Equatable, Hashable {
 
     var label: String {
         let channels = switch channelCount {
-        case 1: "Mono"
-        case 2: "Stereo"
-        default: "\(channelCount) ch"
+        case 1: String(localized: "Mono", comment: "Channel mode")
+        case 2: String(localized: "Stereo", comment: "Channel mode")
+        default: String(localized: "\(channelCount) ch", comment: "Number of channels, short")
         }
         return "\(channels) · \(bitDepth)-bit/\(RecordingQuality.formatSampleRate(sampleRate))"
     }
@@ -73,7 +73,7 @@ nonisolated enum ExportFormat: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .original: "Original (CAF)"
+        case .original: String(localized: "Original (CAF)", comment: "Export format: the session file as it is")
         case .wav: "WAV"
         case .aiff: "AIFF"
         case .flac: "FLAC"
@@ -164,9 +164,9 @@ nonisolated enum RenameError: Error, Equatable {
 
     var message: String {
         switch self {
-        case .empty: "Enter a name."
-        case .invalidCharacters: "Names can't contain “/” or “:”."
-        case .duplicate: "Another session already has this name."
+        case .empty: String(localized: "Enter a name.", comment: "Session library text")
+        case .invalidCharacters: String(localized: "Names can't contain “/” or “:”.", comment: "Session library text")
+        case .duplicate: String(localized: "Another session already has this name.", comment: "Session library text")
         }
     }
 }
@@ -176,7 +176,8 @@ struct LibraryNotice: Identifiable, Equatable {
     enum Kind: Equatable {
         case trimmed(sessionName: String)
         case notEnoughStorage
-        case operationFailed(String)
+        /// The whole localized message, e.g. "Renaming failed. Please try again."
+        case operationFailed(message: String)
     }
 
     let id = UUID()
@@ -189,9 +190,9 @@ struct LibraryNotice: Identifiable, Equatable {
 
     var text: String {
         switch kind {
-        case .trimmed(let name): "Saved: \(name)"
-        case .notEnoughStorage: "Not enough free storage."
-        case .operationFailed(let action): "\(action) failed. Please try again."
+        case .trimmed(let name): String(localized: "Saved: \(name)", comment: "Notice after saving a trimmed session")
+        case .notEnoughStorage: String(localized: "Not enough free storage.", comment: "Session library text")
+        case .operationFailed(let message): message
         }
     }
 }

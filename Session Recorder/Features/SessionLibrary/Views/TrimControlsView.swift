@@ -18,7 +18,7 @@ struct TrimControlsView: View {
                 timeColumn("End", SessionLibraryLogic.formatTrimTime(range.end), alignment: .trailing)
             }
 
-            Button(isPlaying ? "Pause" : "Play Selection",
+            Button(isPlaying ? String(localized: "Pause", comment: "Trim") : String(localized: "Play Selection", comment: "Trim"),
                    systemImage: isPlaying ? "pause.circle.fill" : "play.circle.fill",
                    action: onPlaySelection)
                 .labelStyle(.iconOnly)
@@ -41,7 +41,7 @@ struct TrimControlsView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func timeColumn(_ title: String, _ value: String, alignment: HorizontalAlignment) -> some View {
+    private func timeColumn(_ title: LocalizedStringKey, _ value: String, alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 2) {
             Text(title)
                 .font(.caption)

@@ -11,8 +11,8 @@ nonisolated enum MeterStyle: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .continuous: "Continuous"
-        case .segmented: "Segmented"
+        case .continuous: String(localized: "Continuous", comment: "Settings option value")
+        case .segmented: String(localized: "Segmented", comment: "Settings option value")
         }
     }
 
@@ -34,10 +34,10 @@ nonisolated enum PeakHold: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .off: "Off"
-        case .oneSecond: "1 Second"
-        case .threeSeconds: "3 Seconds"
-        case .untilReset: "Until Reset"
+        case .off: String(localized: "Off", comment: "Settings option value")
+        case .oneSecond: String(localized: "1 Second", comment: "Settings option value")
+        case .threeSeconds: String(localized: "3 Seconds", comment: "Settings option value")
+        case .untilReset: String(localized: "Until Reset", comment: "Settings option value")
         }
     }
 
@@ -59,9 +59,9 @@ nonisolated enum PauseFade: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .off: "Off"
-        case .short: "Short"
-        case .long: "Long"
+        case .off: String(localized: "Off", comment: "Settings option value")
+        case .short: String(localized: "Short", comment: "Settings option value")
+        case .long: String(localized: "Long", comment: "Settings option value")
         }
     }
 
@@ -84,11 +84,11 @@ nonisolated enum RecordingTimeLimit: String, CaseIterable, Identifiable, Codable
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .off: "Off"
-        case .oneHour: "1 Hour"
-        case .twoHours: "2 Hours"
-        case .fourHours: "4 Hours"
-        case .eightHours: "8 Hours"
+        case .off: String(localized: "Off", comment: "Settings option value")
+        case .oneHour: String(localized: "1 Hour", comment: "Settings option value")
+        case .twoHours: String(localized: "2 Hours", comment: "Settings option value")
+        case .fourHours: String(localized: "4 Hours", comment: "Settings option value")
+        case .eightHours: String(localized: "8 Hours", comment: "Settings option value")
         }
     }
 
@@ -111,9 +111,9 @@ nonisolated enum LowStorageWarning: String, CaseIterable, Identifiable, Codable 
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .tenMinutes: "10 Minutes Left"
-        case .thirtyMinutes: "30 Minutes Left"
-        case .sixtyMinutes: "60 Minutes Left"
+        case .tenMinutes: String(localized: "10 Minutes Left", comment: "Settings option value")
+        case .thirtyMinutes: String(localized: "30 Minutes Left", comment: "Settings option value")
+        case .sixtyMinutes: String(localized: "60 Minutes Left", comment: "Settings option value")
         }
     }
 
@@ -140,9 +140,9 @@ nonisolated enum AppTheme: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .system: "System"
-        case .light: "Light"
-        case .dark: "Dark"
+        case .system: String(localized: "System", comment: "Settings option value")
+        case .light: String(localized: "Light", comment: "Settings option value")
+        case .dark: String(localized: "Dark", comment: "Settings option value")
         }
     }
 }
@@ -154,8 +154,8 @@ nonisolated enum WaveformStyle: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .bars: "Bars"
-        case .line: "Line"
+        case .bars: String(localized: "Bars", comment: "Settings option value")
+        case .line: String(localized: "Line", comment: "Settings option value")
         }
     }
 }
@@ -169,9 +169,9 @@ nonisolated enum SessionSortOrder: String, CaseIterable, Identifiable, Codable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .newestFirst: "Newest First"
-        case .oldestFirst: "Oldest First"
-        case .name: "Name"
+        case .newestFirst: String(localized: "Newest First", comment: "Settings option value")
+        case .oldestFirst: String(localized: "Oldest First", comment: "Settings option value")
+        case .name: String(localized: "Name", comment: "Settings option value")
         }
     }
 }

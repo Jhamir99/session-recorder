@@ -29,7 +29,7 @@ struct RecordingControlsView: View {
     }
 
     private func controlButton(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String,
         tint: Color,
         size: CGFloat,
@@ -47,7 +47,7 @@ struct RecordingControlsView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        .accessibilityLabel(Text(title))
     }
 }
 

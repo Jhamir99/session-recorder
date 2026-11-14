@@ -41,14 +41,16 @@ struct AudioSourceSummaryRow: View {
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Audio source: \(title), \(subtitle)")
-        .accessibilityHint(isLocked ? "The source cannot change while recording" : "Opens audio source settings")
+        .accessibilityLabel(String(localized: "Audio source: \(title), \(subtitle)", comment: "VoiceOver: source row"))
+        .accessibilityHint(isLocked
+            ? String(localized: "The source cannot change while recording", comment: "VoiceOver hint: locked source row")
+            : String(localized: "Opens audio source settings", comment: "VoiceOver hint: source row"))
     }
 
     private var title: String {
         switch viewModel.sourceSummary {
         case .noInputSelected:
-            return "No input selected"
+            return String(localized: "No input selected", comment: "Source row status")
         case .permissionRequired(let label),
              .noChannelsAvailable(let label),
              .noValidChannel(let label),
@@ -60,13 +62,13 @@ struct AudioSourceSummaryRow: View {
     private var subtitle: String {
         switch viewModel.sourceSummary {
         case .noInputSelected:
-            return "Choose an audio source"
+            return String(localized: "Choose an audio source", comment: "Source row status")
         case .permissionRequired:
-            return "Permission required"
+            return String(localized: "Permission required", comment: "Source row status")
         case .noChannelsAvailable:
-            return "No channels available"
+            return String(localized: "No channels available", comment: "Source row status")
         case .noValidChannel:
-            return "No valid channel selected"
+            return String(localized: "No valid channel selected", comment: "Source row status")
         case .selected(_, let mode, let channelNumbers):
             let channels = AudioDeviceSelectionHelper.sourceSummaryChannelText(mode: mode, channelNumbers: channelNumbers)
             guard let qualityLabel else { return channels }

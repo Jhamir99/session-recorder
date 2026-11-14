@@ -12,7 +12,7 @@ struct RecordingIndicator: View {
             HStack(spacing: 8) {
                 Image(systemName: isPaused ? "pause.circle.fill" : "record.circle.fill")
                     .foregroundStyle(isPaused ? Color.orange : Color.red)
-                Text(isPaused ? "PAUSED" : "REC")
+                (isPaused ? Text("PAUSED", comment: "Recording state badge") : Text(verbatim: "REC"))
                     .font(.subheadline.weight(.bold))
                 Text(RecordingLogic.formatElapsed(elapsedSeconds))
                     .font(.subheadline.monospacedDigit())
@@ -33,7 +33,9 @@ struct RecordingIndicator: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            "\(isPaused ? "Recording paused" : "Recording"), \(RecordingLogic.formatElapsed(elapsedSeconds))"
+            isPaused
+                ? String(localized: "Recording paused, \(RecordingLogic.formatElapsed(elapsedSeconds))", comment: "VoiceOver: Sessions tab indicator")
+                : String(localized: "Recording, \(RecordingLogic.formatElapsed(elapsedSeconds))", comment: "VoiceOver: Sessions tab indicator")
         )
         .accessibilityHint("Returns to the Record tab.")
         .accessibilityAddTraits(.isButton)

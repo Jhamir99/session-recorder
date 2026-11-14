@@ -85,7 +85,9 @@ struct WaveformView: View {
         .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
         .accessibilityElement()
         .accessibilityLabel("Waveform")
-        .accessibilityValue(isLoading ? "Loading" : "\(SessionLibraryLogic.formatPlaybackTime(duration)) long")
+        .accessibilityValue(isLoading
+            ? String(localized: "Loading", comment: "VoiceOver: waveform")
+            : String(localized: "\(SessionLibraryLogic.formatPlaybackTime(duration)) long", comment: "VoiceOver: waveform duration"))
     }
 
     /// Tap or drag anywhere on the waveform to move the playback position.

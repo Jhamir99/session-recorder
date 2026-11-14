@@ -114,7 +114,7 @@ final class SessionLibraryViewModel: ObservableObject {
             refresh()
             return true
         } catch {
-            notice = LibraryNotice(kind: .operationFailed("Renaming"))
+            notice = LibraryNotice(kind: .operationFailed(message: String(localized: "The session could not be renamed. Please try again.", comment: "Rename error")))
             refresh()
             return false
         }
@@ -173,7 +173,7 @@ final class SessionLibraryViewModel: ObservableObject {
                 selectedSessionID = nil
             }
         } catch {
-            notice = LibraryNotice(kind: .operationFailed("Deleting"))
+            notice = LibraryNotice(kind: .operationFailed(message: String(localized: "The session could not be deleted. Please try again.", comment: "Delete error")))
         }
         refresh()
     }

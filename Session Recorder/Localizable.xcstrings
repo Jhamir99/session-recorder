@@ -1,27 +1,93 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@ long" : {
-
+    "%@ disconnected. Recording paused." : {
+      "comment" : "Recording notice"
     },
-    "%@, %@" : {
+    "%@ long" : {
+      "comment" : "VoiceOver: waveform duration"
+    },
+    "%@ was disconnected. Switched to %@." : {
+      "comment" : "Audio source message",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@, %2$@"
+            "value" : "%1$@ was disconnected. Switched to %2$@."
           }
         }
       }
     },
-    "%lld" : {
-
+    "%@ · %@ · %@ available" : {
+      "comment" : "Library storage line: sessions · used size · free space",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@ · %3$@ available"
+          }
+        }
+      }
     },
-    "%lld-bit" : {
-
+    "%@, clipping" : {
+      "comment" : "VoiceOver: meter level while clipping"
+    },
+    "%lld ch" : {
+      "comment" : "Number of channels, short"
+    },
+    "%lld dB" : {
+      "comment" : "VoiceOver: meter level"
+    },
+    "%lld sessions" : {
+      "comment" : "Library storage line: number of sessions"
+    },
+    "1 Hour" : {
+      "comment" : "Settings option value"
+    },
+    "1 Second" : {
+      "comment" : "Settings option value"
+    },
+    "1 session" : {
+      "comment" : "Library storage line: one session"
+    },
+    "10 Minutes Left" : {
+      "comment" : "Settings option value"
+    },
+    "2 Hours" : {
+      "comment" : "Settings option value"
+    },
+    "3 Seconds" : {
+      "comment" : "Settings option value"
+    },
+    "30 Minutes Left" : {
+      "comment" : "Settings option value"
+    },
+    "4 Hours" : {
+      "comment" : "Settings option value"
+    },
+    "60 Minutes Left" : {
+      "comment" : "Settings option value"
+    },
+    "8 Hours" : {
+      "comment" : "Settings option value"
     },
     "AAC bitrate" : {
 
+    },
+    "About %@" : {
+      "comment" : "Estimated export size"
+    },
+    "About %@ per hour (mono). Saved for this device." : {
+      "comment" : "Quality footer"
+    },
+    "About %@ per hour (stereo). Saved for this device." : {
+      "comment" : "Quality footer"
+    },
+    "About %lld h left" : {
+      "comment" : "Remaining recording time"
+    },
+    "About %lld min left" : {
+      "comment" : "Remaining recording time"
     },
     "Actions" : {
 
@@ -29,13 +95,26 @@
     "Allow Audio Input" : {
 
     },
+    "Another session already has this name." : {
+      "comment" : "Session library text"
+    },
     "Appearance" : {
 
     },
     "Audio Source" : {
 
     },
+    "Audio input is needed to show levels and record." : {
+      "comment" : "Access notice"
+    },
+    "Audio input is restricted on this device, so recording isn't available." : {
+      "comment" : "Access notice"
+    },
+    "Audio input is turned off for Session Recorder. Turn it on in Settings to record." : {
+      "comment" : "Access notice"
+    },
     "Audio source: %@, %@" : {
+      "comment" : "VoiceOver: source row",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -51,13 +130,13 @@
     "Back to recording" : {
 
     },
+    "Bars" : {
+      "comment" : "Settings option value"
+    },
     "Bit depth" : {
 
     },
     "Bitrate" : {
-
-    },
-    "CLIP" : {
 
     },
     "Can't be played" : {
@@ -66,7 +145,7 @@
     "Cancel" : {
 
     },
-    "Capture: %@" : {
+    "Channel" : {
 
     },
     "Channels" : {
@@ -75,20 +154,35 @@
     "Choose Source…" : {
 
     },
+    "Choose a device and channels before recording." : {
+      "comment" : "Recording notice"
+    },
+    "Choose an audio source" : {
+      "comment" : "Source row status"
+    },
     "Close" : {
 
+    },
+    "Compressed: smaller file, some quality is lost." : {
+      "comment" : "Export format footer"
     },
     "Continue" : {
 
     },
+    "Continuous" : {
+      "comment" : "Settings option value"
+    },
+    "Dark" : {
+      "comment" : "Settings option value"
+    },
     "Delete" : {
-
+      "comment" : "Delete confirmation"
     },
     "Delete “%@”?" : {
 
     },
     "Delete…" : {
-
+      "comment" : "Session menu"
     },
     "Device" : {
 
@@ -98,6 +192,15 @@
     },
     "Done" : {
 
+    },
+    "Duration" : {
+
+    },
+    "End" : {
+
+    },
+    "Enter a name." : {
+      "comment" : "Session library text\nSettings message"
     },
     "Estimated size" : {
 
@@ -126,19 +229,46 @@
     "Got It" : {
 
     },
+    "Input level" : {
+      "comment" : "VoiceOver: meter name"
+    },
     "Keep screen on while recording" : {
 
     },
     "Last Used" : {
 
     },
+    "Left" : {
+
+    },
+    "Left level" : {
+      "comment" : "VoiceOver: meter name"
+    },
+    "Less than 1 min left" : {
+      "comment" : "Remaining recording time"
+    },
     "Library" : {
 
     },
+    "Light" : {
+      "comment" : "Settings option value"
+    },
+    "Line" : {
+      "comment" : "Settings option value"
+    },
     "Loading" : {
-
+      "comment" : "VoiceOver: waveform"
+    },
+    "Long" : {
+      "comment" : "Settings option value"
+    },
+    "Lossless: same quality as the original." : {
+      "comment" : "Export format footer"
     },
     "Low storage warning" : {
+
+    },
+    "Marks the loudest recent peak to help you avoid clipping." : {
 
     },
     "Meter style" : {
@@ -148,22 +278,46 @@
 
     },
     "Mono" : {
-
+      "comment" : "Channel mode"
+    },
+    "Mono · %@" : {
+      "comment" : "Source row: mono channel"
     },
     "Move to Trash" : {
-
+      "comment" : "Delete confirmation\nSession menu"
     },
     "Name" : {
-
+      "comment" : "Settings option value"
+    },
+    "Names can't contain “/” or “:”." : {
+      "comment" : "Session library text\nSettings message"
     },
     "New session names: %@ 2026-11-14 22.30.15" : {
 
     },
+    "Newest First" : {
+      "comment" : "Settings option value"
+    },
     "No audio input devices are available." : {
 
     },
+    "No channels are available for this device." : {
+      "comment" : "Audio source message"
+    },
+    "No channels available" : {
+      "comment" : "Source row status"
+    },
+    "No input selected" : {
+      "comment" : "Source row status"
+    },
     "No sessions yet" : {
 
+    },
+    "No valid channel is available for this device." : {
+      "comment" : "Audio source message"
+    },
+    "No valid channel selected" : {
+      "comment" : "Source row status"
     },
     "None" : {
 
@@ -171,32 +325,59 @@
     "Not Now" : {
 
     },
+    "Not enough free storage to export." : {
+      "comment" : "Export error"
+    },
+    "Not enough free storage to record." : {
+      "comment" : "Recording notice"
+    },
+    "Not enough free storage." : {
+      "comment" : "Session library text"
+    },
     "OK" : {
 
+    },
+    "Off" : {
+      "comment" : "Settings option value"
+    },
+    "Oldest First" : {
+      "comment" : "Settings option value"
     },
     "Open Settings" : {
 
     },
     "Opens audio source settings" : {
-
+      "comment" : "VoiceOver hint: source row"
+    },
+    "Original (CAF)" : {
+      "comment" : "Export format: the session file as it is"
     },
     "PAUSED" : {
-
+      "comment" : "Recording state badge"
     },
     "Pause" : {
-
+      "comment" : "Player\nRecording menu\nTrim"
     },
     "Peak hold" : {
 
     },
+    "Permission must be granted to access audio input channels." : {
+      "comment" : "Audio source message"
+    },
+    "Permission required" : {
+      "comment" : "Source row status"
+    },
     "Play" : {
-
+      "comment" : "Player"
     },
     "Play Selection" : {
-
+      "comment" : "Trim"
     },
     "Play/Pause" : {
 
+    },
+    "Play/Pause Session" : {
+      "comment" : "Recording menu: Space plays the open session"
     },
     "Playback is unavailable while recording." : {
 
@@ -204,11 +385,8 @@
     "Quality" : {
 
     },
-    "REC" : {
-
-    },
     "Record" : {
-
+      "comment" : "Recording menu"
     },
     "Record your sessions" : {
 
@@ -216,7 +394,45 @@
     "Recording" : {
 
     },
+    "Recording needs access to audio input." : {
+      "comment" : "Recording notice"
+    },
+    "Recording paused by a call or another app." : {
+      "comment" : "Recording notice"
+    },
+    "Recording paused, %@" : {
+      "comment" : "VoiceOver: Sessions tab indicator"
+    },
+    "Recording stopped after %@ (time limit)." : {
+      "comment" : "Recording notice"
+    },
+    "Recording stopped after %@ (time limit). Saved: %@" : {
+      "comment" : "Recording notice",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Recording stopped after %1$@ (time limit). Saved: %2$@"
+          }
+        }
+      }
+    },
+    "Recording stopped because of an audio error." : {
+      "comment" : "Recording notice"
+    },
+    "Recording stopped because of an audio error. Saved: %@" : {
+      "comment" : "Recording notice"
+    },
     "Recording time limit" : {
+
+    },
+    "Recording, %@" : {
+      "comment" : "VoiceOver: Sessions tab indicator"
+    },
+    "Recovered an interrupted recording: %@" : {
+      "comment" : "Recording notice"
+    },
+    "Removes the click when you pause and resume a recording." : {
 
     },
     "Rename" : {
@@ -228,8 +444,17 @@
     "Rename…" : {
 
     },
+    "Resume" : {
+      "comment" : "Recording menu"
+    },
     "Returns to the Record tab." : {
 
+    },
+    "Right" : {
+
+    },
+    "Right level" : {
+      "comment" : "VoiceOver: meter name"
     },
     "Sample rate" : {
 
@@ -240,8 +465,14 @@
     "Save creates a new session. The original is kept." : {
 
     },
+    "Saved: %@" : {
+      "comment" : "Notice after saving a trimmed session\nRecording notice"
+    },
     "Save…" : {
 
+    },
+    "Segmented" : {
+      "comment" : "Settings option value"
     },
     "Select a session" : {
 
@@ -267,8 +498,14 @@
     "Share…" : {
 
     },
+    "Short" : {
+      "comment" : "Settings option value"
+    },
     "Show in Finder" : {
 
+    },
+    "Silent" : {
+      "comment" : "VoiceOver: meter level"
     },
     "Sort" : {
 
@@ -276,23 +513,90 @@
     "Sort By" : {
 
     },
-    "Stereo" : {
+    "Start" : {
 
     },
+    "Stereo" : {
+      "comment" : "Channel mode"
+    },
+    "Stereo · %lld–%lld" : {
+      "comment" : "Source row: stereo channel pair",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Stereo · %1$lld–%2$lld"
+          }
+        }
+      }
+    },
+    "Stereo · L %lld · R %lld" : {
+      "comment" : "Source row: stereo left/right channels",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Stereo · L %1$lld · R %2$lld"
+          }
+        }
+      }
+    },
     "Stop" : {
+      "comment" : "Recording menu"
+    },
+    "Stops and saves the recording when it reaches this length." : {
 
+    },
+    "Storage is almost full: about %lld minutes of recording left." : {
+      "comment" : "Recording notice"
+    },
+    "Storage is full. Recording stopped and saved: %@" : {
+      "comment" : "Recording notice"
+    },
+    "Switched back to %@." : {
+      "comment" : "Audio source message"
+    },
+    "Switched to %@." : {
+      "comment" : "Audio source message"
+    },
+    "System" : {
+      "comment" : "Settings option value"
+    },
+    "The audio device is not available. Check the connection and try again." : {
+      "comment" : "Recording notice"
+    },
+    "The export failed. Please try again." : {
+      "comment" : "Export error"
     },
     "The format used by default when you share a session. You can still change it before sharing." : {
 
     },
+    "The recording file could not be created." : {
+      "comment" : "Recording notice"
+    },
+    "The selected audio device" : {
+      "comment" : "Used when the disconnected device name is unknown"
+    },
+    "The selected audio device was disconnected." : {
+      "comment" : "Audio source message"
+    },
     "The selection must be at least 1 second long." : {
 
+    },
+    "The session could not be deleted. Please try again." : {
+      "comment" : "Delete error"
+    },
+    "The session could not be renamed. Please try again." : {
+      "comment" : "Rename error"
     },
     "The session will be moved to the Trash." : {
 
     },
     "The source cannot change while recording" : {
-
+      "comment" : "VoiceOver hint: locked source row"
+    },
+    "The trimmed session could not be saved. Please try again." : {
+      "comment" : "Trim error"
     },
     "Theme" : {
 
@@ -309,6 +613,15 @@
     "Trim…" : {
 
     },
+    "Until Reset" : {
+      "comment" : "Settings option value"
+    },
+    "Use 30 characters or fewer." : {
+      "comment" : "Settings message"
+    },
+    "Warns when this much recording time is left." : {
+
+    },
     "Waveform" : {
 
     },
@@ -318,8 +631,8 @@
     "Your recordings stay on this device." : {
 
     },
-    "·" : {
-
+    "another audio device" : {
+      "comment" : "Used when the new device name is unknown"
     }
   },
   "version" : "1.0"

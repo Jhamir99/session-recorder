@@ -250,7 +250,7 @@ struct ContentView: View {
                 #if DEBUG
                 // Capture spike (recording plan §3): native format delivered by the device.
                 if let format = recordingViewModel.nativeFormatDescription {
-                    Text("Capture: \(format)")
+                    Text(verbatim: "Capture: \(format)")
                         .font(.caption2.monospaced())
                         .foregroundStyle(.secondary)
                 }

@@ -147,8 +147,8 @@ enum RecordingLogic {
     /// `About 5 h left`, `About 25 min left`, `Less than 1 min left`.
     static func formatRemaining(_ seconds: TimeInterval) -> String {
         let minutes = Int(seconds / 60)
-        if minutes < 1 { return "Less than 1 min left" }
-        if minutes < 60 { return "About \(minutes) min left" }
-        return "About \(minutes / 60) h left"
+        if minutes < 1 { return String(localized: "Less than 1 min left", comment: "Remaining recording time") }
+        if minutes < 60 { return String(localized: "About \(minutes) min left", comment: "Remaining recording time") }
+        return String(localized: "About \(minutes / 60) h left", comment: "Remaining recording time")
     }
 }

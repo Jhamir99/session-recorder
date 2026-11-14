@@ -24,7 +24,7 @@ struct RecordingCommands: Commands {
     var body: some Commands {
         CommandMenu("Recording") {
             // ⌘R records when idle and stops while recording or paused.
-            Button(isActive ? "Stop" : "Record") {
+            Button(isActive ? String(localized: "Stop", comment: "Recording menu") : String(localized: "Record", comment: "Recording menu")) {
                 guard let recording else { return }
                 if recording.state.hasActiveRecording {
                     recording.stopRecording()
@@ -58,8 +58,12 @@ struct RecordingCommands: Commands {
     }
 
     private var spaceTitle: String {
-        if isActive { return isPaused ? "Resume" : "Pause" }
-        return canControlPlayback ? "Play/Pause Session" : "Pause"
+        if isActive {
+            return isPaused ? String(localized: "Resume", comment: "Recording menu") : String(localized: "Pause", comment: "Recording menu")
+        }
+        return canControlPlayback
+            ? String(localized: "Play/Pause Session", comment: "Recording menu: Space plays the open session")
+            : String(localized: "Pause", comment: "Recording menu")
     }
 
     private var canControlPlayback: Bool {

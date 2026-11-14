@@ -128,8 +128,8 @@ struct ExportSheet: View {
 
     private var footerText: String {
         viewModel.choice.format.isLossless
-            ? "Lossless: same quality as the original."
-            : "Compressed: smaller file, some quality is lost."
+            ? String(localized: "Lossless: same quality as the original.", comment: "Export format footer")
+            : String(localized: "Compressed: smaller file, some quality is lost.", comment: "Export format footer")
     }
 
     /// Uses the finished export if it matches the current choice; otherwise exports first.

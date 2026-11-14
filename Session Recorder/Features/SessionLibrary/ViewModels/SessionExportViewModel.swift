@@ -43,7 +43,7 @@ final class SessionExportViewModel: ObservableObject {
     var estimateText: String? {
         guard let info = session.audioInfo else { return nil }
         let size = RecordingLogic.formatFileSize(SessionLibraryLogic.estimatedExportBytes(choice: choice, info: info))
-        return SessionLibraryLogic.isExactEstimate(choice.format) ? size : "About \(size)"
+        return SessionLibraryLogic.isExactEstimate(choice.format) ? size : String(localized: "About \(size)", comment: "Estimated export size")
     }
 
     /// Reads the header if the list had not yet (the size estimate needs it).
@@ -83,8 +83,8 @@ final class SessionExportViewModel: ObservableObject {
             } catch {
                 guard let self, !Task.isCancelled else { return }
                 phase = .failed((error as? SessionExportService.ExportError) == .notEnoughStorage
-                    ? "Not enough free storage to export."
-                    : "The export failed. Please try again.")
+                    ? String(localized: "Not enough free storage to export.", comment: "Export error")
+                    : String(localized: "The export failed. Please try again.", comment: "Export error"))
             }
         }
     }

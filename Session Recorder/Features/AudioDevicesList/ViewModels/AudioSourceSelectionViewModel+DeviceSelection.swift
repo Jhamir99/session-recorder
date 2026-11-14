@@ -78,7 +78,7 @@ extension AudioSourceSelectionViewModel {
             devices: rawDevices
         ), id != selectedDeviceID {
             replacedDeviceID = nil
-            autoSelectDevice(id: id, notice: "Switched back to \(label(for: id)).")
+            autoSelectDevice(id: id, notice: String(localized: "Switched back to \(label(for: id)).", comment: "Audio source message"))
             return
         }
 
@@ -87,7 +87,7 @@ extension AudioSourceSelectionViewModel {
             devices: rawDevices,
             selectedDeviceID: selectedDeviceID
         ) {
-            autoSelectDevice(id: id, notice: "Switched to \(label(for: id)).")
+            autoSelectDevice(id: id, notice: String(localized: "Switched to \(label(for: id)).", comment: "Audio source message"))
             return
         }
 
@@ -123,8 +123,8 @@ extension AudioSourceSelectionViewModel {
             clearSelectionForDisconnect()
             return
         }
-        let disconnectedName = disconnectedLabel ?? "The selected audio device"
-        autoSelectDevice(id: fallbackID, notice: "\(disconnectedName) was disconnected. Switched to \(label(for: fallbackID)).")
+        let disconnectedName = disconnectedLabel ?? String(localized: "The selected audio device", comment: "Used when the disconnected device name is unknown")
+        autoSelectDevice(id: fallbackID, notice: String(localized: "\(disconnectedName) was disconnected. Switched to \(label(for: fallbackID)).", comment: "Audio source message"))
     }
 
     /// On iOS the input route decides which device is captured and how many channels it exposes,
@@ -137,7 +137,7 @@ extension AudioSourceSelectionViewModel {
     }
 
     private func label(for deviceID: String) -> String {
-        devices.first(where: { $0.id == deviceID })?.displayLabel ?? "another audio device"
+        devices.first(where: { $0.id == deviceID })?.displayLabel ?? String(localized: "another audio device", comment: "Used when the new device name is unknown")
     }
 
     func applyStateAfterDeviceSelection() {
@@ -146,7 +146,7 @@ extension AudioSourceSelectionViewModel {
             showsPermissionPrompt = true
             activeSelection = nil
             displayedChannels = []
-            userMessage = makeMessage(kind: .permissionRequired, text: "Permission must be granted to access audio input channels.", showsRetry: true)
+            userMessage = makeMessage(kind: .permissionRequired, text: String(localized: "Permission must be granted to access audio input channels.", comment: "Audio source message"), showsRetry: true)
             return
         }
         showsPermissionPrompt = false
@@ -164,7 +164,7 @@ extension AudioSourceSelectionViewModel {
         displayedChannels = device.channels
         if device.channels.isEmpty {
             activeSelection = nil
-            userMessage = makeMessage(kind: .noChannelsAvailable, text: "No channels are available for this device.", showsRetry: false)
+            userMessage = makeMessage(kind: .noChannelsAvailable, text: String(localized: "No channels are available for this device.", comment: "Audio source message"), showsRetry: false)
             return
         }
 
@@ -191,7 +191,7 @@ extension AudioSourceSelectionViewModel {
             activeSelection = nil
             // Channels are not final while input is being routed to this device: wait, no error yet.
             if service.isRoutingInput { return }
-            userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
+            userMessage = makeMessage(kind: .noValidChannelAvailable, text: String(localized: "No valid channel is available for this device.", comment: "Audio source message"), showsRetry: false)
             return
         }
 
@@ -234,7 +234,7 @@ extension AudioSourceSelectionViewModel {
             displayedChannels = []
             showsPermissionPrompt = true
             if userMessage?.isSourceChangeNotice != true {
-                userMessage = makeMessage(kind: .permissionRequired, text: "Permission must be granted to access audio input channels.", showsRetry: true)
+                userMessage = makeMessage(kind: .permissionRequired, text: String(localized: "Permission must be granted to access audio input channels.", comment: "Audio source message"), showsRetry: true)
             }
             return
         }
@@ -265,7 +265,7 @@ extension AudioSourceSelectionViewModel {
         if device.channels.isEmpty {
             activeSelection = nil
             if userMessage?.isSourceChangeNotice != true {
-                userMessage = makeMessage(kind: .noChannelsAvailable, text: "No channels are available for this device.", showsRetry: false)
+                userMessage = makeMessage(kind: .noChannelsAvailable, text: String(localized: "No channels are available for this device.", comment: "Audio source message"), showsRetry: false)
             }
             return
         }
@@ -275,7 +275,7 @@ extension AudioSourceSelectionViewModel {
             if validity.showsNoValidChannelError {
                 self.activeSelection = nil
                 if service.isRoutingInput { return }
-                userMessage = makeMessage(kind: .noValidChannelAvailable, text: "No valid channel is available for this device.", showsRetry: false)
+                userMessage = makeMessage(kind: .noValidChannelAvailable, text: String(localized: "No valid channel is available for this device.", comment: "Audio source message"), showsRetry: false)
                 return
             }
         }
@@ -297,6 +297,6 @@ extension AudioSourceSelectionViewModel {
         displayedChannels = []
         stereoLeftCandidateID = nil
         showsPermissionPrompt = false
-        userMessage = makeMessage(kind: .deviceDisconnected, text: "The selected audio device was disconnected.", showsRetry: false)
+        userMessage = makeMessage(kind: .deviceDisconnected, text: String(localized: "The selected audio device was disconnected.", comment: "Audio source message"), showsRetry: false)
     }
 }

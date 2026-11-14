@@ -29,7 +29,7 @@ private struct QualityPickers: View {
                 }
                 Picker("Bit depth", selection: bitDepthBinding(current: quality)) {
                     ForEach(RecordingLogic.allowedBitDepths, id: \.self) { bitDepth in
-                        Text("\(bitDepth)-bit").tag(bitDepth)
+                        Text(verbatim: "\(bitDepth)-bit").tag(bitDepth)
                     }
                 }
             } header: {
@@ -62,7 +62,9 @@ private struct QualityPickers: View {
     private func footerText(for quality: RecordingQuality) -> String {
         let channelCount = max(viewModel.meteredChannelCount, 1)
         let bytesPerHour = RecordingLogic.bytesPerSecond(quality: quality, channelCount: channelCount) * 3600
-        let mode = channelCount == 2 ? "stereo" : "mono"
-        return "About \(RecordingLogic.formatFileSize(Int64(bytesPerHour))) per hour (\(mode)). Saved for this device."
+        let size = RecordingLogic.formatFileSize(Int64(bytesPerHour))
+        return channelCount == 2
+            ? String(localized: "About \(size) per hour (stereo). Saved for this device.", comment: "Quality footer")
+            : String(localized: "About \(size) per hour (mono). Saved for this device.", comment: "Quality footer")
     }
 }

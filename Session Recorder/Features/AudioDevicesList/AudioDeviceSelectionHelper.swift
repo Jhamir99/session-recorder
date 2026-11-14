@@ -216,12 +216,14 @@ enum AudioDeviceSelectionHelper {
     static func sourceSummaryChannelText(mode: AudioChannelMode, channelNumbers: [Int]) -> String {
         switch mode {
         case .mono:
-            return "Mono · " + channelNumbers.map(String.init).joined(separator: ", ")
+            return String(localized: "Mono · \(channelNumbers.map(String.init).joined(separator: ", "))", comment: "Source row: mono channel")
         case .stereo:
-            guard channelNumbers.count == 2 else { return "Stereo" }
+            guard channelNumbers.count == 2 else { return String(localized: "Stereo", comment: "Channel mode") }
             let left = channelNumbers[0], right = channelNumbers[1]
             // A range reads naturally only for an adjacent ascending pair.
-            return right == left + 1 ? "Stereo · \(left)–\(right)" : "Stereo · L \(left) · R \(right)"
+            return right == left + 1
+                ? String(localized: "Stereo · \(left)–\(right)", comment: "Source row: stereo channel pair")
+                : String(localized: "Stereo · L \(left) · R \(right)", comment: "Source row: stereo left/right channels")
         }
     }
 

@@ -15,11 +15,11 @@ struct SessionRow: View {
                 case .loading:
                     EmptyView()
                 case .readable(let info):
-                    Text("·")
+                    Text(verbatim: "·")
                     Text(SessionLibraryLogic.formatPlaybackTime(info.duration))
                         .monospacedDigit()
                 case .unreadable:
-                    Text("·")
+                    Text(verbatim: "·")
                     Label("Can't be played", systemImage: "exclamationmark.triangle.fill")
                         .labelStyle(.titleAndIcon)
                         .foregroundStyle(.orange)

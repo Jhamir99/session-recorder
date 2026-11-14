@@ -17,7 +17,7 @@ struct RecordingStatusView: View {
 
             HStack(spacing: 6) {
                 Text(RecordingLogic.formatFileSize(liveInfo.fileSizeBytes))
-                Text("·")
+                Text(verbatim: "·")
                 Text(RecordingLogic.formatRemaining(liveInfo.remainingSeconds))
             }
             .font(.subheadline)
@@ -33,7 +33,7 @@ struct RecordingStatusView: View {
     }
 
     private var stateBadge: some View {
-        Text(isPaused ? "PAUSED" : "REC")
+        (isPaused ? Text("PAUSED", comment: "Recording state badge") : Text(verbatim: "REC"))
             .font(.caption.weight(.bold))
             .padding(.horizontal, 6)
             .padding(.vertical, 2)

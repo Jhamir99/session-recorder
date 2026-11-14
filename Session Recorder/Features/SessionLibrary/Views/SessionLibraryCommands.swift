@@ -73,6 +73,8 @@ struct SessionLibraryCommands: Commands {
     }
 
     private var deleteTitle: String {
-        SessionLibraryStore.deleteMovesToTrash ? "Move to Trash" : "Delete…"
+        SessionLibraryStore.deleteMovesToTrash
+            ? String(localized: "Move to Trash", comment: "Session menu")
+            : String(localized: "Delete…", comment: "Session menu")
     }
 }

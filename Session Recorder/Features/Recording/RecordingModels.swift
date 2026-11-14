@@ -95,35 +95,35 @@ struct RecordingNotice: Identifiable, Equatable {
     var text: String {
         switch kind {
         case .saved(let name):
-            "Saved: \(name)"
+            String(localized: "Saved: \(name)", comment: "Recording notice")
         case .recovered(let name):
-            "Recovered an interrupted recording: \(name)"
+            String(localized: "Recovered an interrupted recording: \(name)", comment: "Recording notice")
         case .startFailed(.permissionRequired):
-            "Recording needs access to audio input."
+            String(localized: "Recording needs access to audio input.", comment: "Recording notice")
         case .startFailed(.noValidSource):
-            "Choose a device and channels before recording."
+            String(localized: "Choose a device and channels before recording.", comment: "Recording notice")
         case .startFailed(.notEnoughStorage):
-            "Not enough free storage to record."
+            String(localized: "Not enough free storage to record.", comment: "Recording notice")
         case .startFailed(.deviceUnavailable):
-            "The audio device is not available. Check the connection and try again."
+            String(localized: "The audio device is not available. Check the connection and try again.", comment: "Recording notice")
         case .startFailed(.cannotCreateFile):
-            "The recording file could not be created."
+            String(localized: "The recording file could not be created.", comment: "Recording notice")
         case .deviceDisconnected(let deviceName):
-            "\(deviceName) disconnected. Recording paused."
+            String(localized: "\(deviceName) disconnected. Recording paused.", comment: "Recording notice")
         case .interrupted:
-            "Recording paused by a call or another app."
+            String(localized: "Recording paused by a call or another app.", comment: "Recording notice")
         case .lowStorageWarning(let minutes):
-            "Storage is almost full: about \(minutes) minutes of recording left."
+            String(localized: "Storage is almost full: about \(minutes) minutes of recording left.", comment: "Recording notice")
         case .timeLimitReached(let limit, let name?):
-            "Recording stopped after \(limit) (time limit). Saved: \(name)"
+            String(localized: "Recording stopped after \(limit) (time limit). Saved: \(name)", comment: "Recording notice")
         case .timeLimitReached(let limit, nil):
-            "Recording stopped after \(limit) (time limit)."
+            String(localized: "Recording stopped after \(limit) (time limit).", comment: "Recording notice")
         case .storageFull(let name):
-            "Storage is full. Recording stopped and saved: \(name)"
+            String(localized: "Storage is full. Recording stopped and saved: \(name)", comment: "Recording notice")
         case .recordingFailed(let name?):
-            "Recording stopped because of an audio error. Saved: \(name)"
+            String(localized: "Recording stopped because of an audio error. Saved: \(name)", comment: "Recording notice")
         case .recordingFailed(nil):
-            "Recording stopped because of an audio error."
+            String(localized: "Recording stopped because of an audio error.", comment: "Recording notice")
         }
     }
 }

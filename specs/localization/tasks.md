@@ -10,7 +10,7 @@ Constraints: C1–C6 (Apple tools only, no deps, English base, no behavior or da
   - **Depends on:** none
   - **Done when:** `es` is a known region; both catalogs exist and the app builds on Mac and iOS.
 
-- [ ] **T2 — Make every user-facing text localizable** (Swift files in all features)
+- [x] **T2 — Make every user-facing text localizable** (Swift files in all features)
   - **RF:** RF-2, RF-3, RF-5, NFR-5
   - **Depends on:** T1
   - **Done when:** Computed texts (enum titles, notices, messages, helpers, menu titles, accessibility) use `String(localized:)` with comments; non-translatable texts are verbatim; an `es` export lists every visible English text and none of the excluded ones.

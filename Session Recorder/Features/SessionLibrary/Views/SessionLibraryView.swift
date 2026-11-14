@@ -42,7 +42,9 @@ struct SessionLibraryView<Indicator: View>: View {
                 titleVisibility: .visible,
                 presenting: viewModel.deletingSession
             ) { session in
-                Button(SessionLibraryStore.deleteMovesToTrash ? "Move to Trash" : "Delete", role: .destructive) {
+                Button(SessionLibraryStore.deleteMovesToTrash
+                       ? String(localized: "Move to Trash", comment: "Delete confirmation")
+                       : String(localized: "Delete", comment: "Delete confirmation"), role: .destructive) {
                     viewModel.delete(session)
                 }
                 Button("Cancel", role: .cancel) {}

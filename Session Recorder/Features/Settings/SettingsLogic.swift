@@ -20,9 +20,9 @@ nonisolated enum SettingsLogic {
 
         var message: String {
             switch self {
-            case .empty: "Enter a name."
-            case .invalidCharacters: "Names can't contain “/” or “:”."
-            case .tooLong: "Use 30 characters or fewer."
+            case .empty: String(localized: "Enter a name.", comment: "Settings message")
+            case .invalidCharacters: String(localized: "Names can't contain “/” or “:”.", comment: "Settings message")
+            case .tooLong: String(localized: "Use 30 characters or fewer.", comment: "Settings message")
             }
         }
     }
@@ -110,9 +110,12 @@ nonisolated enum SettingsLogic {
 
     /// `12 sessions · 4.2 GB · 85 GB available` (singular for one session).
     static func storageSummary(sessionCount: Int, totalBytes: Int64, freeBytes: Int64) -> String {
-        let sessions = sessionCount == 1 ? "1 session" : "\(sessionCount) sessions"
+        // English and Spanish only need singular/plural; the one-session case has its own text.
+        let sessions = sessionCount == 1
+            ? String(localized: "1 session", comment: "Library storage line: one session")
+            : String(localized: "\(sessionCount) sessions", comment: "Library storage line: number of sessions")
         let used = ByteCountFormatter.string(fromByteCount: totalBytes, countStyle: .file)
         let free = ByteCountFormatter.string(fromByteCount: freeBytes, countStyle: .file)
-        return "\(sessions) · \(used) · \(free) available"
+        return String(localized: "\(sessions) · \(used) · \(free) available", comment: "Library storage line: sessions · used size · free space")
     }
 }

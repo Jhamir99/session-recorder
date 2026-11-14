@@ -85,7 +85,7 @@ extension SessionDetailViewModel {
                 self?.isSavingTrim = false
                 self?.trimErrorMessage = (error as? SessionLibraryStore.TrimError) == .notEnoughStorage
                     ? LibraryNotice(kind: .notEnoughStorage).text
-                    : LibraryNotice(kind: .operationFailed("Saving the trimmed session")).text
+                    : LibraryNotice(kind: .operationFailed(message: String(localized: "The trimmed session could not be saved. Please try again.", comment: "Trim error"))).text
             }
         }
     }

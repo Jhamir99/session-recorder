@@ -51,7 +51,7 @@ private struct MeterRow: View {
                 .frame(height: 10)
                 .overlay { heldPeakMarker }
 
-            Text("CLIP")
+            Text(verbatim: "CLIP")
                 .font(.caption2.weight(.bold))
                 .padding(.horizontal, 4)
                 .padding(.vertical, 1)
@@ -114,16 +114,17 @@ private struct MeterRow: View {
 
     private var accessibilityName: String {
         switch label {
-        case "L": "Left level"
-        case "R": "Right level"
-        default: "Input level"
+        case "L": String(localized: "Left level", comment: "VoiceOver: meter name")
+        case "R": String(localized: "Right level", comment: "VoiceOver: meter name")
+        default: String(localized: "Input level", comment: "VoiceOver: meter name")
         }
     }
 
     private var accessibilityLevel: String {
         let decibels = level.peak > 0 ? Int((20 * log10(level.peak)).rounded()) : nil
-        let value = decibels.map { "\($0) dB" } ?? "Silent"
-        return level.isClipping ? "\(value), clipping" : value
+        let value = decibels.map { String(localized: "\($0) dB", comment: "VoiceOver: meter level") }
+            ?? String(localized: "Silent", comment: "VoiceOver: meter level")
+        return level.isClipping ? String(localized: "\(value), clipping", comment: "VoiceOver: meter level while clipping") : value
     }
 }
 

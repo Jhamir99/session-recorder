@@ -57,13 +57,13 @@ struct ChannelSelectionView: View {
     }
 
     /// Menu of channel numbers; `excluding` hides the channel used by the other stereo side.
-    private func channelPicker(_ title: String, selection: Binding<String?>, excluding excludedID: String?) -> some View {
+    private func channelPicker(_ title: LocalizedStringKey, selection: Binding<String?>, excluding excludedID: String?) -> some View {
         Picker(title, selection: selection) {
             if selection.wrappedValue == nil {
                 Text("None").tag(String?.none)
             }
             ForEach(viewModel.displayedChannels.filter { $0.id != excludedID }) { channel in
-                Text("\(channel.number)").tag(Optional(channel.id))
+                Text(verbatim: "\(channel.number)").tag(Optional(channel.id))
             }
         }
         .pickerStyle(.menu)

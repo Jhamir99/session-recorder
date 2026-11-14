@@ -27,9 +27,9 @@ struct AudioAccessNoticeView: View {
 
     private var message: String {
         switch access {
-        case .notAsked: "Audio input is needed to show levels and record."
-        case .denied: "Audio input is turned off for Session Recorder. Turn it on in Settings to record."
-        case .restricted: "Audio input is restricted on this device, so recording isn't available."
+        case .notAsked: String(localized: "Audio input is needed to show levels and record.", comment: "Access notice")
+        case .denied: String(localized: "Audio input is turned off for Session Recorder. Turn it on in Settings to record.", comment: "Access notice")
+        case .restricted: String(localized: "Audio input is restricted on this device, so recording isn't available.", comment: "Access notice")
         case .allowed: ""
         }
     }
