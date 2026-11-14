@@ -249,6 +249,15 @@ final class RecordingViewModel: ObservableObject {
         pause(reason: .user)
     }
 
+    /// Space while a recording exists: pause, or resume when possible (RF-9).
+    func togglePauseFromKeyboard() {
+        switch state {
+        case .recording: pauseRecording()
+        case .paused: resumeRecording()
+        case .idle: break
+        }
+    }
+
     /// Pauses writing; automatic pauses (disconnect, interruption) also come through here.
     func pause(reason: RecordingPauseReason) {
         guard state == .recording else { return }

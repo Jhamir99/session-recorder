@@ -11,7 +11,11 @@ struct SessionDetailView: View {
     var onShare: (() -> Void)?
     var onDelete: (() -> Void)?
 
+    /// Told when this detail appears/disappears, so the Session menu controls the right playback.
+    private weak var library: SessionLibraryViewModel?
+
     init(
+        library: SessionLibraryViewModel? = nil,
         session: SessionItem,
         handoff: PlaybackHandoff,
         isRecordingActive: Bool,
@@ -21,6 +25,7 @@ struct SessionDetailView: View {
         onDelete: (() -> Void)? = nil
     ) {
         _viewModel = StateObject(wrappedValue: SessionDetailViewModel(session: session, handoff: handoff, trimContext: trimContext))
+        self.library = library
         self.session = session
         self.isRecordingActive = isRecordingActive
         self.onRename = onRename
@@ -60,7 +65,11 @@ struct SessionDetailView: View {
         .onChange(of: isRecordingActive) { _, active in
             viewModel.setPlaybackBlocked(active)
         }
-        .onDisappear { viewModel.cancel() }
+        .onAppear { library?.detailDidAppear(viewModel) }
+        .onDisappear {
+            viewModel.cancel()
+            library?.detailDidDisappear(viewModel)
+        }
         .toolbar {
             if viewModel.isTrimming {
                 ToolbarItem(placement: .cancellationAction) {

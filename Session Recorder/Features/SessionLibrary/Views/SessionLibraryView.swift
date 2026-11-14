@@ -16,6 +16,12 @@ struct SessionLibraryView<Indicator: View>: View {
             .task {
                 viewModel.refresh()
             }
+            // The list keeps keyboard focus on Mac and would take these keys before the menus.
+            .onKeyPress(keys: [.leftArrow, .rightArrow], phases: .down) { press in
+                guard press.modifiers == .command else { return .ignored }
+                let seconds = press.key == .leftArrow ? -SessionLibraryLogic.skipInterval : SessionLibraryLogic.skipInterval
+                return handlePlaybackKey { $0.skip(by: seconds) }
+            }
             .sheet(item: $viewModel.renamingSession) { session in
                 RenameSessionSheet(session: session, viewModel: viewModel)
             }
@@ -73,11 +79,20 @@ struct SessionLibraryView<Indicator: View>: View {
         #endif
     }
 
+    private func handlePlaybackKey(_ action: (SessionDetailViewModel) -> Void) -> KeyPress.Result {
+        guard viewModel.canControlPlayback(isRecordingActive: isRecordingActive), let detail = viewModel.activeDetail else {
+            return .ignored
+        }
+        action(detail)
+        return .handled
+    }
+
     @ViewBuilder
     private var detail: some View {
         if let session = viewModel.selectedSession {
             // A new detail (and view model) per session file.
             SessionDetailView(
+                library: viewModel,
                 session: session,
                 handoff: viewModel.playbackHandoff,
                 isRecordingActive: isRecordingActive,

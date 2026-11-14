@@ -4,6 +4,17 @@ import Foundation
 extension SessionDetailViewModel {
     var isTrimming: Bool { trimRange != nil }
 
+    /// Space / media play-pause: the selection while trimming, otherwise the whole session (RF-8).
+    func togglePlaybackFromKeyboard() {
+        if isPlaying {
+            pause()
+        } else if isTrimming {
+            playSelection()
+        } else {
+            play()
+        }
+    }
+
     var canSaveTrim: Bool {
         guard let trimRange, !isSavingTrim else { return false }
         return SessionLibraryLogic.isValidTrim(trimRange, duration: duration)

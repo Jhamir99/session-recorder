@@ -12,6 +12,8 @@ final class SessionLibraryViewModel: ObservableObject {
     @Published var renamingSession: SessionItem?
     /// Session whose share sheet is open (RF-6).
     @Published var sharingSession: SessionItem?
+    /// Detail shown in this window (set by the detail view); the Session menu controls its playback.
+    @Published private(set) var activeDetail: SessionDetailViewModel?
     /// An export is running: on Mac the whole window is darkened behind the progress card.
     @Published var isExportInProgress = false
     /// Session waiting for delete confirmation (RF-4).
@@ -25,6 +27,7 @@ final class SessionLibraryViewModel: ObservableObject {
     private var audioInfoTask: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
     private weak var recording: RecordingViewModel?
+    private var activeDetailObservation: AnyCancellable?
     /// Stops the playback that currently owns the audio session (nil when nothing plays).
     private var stopActivePlayback: (@MainActor () -> Void)?
 
@@ -152,6 +155,30 @@ final class SessionLibraryViewModel: ObservableObject {
             notice = LibraryNotice(kind: .operationFailed("Deleting"))
         }
         refresh()
+    }
+
+    func detailDidAppear(_ detail: SessionDetailViewModel) {
+        activeDetail = detail
+        // Menus observe the library: forward detail changes (player ready, playing) so they update.
+        activeDetailObservation = detail.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+    }
+
+    func detailDidDisappear(_ detail: SessionDetailViewModel) {
+        guard activeDetail === detail else { return }
+        activeDetail = nil
+        activeDetailObservation = nil
+    }
+
+    /// Playback shortcuts (Space, ⌘← / ⌘→) are possible: a detail is open, no recording, no dialog (RF-8).
+    func canControlPlayback(isRecordingActive: Bool) -> Bool {
+        guard let activeDetail, !hasOpenDialog, !isRecordingActive else { return false }
+        return activeDetail.canPlay
+    }
+
+    /// A sheet or dialog is open (rename, share, delete): keyboard shortcuts must not act behind it (RF-8).
+    var hasOpenDialog: Bool {
+        renamingSession != nil || sharingSession != nil || deletingSession != nil
     }
 
     var selectedSession: SessionItem? {

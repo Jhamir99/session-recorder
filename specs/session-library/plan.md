@@ -121,7 +121,7 @@ any ──Record tab selected / detail closed / session deleted──▶ stopped
 | Share sheet | Format picker, AAC bitrate (only for AAC), "About 412 MB", Export → progress + Cancel → Share… (+ Save… on Mac). | RF-6 |
 | Rename | Small sheet with a text field; validation shown as you type (an alert cannot validate live); Rename disabled while invalid or unchanged. | RF-3 |
 | Delete | Confirmation dialog naming the session; iOS text says it cannot be undone; Mac says it moves to the Trash. | RF-4 |
-| Mac menu | **Session** menu: Play/Pause (Space), Skip Back (⌘←), Skip Forward (⌘→), Rename…, Delete (⌘⌫), Show in Finder. Space for playback is enabled only when no recording exists and no rename is in progress; the Recording menu's Space is enabled only while a recording exists, so they never overlap. | RF-8 |
+| Mac menu | **Session** menu: Play/Pause (Space), Skip Back (⌘←), Skip Forward (⌘→), Rename…, Delete (⌘⌫), Show in Finder. Space has a single menu item (Recording menu: pause/resume while recording, otherwise play/pause the open session), because two items with the same key equivalent made the Mac ignore both; on Mac a window-level key monitor handles Space (focused lists consumed it), except while a text field is edited or a dialog is open. | RF-8 |
 | Accessibility | Waveform exposes position as an adjustable value; buttons have labels; large Dynamic Type supported. | NFR-1 |
 
 ## 6) Technical decisions and rejected alternatives

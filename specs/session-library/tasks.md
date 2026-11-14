@@ -97,7 +97,7 @@ Constraints: C1–C6 (SwiftUI/Apple APIs only, no deps, logic separated from UI,
   - **Done when:** Share from detail and list context menu: format + bitrate, size estimate, Export with progress/Cancel, then Share… (system share sheet) and Save… on Mac; last format remembered (`library_export_format_v1`); temp files removed when the sheet closes.
 
 ### Mac and finishing
-- [ ] **T18 — Session menu and keyboard shortcuts** (`Views/SessionLibraryCommands.swift`, `MyApp.swift`, `ContentView.swift`)
+- [x] **T18 — Session menu and keyboard shortcuts** (`Views/SessionLibraryCommands.swift`, `MyApp.swift`, `ContentView.swift`)
   - **RF:** RF-8
   - **Depends on:** T9, T12, T13
   - **Done when:** Play/Pause (Space), ⌘← / ⌘→, Rename…, Delete (⌘⌫), Show in Finder work on Mac (and iPad keyboard); Space never conflicts with the Recording menu or a rename text field.

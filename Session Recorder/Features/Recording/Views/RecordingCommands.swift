@@ -18,6 +18,7 @@ extension FocusedValues {
 /// Acts on the recording of the focused window.
 struct RecordingCommands: Commands {
     @FocusedObject private var recording: RecordingViewModel?
+    @FocusedObject private var library: SessionLibraryViewModel?
     @FocusedValue(\.chooseRecordingSource) private var chooseSource
 
     var body: some Commands {
@@ -34,18 +35,18 @@ struct RecordingCommands: Commands {
             .keyboardShortcut("r")
             .disabled(!(isActive || recording?.canRecord == true))
 
-            // Space without modifiers. The app has no text fields yet; when one is added (e.g. rename in the
-            // session library), check that typing a space there does not pause the recording (RF-9).
-            Button(isPaused ? "Resume" : "Pause") {
-                guard let recording else { return }
-                if isPaused {
-                    recording.resumeRecording()
+            // The app's only Space shortcut (two menu items with the same key equivalent made the Mac ignore
+            // both): pause/resume while a recording exists, otherwise play/pause the open session (library RF-8).
+            // Disabled while a library dialog with a text field is open, so typing a space never acts (RF-9).
+            Button(spaceTitle) {
+                if isActive {
+                    recording?.togglePauseFromKeyboard()
                 } else {
-                    recording.pauseRecording()
+                    library?.activeDetail?.togglePlaybackFromKeyboard()
                 }
             }
             .keyboardShortcut(.space, modifiers: [])
-            .disabled(!(recording?.state == .recording || recording?.canResume == true))
+            .disabled(!isSpaceEnabled)
 
             Divider()
 
@@ -54,6 +55,23 @@ struct RecordingCommands: Commands {
             }
             .disabled(chooseSource == nil || recording == nil || isActive)
         }
+    }
+
+    private var spaceTitle: String {
+        if isActive { return isPaused ? "Resume" : "Pause" }
+        return canControlPlayback ? "Play/Pause Session" : "Pause"
+    }
+
+    private var canControlPlayback: Bool {
+        library?.canControlPlayback(isRecordingActive: isActive) == true
+    }
+
+    private var isSpaceEnabled: Bool {
+        guard library?.hasOpenDialog != true else { return false }
+        if isActive {
+            return recording?.state == .recording || recording?.canResume == true
+        }
+        return canControlPlayback
     }
 
     private var isActive: Bool {
@@ -65,3 +83,69 @@ struct RecordingCommands: Commands {
         return false
     }
 }
+
+#if os(macOS)
+import AppKit
+
+/// Mac: handles Space at the window level. Keys without ⌘ go to the focused view first (sidebar, session
+/// list…), which used Space itself, so the menu's Space shortcut never fired. Space is ignored while a text
+/// field is being edited (e.g. renaming), so typing a space never pauses or plays (RF-9, library RF-8).
+struct SpaceKeyHandler: NSViewRepresentable {
+    /// Returns true when Space was used (pause/resume recording or play/pause the open session).
+    let onSpace: () -> Bool
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        context.coordinator.view = view
+        context.coordinator.install()
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        context.coordinator.onSpace = onSpace
+    }
+
+    static func dismantleNSView(_ view: NSView, coordinator: Coordinator) {
+        coordinator.uninstall()
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onSpace: onSpace)
+    }
+
+    @MainActor
+    final class Coordinator {
+        var onSpace: () -> Bool
+        weak var view: NSView?
+        private var monitor: Any?
+
+        init(onSpace: @escaping () -> Bool) {
+            self.onSpace = onSpace
+        }
+
+        func install() {
+            // Local monitors run on the main thread.
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self else { return event }
+                nonisolated(unsafe) let event = event
+                let handled = MainActor.assumeIsolated { self.handles(event) }
+                return handled ? nil : event
+            }
+        }
+
+        func uninstall() {
+            if let monitor { NSEvent.removeMonitor(monitor) }
+            monitor = nil
+        }
+
+        /// True when the event was a plain Space for this window and it was used.
+        private func handles(_ event: NSEvent) -> Bool {
+            let modifiers = event.modifierFlags.intersection([.command, .option, .control, .shift])
+            guard event.keyCode == 49, modifiers.isEmpty, !event.isARepeat,
+                  let window = view?.window, event.window === window,
+                  !(window.firstResponder is NSText) else { return false }
+            return onSpace()
+        }
+    }
+}
+#endif

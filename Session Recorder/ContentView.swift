@@ -39,6 +39,7 @@ struct ContentView: View {
         .tabViewStyle(.sidebarAdaptable)
         #if os(macOS)
         .overlay { ExportDimmingOverlay(library: libraryViewModel) }
+        .background(SpaceKeyHandler(onSpace: handleSpaceKey))
         #endif
         // Injected at the root so tabs and sheets presented from them share the same state.
         .environmentObject(audioSourceViewModel)
@@ -53,6 +54,7 @@ struct ContentView: View {
         }
         // Recording menu and shortcuts act on this window's recording (RF-9).
         .focusedSceneObject(recordingViewModel)
+        .focusedSceneObject(libraryViewModel)
         .focusedSceneValue(\.chooseRecordingSource, ChooseRecordingSourceAction(windowID: windowID) {
             selectedTab = .record
             isShowingSourceSheet = true
@@ -71,6 +73,22 @@ struct ContentView: View {
         }
         #endif
     }
+
+    #if os(macOS)
+    /// Same rules as the Space menu item: recording first, otherwise the open session; never behind a dialog.
+    private func handleSpaceKey() -> Bool {
+        guard !libraryViewModel.hasOpenDialog, !isShowingSourceSheet else { return false }
+        if recordingViewModel.state.hasActiveRecording {
+            guard recordingViewModel.state == .recording || recordingViewModel.canResume else { return false }
+            recordingViewModel.togglePauseFromKeyboard()
+            return true
+        }
+        guard libraryViewModel.canControlPlayback(isRecordingActive: false),
+              let detail = libraryViewModel.activeDetail else { return false }
+        detail.togglePlaybackFromKeyboard()
+        return true
+    }
+    #endif
 
     private var recordTab: some View {
         NavigationStack {
