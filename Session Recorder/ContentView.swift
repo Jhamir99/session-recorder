@@ -19,6 +19,8 @@ struct ContentView: View {
     @StateObject private var settingsStore: AppSettingsStore
     @StateObject private var foldersStore: SessionsFolderStore
     @State private var isShowingSettings = false
+    /// Session waiting for confirmation to be removed from the saved notice.
+    @State private var removingSessionName: String?
     #if os(iOS)
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     #endif
@@ -211,12 +213,6 @@ struct ContentView: View {
                     isLocked: recordingViewModel.state.hasActiveRecording
                 ) { isShowingSourceSheet = true }
 
-                if let message = audioSourceViewModel.recordTabMessage {
-                    Text(message.text)
-                        .font(.footnote)
-                        .foregroundStyle(message.kind == .sourceChangedAutomatically ? Color.secondary : Color.red)
-                }
-
                 // USB-C note: built-in microphone and no external device (first-use RF-6).
                 if AudioAccessLogic.showsExternalDeviceNote(
                     access: audioAccess,
@@ -251,8 +247,20 @@ struct ContentView: View {
                         .padding(.top, 16)
                 }
 
+                // Source changed by itself (device connected or disconnected), with the other notices.
+                if let message = audioSourceViewModel.recordTabMessage {
+                    let severity: RecordingNotice.Severity = message.kind == .deviceDisconnected ? .warning : .success
+                    noticeBox(severity) {
+                        noticeRow(message.text, severity: severity, onDismiss: audioSourceViewModel.dismissRecordTabMessage)
+                    }
+                }
+
                 if let notice = recordingViewModel.notice {
-                    recordingNoticeView(notice)
+                    if let sessionName = notice.sessionName {
+                        savedNoticeView(notice, sessionName: sessionName)
+                    } else {
+                        noticeBox(notice.severity) { recordingNoticeView(notice) }
+                    }
                 }
 
                 if recordingViewModel.showsDoNotDisturbTip {
@@ -284,19 +292,111 @@ struct ContentView: View {
         .sheet(isPresented: $isShowingSourceSheet) {
             sourceSheet
         }
+        .alert(
+            "Delete “\(removingSessionName ?? "")”?",
+            isPresented: removeSessionAlertBinding,
+            presenting: removingSessionName
+        ) { name in
+            Button(libraryViewModel.deleteConfirmation.button, role: .destructive) {
+                if libraryViewModel.deleteSession(named: name) {
+                    recordingViewModel.dismissNotice()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text(libraryViewModel.deleteConfirmation.message)
+        }
     }
 
+    /// Notice text with an icon colored by severity, and a button to dismiss it.
     private func recordingNoticeView(_ notice: RecordingNotice) -> some View {
+        noticeRow(notice.text, severity: notice.severity, onDismiss: recordingViewModel.dismissNotice)
+    }
+
+    private func noticeRow(_ text: String, severity: RecordingNotice.Severity, onDismiss: @escaping () -> Void) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(notice.text)
+            Image(systemName: noticeIcon(severity))
+                .foregroundStyle(noticeColor(severity))
+            Text(text)
                 .font(.footnote)
-                .foregroundStyle(notice.isError ? Color.red : Color.secondary)
             Spacer(minLength: 0)
-            Button("Dismiss", systemImage: "xmark.circle.fill", action: recordingViewModel.dismissNotice)
+            Button("Dismiss", systemImage: "xmark.circle.fill", action: onDismiss)
                 .labelStyle(.iconOnly)
                 .buttonStyle(.plain)
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    /// A session was saved: the notice in a box, with buttons to open it in Sessions or remove it
+    /// (after confirmation).
+    private func savedNoticeView(_ notice: RecordingNotice, sessionName: String) -> some View {
+        noticeBox(notice.severity) {
+            VStack(alignment: .leading, spacing: 10) {
+                recordingNoticeView(notice)
+                HStack(spacing: 8) {
+                    Button("View") { showSavedSession(named: sessionName) }
+                        #if os(macOS)
+                        // Bordered buttons on Mac ignore the tint and the destructive role; match iPhone.
+                        .foregroundStyle(.tint)
+                        #endif
+                    Button("Remove", role: .destructive) { removingSessionName = sessionName }
+                        #if os(macOS)
+                        .foregroundStyle(.red)
+                        #endif
+                }
+                .font(.footnote)
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+    }
+
+    /// Box shared by the Record tab notices, tinted by severity (same look as the sessions folder banner).
+    private func noticeBox<Content: View>(_ severity: RecordingNotice.Severity, @ViewBuilder content: () -> Content) -> some View {
+        content()
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(noticeBackground(severity), in: RoundedRectangle(cornerRadius: 10))
+            .padding(.top, 8)
+    }
+
+    /// Success uses the neutral background of the Do Not Disturb tip: green clashed with the blue and red
+    /// buttons; the green icon is enough.
+    private func noticeBackground(_ severity: RecordingNotice.Severity) -> AnyShapeStyle {
+        switch severity {
+        case .error, .warning: AnyShapeStyle(noticeColor(severity).opacity(0.12))
+        case .success: AnyShapeStyle(.quaternary.opacity(0.5))
+        }
+    }
+
+    private func noticeIcon(_ severity: RecordingNotice.Severity) -> String {
+        switch severity {
+        case .error: "exclamationmark.octagon.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .success: "checkmark.circle.fill"
+        }
+    }
+
+    private func noticeColor(_ severity: RecordingNotice.Severity) -> Color {
+        switch severity {
+        case .error: .red
+        case .warning: .orange
+        case .success: .green
+        }
+    }
+
+    private func showSavedSession(named name: String) {
+        recordingViewModel.dismissNotice()
+        libraryViewModel.showSession(named: name)
+        selectedTab = .sessions
+    }
+
+    /// Centered confirmation before removing the session from the saved notice.
+    private var removeSessionAlertBinding: Binding<Bool> {
+        Binding(
+            get: { removingSessionName != nil },
+            set: { if !$0 { removingSessionName = nil } }
+        )
     }
 
     // iPhone/iPad only (the view model never shows it on Mac): calls pause the recording (RF-3, RF-8).

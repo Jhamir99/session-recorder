@@ -35,6 +35,9 @@ final class SessionLibraryViewModel: ObservableObject {
     }
     /// Increases on every refresh so results of an older refresh are ignored.
     private var refreshGeneration = 0
+    /// File to select once listed; kept across refreshes so a newer refresh (e.g. the Sessions tab
+    /// appearing) does not drop it.
+    private var pendingSelectionURL: URL?
     private var audioInfoTask: Task<Void, Never>?
     private var cancellables: Set<AnyCancellable> = []
     private weak var recording: RecordingViewModel?
@@ -188,6 +191,37 @@ final class SessionLibraryViewModel: ObservableObject {
         refresh()
     }
 
+    // MARK: Saved notice on the Record tab
+
+    /// A recording saves into the folder in use, the same one the library lists.
+    private func sessionURL(named name: String) -> URL {
+        store.sessionsDirectory.appending(path: name).appendingPathExtension(SessionFileStore.fileExtension)
+    }
+
+    /// Lists the folder and selects the session, which opens its detail (View on the saved notice).
+    func showSession(named name: String) {
+        refresh(selecting: sessionURL(named: name))
+    }
+
+    /// Deletes a just-saved session (Remove on the saved notice, after confirmation). False if it failed.
+    @discardableResult
+    func deleteSession(named name: String) -> Bool {
+        let url = sessionURL(named: name)
+        if let session = sessions.first(where: { $0.url.standardizedFileURL == url.standardizedFileURL }) {
+            delete(session)
+            return notice == nil
+        }
+        // Not listed yet (the refresh after saving may still be running).
+        do {
+            try store.delete(url)
+            refresh()
+            return true
+        } catch {
+            notice = LibraryNotice(kind: .operationFailed(message: String(localized: "The session could not be deleted. Please try again.", comment: "Delete error")))
+            return false
+        }
+    }
+
     func detailDidAppear(_ detail: SessionDetailViewModel) {
         activeDetail = detail
         // Menus observe the library: forward detail changes (player ready, playing) so they update.
@@ -275,6 +309,7 @@ final class SessionLibraryViewModel: ObservableObject {
 
     func refresh(selecting urlToSelect: URL? = nil) {
         guard !isPreview else { return }
+        if let urlToSelect { pendingSelectionURL = urlToSelect }
         refreshGeneration += 1
         let generation = refreshGeneration
         let store = store
@@ -298,7 +333,9 @@ final class SessionLibraryViewModel: ObservableObject {
                 return kept
             }
             hasLoaded = true
-            if let urlToSelect, let item = sessions.first(where: { $0.url.standardizedFileURL == urlToSelect.standardizedFileURL }) {
+            if let urlToSelect = pendingSelectionURL,
+               let item = sessions.first(where: { $0.url.standardizedFileURL == urlToSelect.standardizedFileURL }) {
+                pendingSelectionURL = nil
                 selectedSessionID = item.id
             } else if let selectedSessionID, !sessions.contains(where: { $0.id == selectedSessionID }) {
                 self.selectedSessionID = nil

@@ -33,19 +33,21 @@ struct SessionLibraryView<Indicator: View>: View {
             .sheet(item: $viewModel.sharingSession) { session in
                 ExportSheet(session: session, initialChoice: viewModel.initialExportChoice) { viewModel.isExportInProgress = $0 }
             }
-            .confirmationDialog(
+            // Centered alert on every platform (not an action sheet on iPhone).
+            .alert(
                 "Delete “\(viewModel.deletingSession?.name ?? "")”?",
+                // The buttons clear `deletingSession` themselves; the setter only writes when something is
+                // left (it runs while the alert closes, during a view update, where publishing is not allowed).
                 isPresented: Binding(
                     get: { viewModel.deletingSession != nil },
-                    set: { if !$0 { viewModel.deletingSession = nil } }
+                    set: { if !$0, viewModel.deletingSession != nil { viewModel.deletingSession = nil } }
                 ),
-                titleVisibility: .visible,
                 presenting: viewModel.deletingSession
             ) { session in
                 Button(viewModel.deleteConfirmation.button, role: .destructive) {
                     viewModel.delete(session)
                 }
-                Button("Cancel", role: .cancel) {}
+                Button("Cancel", role: .cancel) { viewModel.deletingSession = nil }
             } message: { _ in
                 Text(viewModel.deleteConfirmation.message)
             }
@@ -175,7 +177,7 @@ struct SessionLibraryView<Indicator: View>: View {
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 10)
                         .background(.bar)
                 }
             }

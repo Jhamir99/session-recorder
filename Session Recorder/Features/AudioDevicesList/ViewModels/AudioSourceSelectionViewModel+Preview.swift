@@ -76,7 +76,7 @@ extension AudioSourceSelectionViewModel {
             selectedMode: .mono,
             displayedChannels: channels,
             activeSelection: .mono(channelID: "d0:1"),
-            userMessage: AudioSourceUserMessage(kind: .sourceChangedAutomatically, text: "Xone:96 was disconnected. Switched to iPhone Microphone.", showsRetryPermissionAction: false),
+            userMessage: AudioSourceUserMessage(kind: .deviceDisconnected, text: "Xone:96 was disconnected. Switched to iPhone Microphone.", showsRetryPermissionAction: false),
             rawDevices: [builtIn]
         ))
     }

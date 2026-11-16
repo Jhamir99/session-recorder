@@ -1595,6 +1595,16 @@
         }
       }
     },
+    "Remove" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Eliminar"
+          }
+        }
+      }
+    },
     "Removes the click when you pause and resume a recording." : {
       "localizations" : {
         "es" : {
@@ -2349,6 +2359,16 @@
         }
       }
     },
+    "View" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ver"
+          }
+        }
+      }
+    },
     "Warns when this much recording time is left." : {
       "localizations" : {
         "es" : {
@@ -2390,5 +2410,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.3"
 }

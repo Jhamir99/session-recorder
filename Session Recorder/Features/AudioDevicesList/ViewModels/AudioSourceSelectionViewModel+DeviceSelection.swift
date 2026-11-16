@@ -96,7 +96,8 @@ extension AudioSourceSelectionViewModel {
 
     /// Selects a device without user action (RF-7). Never shows the system permission prompt:
     /// it only checks the current status; if not granted, the permission message and retry appear (RF-4).
-    func autoSelectDevice(id: String, notice: String?) {
+    /// `noticeKind`: `.deviceDisconnected` when the source changed because the selected device went away.
+    func autoSelectDevice(id: String, notice: String?, noticeKind: AudioSourceUserMessage.Kind = .sourceChangedAutomatically) {
         selectedDeviceID = id
         routeInputToSelectedDevice()
         stereoLeftCandidateID = nil
@@ -106,7 +107,7 @@ extension AudioSourceSelectionViewModel {
         applyStateAfterDeviceSelection()
         // Do not replace permission/channel errors: they drive the sheet's retry action and messages.
         if let notice, userMessage == nil {
-            userMessage = makeMessage(kind: .sourceChangedAutomatically, text: notice, showsRetry: false)
+            userMessage = makeMessage(kind: noticeKind, text: notice, showsRetry: false)
         }
     }
 
@@ -124,7 +125,8 @@ extension AudioSourceSelectionViewModel {
             return
         }
         let disconnectedName = disconnectedLabel ?? String(localized: "The selected audio device", comment: "Used when the disconnected device name is unknown")
-        autoSelectDevice(id: fallbackID, notice: String(localized: "\(disconnectedName) was disconnected. Switched to \(label(for: fallbackID)).", comment: "Audio source message"))
+        autoSelectDevice(id: fallbackID, notice: String(localized: "\(disconnectedName) was disconnected. Switched to \(label(for: fallbackID)).", comment: "Audio source message"),
+                         noticeKind: .deviceDisconnected)
     }
 
     /// On iOS the input route decides which device is captured and how many channels it exposes,

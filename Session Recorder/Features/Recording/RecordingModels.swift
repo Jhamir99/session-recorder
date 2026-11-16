@@ -84,12 +84,33 @@ struct RecordingNotice: Identifiable, Equatable {
     let id = UUID()
     let kind: Kind
 
-    var isError: Bool {
+    /// How the notice is shown: a failure, something that needs attention, or a saved session.
+    enum Severity: Equatable {
+        case error
+        case warning
+        case success
+    }
+
+    var severity: Severity {
         switch kind {
-        case .saved, .recovered: false
-        case .savedInAppFolder: true
-        case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning, .storageFull, .recordingFailed: true
-        case .timeLimitReached: false
+        case .startFailed, .storageFull, .recordingFailed:
+            .error
+        case .savedInAppFolder, .deviceDisconnected, .interrupted, .lowStorageWarning, .timeLimitReached(_, nil):
+            .warning
+        case .saved, .recovered, .timeLimitReached:
+            .success
+        }
+    }
+
+    /// Session this notice is about, when one was saved: the notice then offers View and Remove.
+    var sessionName: String? {
+        switch kind {
+        case .saved(let name), .savedInAppFolder(let name), .recovered(let name), .storageFull(let name):
+            name
+        case .timeLimitReached(_, let name), .recordingFailed(let name):
+            name
+        case .startFailed, .deviceDisconnected, .interrupted, .lowStorageWarning:
+            nil
         }
     }
 

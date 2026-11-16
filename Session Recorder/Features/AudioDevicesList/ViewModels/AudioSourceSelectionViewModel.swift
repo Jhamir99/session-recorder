@@ -57,6 +57,12 @@ final class AudioSourceSelectionViewModel: ObservableObject {
         return userMessage
     }
 
+    /// Dismiss button of the Record tab message.
+    func dismissRecordTabMessage() {
+        guard userMessage?.isSourceChangeNotice == true else { return }
+        userMessage = nil
+    }
+
     var canSelectStereo: Bool {
         AudioDeviceSelectionHelper.allowsStereoSelection(availableChannels: displayedChannels)
     }
